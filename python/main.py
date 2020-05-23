@@ -1,8 +1,12 @@
 
 import os
 from settings import Settings
+from team import Team
+from season import Season
 
 nl = '\n'
+cl = 2 * (chr(27) + '[2J')
+clear = lambda: os.system('cls' if os.name == 'nt' else 'clear')
 
 def home_screen(settings):
   print('hello')
@@ -14,15 +18,8 @@ def home_screen(settings):
     sep=nl
   )
   a = input()
+  clear()
   choose_option(a, settings)
-
-def get_team(tn):
-  teama = {0: 'john smith'}
-  teamb = {0: 'james smith'}
-  return {
-    'a': teama,
-    'b': teamb
-  }[tn]
 
 def new_game():
   options = ['easy', 'medium', 'hard']
@@ -42,8 +39,14 @@ def new_game():
   )
   team_name = input()
   if team_name in poss_teams:
-    team = get_team(team_name)
+    team = Team(team_name)
     print(team)
+    for player in team.players:
+      print(player)
+      print(team.players[player])
+  season = Season(team)
+  print(season)
+  season.save()
 
 def load_game():
   games = os.listdir('../data/games/')
