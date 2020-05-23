@@ -1,14 +1,20 @@
 
 import os
+from settings import Settings
 
 nl = '\n'
 
-def home_screen():
+def home_screen(settings):
+  print('hello')
+  options = ['new', 'load', 'settings', 'exit']
   print(
-    'hello',
-    'new load settings exit',
+    'choose option:',
+    '\t'.join(options),
+    nl,
     sep=nl
   )
+  a = input()
+  choose_option(a, settings)
 
 def get_team(tn):
   teama = {0: 'john smith'}
@@ -19,17 +25,19 @@ def get_team(tn):
   }[tn]
 
 def new_game():
+  options = ['easy', 'medium', 'hard']
   print(
     'choose difficulty',
-    'easy medium hard',
+    '\t'.join(options),
+    nl,
     sep=nl
   )
   game_diff = input()
   poss_teams = ['a', 'b']
   print(
     'choose team:',
-    'a',
-    'b',
+    '\t'.join(poss_teams),
+    nl,
     sep=nl
   )
   team_name = input()
@@ -40,30 +48,26 @@ def new_game():
 def load_game():
   games = os.listdir('../data/games/')
   if games == []:
-    print('no games found')
+    print('\tno games found\n')
   else:
     print('choose game:')
     for game in games:
       print(game)
 
-def settings():
-  print('settings')
-
-def choose_option(txt):
+def choose_option(txt, settings):
   if txt == 'new':
     new_game()
   elif txt == 'load':
     load_game()
   elif txt == 'settings':
-    settings()
+    settings.get_settings()
   elif txt == 'exit':
     print('bye')
     exit()
 
 if __name__=="__main__":
 
-  home_screen()
   while True:
-    a = input()
-    choose_option(a)
+    settings = Settings()
+    home_screen(settings)
 
