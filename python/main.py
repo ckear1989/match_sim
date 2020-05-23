@@ -1,15 +1,15 @@
 
 def choose_option(txt):
   if txt == 'new':
-    print txt
+    print(txt)
   elif txt == 'exit':
-    print 'bye'
+    print('bye')
     exit()
 
 if __name__=="__main__":
 
-  print 'hello'
+  print('hello')
   while True:
-    a = raw_input()
+    a = input()
     choose_option(a)
 
