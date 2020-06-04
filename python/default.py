@@ -1,24 +1,10 @@
 
-poss_teams = [
-  'a',
-  'b'
-]
+with open('../data/defaults/poss_teams.txt', 'r') as f:
+  poss_teams = [x.strip() for x in f.readlines()]
 
-first_names = [
-  'Adam',
-  'Brendan',
-  'Ciaran',
-  'Declan',
-  'Eoghan',
-  'Francis'
-]
+with open('../data/defaults/first_names.txt', 'r') as f:
+  first_names = [x.strip() for x in f.readlines()]
 
-last_names = [
-  'Andrews',
-  'Banagher',
-  'Conroy',
-  'Driscoll',
-  'Evans',
-  'Fitzgerald'
-]
+with open('../data/defaults/last_names.txt', 'r') as f:
+  last_names = [x.strip() for x in f.readlines()]
 
