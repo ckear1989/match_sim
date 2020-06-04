@@ -24,6 +24,21 @@ class Match():
         self.event()
       time.sleep(0.1)
       print()
+    self.half_time()
+    while self.time <= 70:
+      self.time += 1
+      print0(self.time)
+      if self.time % 5 == 0:
+        self.event()
+      time.sleep(0.1)
+      print()
+    self.full_time()
+
+  def half_time(self):
+    time.sleep(1)
+
+  def full_time(self):
+    self.half_time()
 
   def event(self):
     if random.random() < 0.5:
@@ -39,8 +54,8 @@ class Match():
 
 if __name__ == "__main__":
 
-  team_a = Team('a')
-  team_b = Team('b')
+  team_a = Team('a', 'a')
+  team_b = Team('b', 'b')
   match = Match(team_a, team_b)
   match.play()
 
