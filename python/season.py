@@ -1,5 +1,6 @@
 
 from team import Team
+import default
 
 import datetime
 import random
@@ -8,8 +9,8 @@ import pickle
 class Season():
   def __init__(self, team):
     self.team = team
-    self.opponents = ['team_b']
-    self.save_file = '../data/games/%s.dat' % self.team.name
+    self.opponents = [t for t in default.poss_teams if t != self.team.name]
+    self.save_file = '../data/games/%s_%s.dat' % (self.team.name, self.team.manager)
     self.start_date = datetime.date(2020, 1, 1)
     self.current_date = self.start_date
     self.start_year = self.start_date.year

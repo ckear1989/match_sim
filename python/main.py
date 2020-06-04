@@ -1,8 +1,11 @@
 
 import os
+import pickle
+
 from settings import Settings
 from team import Team
 from season import Season
+import default
 
 nl = '\n'
 cl = 2 * (chr(27) + '[2J')
@@ -30,16 +33,16 @@ def new_game():
     sep=nl
   )
   game_diff = input()
-  poss_teams = ['a', 'b']
   print(
     'choose team:',
-    '\t'.join(poss_teams),
+    '\t'.join(default.poss_teams),
     nl,
     sep=nl
   )
   team_name = input()
-  if team_name in poss_teams:
-    team = Team(team_name)
+  manager_name = input('manager name:')
+  if team_name in default.poss_teams:
+    team = Team(team_name, manager_name)
     print(team)
     for player in team.players:
       print(player)
@@ -50,12 +53,19 @@ def new_game():
 
 def load_game():
   games = os.listdir('../data/games/')
+  games = [g.replace('.dat', '') for g in games]
   if games == []:
     print('\tno games found\n')
   else:
     print('choose game:')
     for game in games:
       print(game)
+  lg = input()
+  if lg in games:
+    with open('../data/games/%s.dat' % lg, 'rb') as f:
+      season = pickle.load(f)
+      print(season)
+      season.save()
 
 def choose_option(txt, settings):
   if txt == 'new':
