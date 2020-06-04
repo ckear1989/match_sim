@@ -50,6 +50,7 @@ def new_game():
   season = Season(team)
   print(season)
   season.save()
+  season.cont()
 
 def load_game():
   games = os.listdir('../data/games/')
@@ -64,8 +65,9 @@ def load_game():
   if lg in games:
     with open('../data/games/%s.dat' % lg, 'rb') as f:
       season = pickle.load(f)
-      print(season)
-      season.save()
+    print(season)
+    season.save()
+    season.cont()
 
 def choose_option(txt, settings):
   if txt == 'new':

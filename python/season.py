@@ -1,5 +1,6 @@
 
 from team import Team
+from match import Match
 import default
 
 import datetime
@@ -15,7 +16,14 @@ class Season():
     self.current_date = self.start_date
     self.start_year = self.start_date.year
     random.seed()
+    self.teams = self.get_teams()
     self.fixtures = self.get_fixtures()
+
+  def get_teams(self):
+    teams = {}
+    for opponent in self.opponents:
+      teams[opponent] = Team(opponent, 'jim')
+    return teams
 
   def get_fixtures(self):
     sundays = []
@@ -43,9 +51,26 @@ class Season():
   def load(self):
     return pickle.load(self.save_file)
 
+  def cont(self):
+    cmd = ''
+    while cmd not in ['exit', 'e']:
+      cmd = input('choose option:\n%s\n' % '\t'.join(['continue', 'training', 'save', 'exit']))
+      self.process(cmd)
+
+  def process(self, cmd):
+    if cmd in ['c', 'continue']:
+      next_f = min(self.fixtures.keys())
+      next_f = self.fixtures[next_f]
+      print(next_f)
+      print(self.team)
+      print(self.teams)
+      next_match = Match(self.team, self.teams[next_f['opponent']])
+      next_match.play()
+
 if __name__=="__main__":
 
-  team = Team('team_a')
+  team = Team('team_a', 'bob')
   season = Season(team)
   print(season.fixtures)
+  season.cont()
 
