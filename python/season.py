@@ -6,6 +6,17 @@ import default
 import datetime
 import random
 import pickle
+import copy
+
+def get_sundays(year):
+  sundays = []
+  adate = datetime.date(year, 1, 1)
+  for i in range(366):
+    adate += datetime.timedelta(1)
+    if adate.year == year:
+      if adate.weekday() == 6:
+        sundays.append(adate)
+  return sundays
 
 class Season():
   def __init__(self, team):
@@ -14,9 +25,18 @@ class Season():
     self.save_file = '../data/games/%s_%s.dat' % (self.team.name, self.team.manager)
     self.start_date = datetime.date(2020, 1, 1)
     self.current_date = self.start_date
-    self.start_year = self.start_date.year
+    self.year = self.start_date.year
     random.seed()
     self.teams = self.get_teams()
+    self.fixtures = self.get_fixtures()
+    self.results = copy.deepcopy(self.fixtures)
+
+  def __str__(self):
+    ps = 'current date: {0}\nnext match date: {1}'.format(self.current_date, min(self.fixtures.keys()))
+    return ps
+
+  def end(self):
+    self.year += 1
     self.fixtures = self.get_fixtures()
 
   def get_teams(self):
@@ -26,12 +46,7 @@ class Season():
     return teams
 
   def get_fixtures(self):
-    sundays = []
-    for i in range(366):
-      new_date = self.start_date + datetime.timedelta(i)
-      if new_date.year == self.start_year:
-        if new_date.weekday() == 6:
-          sundays.append(new_date)
+    sundays = get_sundays(self.year)
     matchups = []
     for opponent in self.opponents:
       for venue in ['home', 'away']:
@@ -40,7 +55,10 @@ class Season():
     for i in range(len(matchups)):
       sunday = sundays[i]
       matchup = random.choice(matchups)
-      fixtures[sunday] = {'opponent': matchup[0], 'venue': matchup[1]}
+      if matchup[1] == 'home':
+        fixtures[sunday] = Match(self.team, self.teams[matchup[0]], sunday)
+      else:
+        fixtures[sunday] = Match(self.teams[matchup[0]], self.team, sunday)
       matchups.remove(matchup)
     return fixtures
 
@@ -52,25 +70,31 @@ class Season():
     return pickle.load(self.save_file)
 
   def cont(self):
+    options = ['(c)ontinue', '(t)raining', '(s)ave', '(e)xit']
     cmd = ''
     while cmd not in ['exit', 'e']:
-      cmd = input('choose option:\n%s\n' % '\t'.join(['continue', 'training', 'save', 'exit']))
+      cmd = input('choose option:\n%s\n' % '\t'.join(options))
       self.process(cmd)
 
   def process(self, cmd):
+    if cmd in ['s', 'save']:
+      self.save()
     if cmd in ['c', 'continue']:
+      self.current_date += datetime.timedelta(1)
       next_f = min(self.fixtures.keys())
-      next_f = self.fixtures[next_f]
-      print(next_f)
-      print(self.team)
-      print(self.teams)
-      next_match = Match(self.team, self.teams[next_f['opponent']])
-      next_match.play()
+      print(self)
+      if self.current_date == next_f:
+        next_match = self.fixtures.pop(next_f)
+        next_match.play(0.001)
+        self.results[next_f] = next_match
+        print(self.fixtures)
+        print(self.results)
+      if self.fixtures == {}:
+        self.end()
 
 if __name__=="__main__":
 
   team = Team('team_a', 'bob')
   season = Season(team)
-  print(season.fixtures)
   season.cont()
 
