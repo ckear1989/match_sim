@@ -40,12 +40,22 @@ class Match():
     ps = '{0} {1} {2} {3}'.format(self.team_a.name, self.team_a_score, self.team_b.name, self.team_b_score)
     return ps
 
+  def throw_in(self):
+    printc(self.stopclock_time)
+    if random.random() < 0.5:
+      posession_player = random.choice(self.team_a.players)
+      team = self.team_a.name
+    else:
+      posession_player = random.choice(self.team_b.players)
+      team = self.team_b.name
+    print('{0} The referee throws the ball in.  {1} wins posession for {2}'.format(self.stopclock_time, posession_player, team))
+
   def play_half(self, end_time, time_step, tane=time_until_next_event()):
     while self.time <= end_time:
       self.time += 1
-      if self.time % 1e3 == 0:
-        self.stopclock_time = stopclock(self.time)
-        printc(self.stopclock_time)
+      self.stopclock_time = stopclock(self.time)
+      if self.time % 60e3 == 0:
+        print(self.stopclock_time)
       if self.time == (tane*1e3):
         self.event()
         tune = time_until_next_event()
@@ -53,10 +63,12 @@ class Match():
       time.sleep(time_step)
 
   def play(self, time_step=1e-4):
+    self.throw_in()
     self.play_half(self.first_half_length, time_step)
     self.half_time()
     second_half_end = self.first_half_length + self.second_half_length
     second_half_tane = (self.first_half_length*1e-3) + time_until_next_event()
+    self.throw_in()
     self.play_half(second_half_end, time_step, tane=second_half_tane)
     self.full_time()
 
@@ -66,31 +78,26 @@ class Match():
   def full_time(self):
     self.half_time()
 
-  def team_a_chance(self):
-    posession_player = random.choice(self.team_a.players)
-    shooting_player = random.choice([x for x in self.team_a.players if x!= posession_player])
-    self.team_a_score += 1
-    print('{0} {1} passes to {2}.  He shoots and scores.  Team {3} scores. {4}'.format(
-      self.stopclock_time, posession_player, shooting_player, self.team_a.name, self.get_score()))
-
   def event(self):
+    print(self.stopclock_time, end=' ')
     a_tot = self.team_a.overall
     b_tot = self.team_b.overall
     p_team_a_chance = a_tot / (a_tot+b_tot)
     if random.random() < p_team_a_chance:
-      self.team_a_chance()
+      team_a.chance()
     else:
-      self.team_b_score += 1
-      print('{0} Team {1} scores. {2}'.format(self.stopclock_time, self.team_b.name, self.get_score()))
+      team_b.chance()
+    print(self.stopclock_time, end=' ')
+    print(self.get_score())
 
   def get_score(self):
-      return 'Score is now {0} {1} {2} {3}\r'.format(
+      return 'Score is now {0} {1} {2} {3}'.format(
         self.team_a.name, self.team_a_score, self.team_b.name, self.team_b_score)
 
 if __name__ == "__main__":
 
   team_a = Team('a', 'a')
   team_b = Team('b', 'b')
-  match = Match(team_a, team_b, datetime.date(2020,1,1))
+  match = Match(team_a, team_b, datetime.date(2020, 1, 1))
   match.play(0)
 
