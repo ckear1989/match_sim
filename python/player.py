@@ -11,9 +11,10 @@ class Player():
     self.overall = int(round(np.random.normal(50, 20), 0))
 
   def __repr__(self):
-    ps = '{0} {1}\noverall:{2:d}'.format(self.first_name, self.last_name, self.overall)
+    # ps = '{0} {1}\noverall:{2:d}'.format(self.first_name, self.last_name, self.overall)
+    ps = '{0} {1}'.format(self.first_name[0], self.last_name)
     return ps
 
   def __str__(self):
-    return self.__repr__
+    return self.__repr__()
 

@@ -46,7 +46,6 @@ class Match():
       if self.time % 1e3 == 0:
         self.stopclock_time = stopclock(self.time)
         printc(self.stopclock_time)
-      # if self.time % (tane*1e3) == 0:
       if self.time == (tane*1e3):
         self.event()
         tune = time_until_next_event()
@@ -67,23 +66,31 @@ class Match():
   def full_time(self):
     self.half_time()
 
+  def team_a_chance(self):
+    posession_player = random.choice(self.team_a.players)
+    shooting_player = random.choice([x for x in self.team_a.players if x!= posession_player])
+    self.team_a_score += 1
+    print('{0} {1} passes to {2}.  He shoots and scores.  Team {3} scores. {4}'.format(
+      self.stopclock_time, posession_player, shooting_player, self.team_a.name, self.get_score()))
+
   def event(self):
-    if random.random() < 0.5:
-      self.team_a_score += 1
-      print('{0} Team {1} scores'.format(self.stopclock_time, self.team_a.name))
+    a_tot = self.team_a.overall
+    b_tot = self.team_b.overall
+    p_team_a_chance = a_tot / (a_tot+b_tot)
+    if random.random() < p_team_a_chance:
+      self.team_a_chance()
     else:
       self.team_b_score += 1
-      print('{0} Team {1} scores'.format(self.stopclock_time, self.team_b.name))
-    self.print_score()
+      print('{0} Team {1} scores. {2}'.format(self.stopclock_time, self.team_b.name, self.get_score()))
 
-  def print_score(self):
-      print('{0} Score is now {1} {2} {3} {4}'.format(self.stopclock_time, self.team_a.name, self.team_a_score, self.team_b.name, self.team_b_score))
+  def get_score(self):
+      return 'Score is now {0} {1} {2} {3}\r'.format(
+        self.team_a.name, self.team_a_score, self.team_b.name, self.team_b_score)
 
 if __name__ == "__main__":
 
   team_a = Team('a', 'a')
   team_b = Team('b', 'b')
-  print(team_a)
   match = Match(team_a, team_b, datetime.date(2020,1,1))
   match.play(0)
 
