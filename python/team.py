@@ -11,7 +11,7 @@ class Team():
     self.manager = manager
     if players is None:
       random.seed(name)
-      self.players = [Player() for i in range(14)]
+      self.players = [Player() for i in range(20)]
     else:
       self.players = players
     self.overall = self.get_overall()
@@ -20,6 +20,10 @@ class Team():
     self.goals = 0
     self.points = 0
     self.league_points = 0
+    self.goalkeepers = [x for x in self.players if x.position in ['GK']]
+    self.defenders = [x for x in self.players if x.position in ['FB', 'HB']]
+    self.midfielders = [x for x in self.players if x.position in ['MI']]
+    self.forwards = [x for x in self.players if x.position in ['FF', 'HF']]
 
   def __repr__(self):
     ps = 'team: {0} rating:{1}\n'.format(self.name, self.overall)
@@ -33,9 +37,21 @@ class Team():
   def get_overall(self):
     return round(np.mean([p.overall for p in self.players]), 2)
 
+  def choose_player(self, p0, p1, p2):
+    p = random.random()
+    if p < p0:
+      player = random.choice(self.goalkeepers)
+    elif p < (p0+p1):
+      player = random.choice(self.defenders)
+    elif p < (p0+p1+p2):
+      player = random.choice(self.midfielders)
+    else:
+      player = random.choice(self.forwards)
+    return player
+
   def chance(self):
-    posession_player = random.choice(self.players)
-    shooting_player = random.choice([x for x in self.players if x!= posession_player])
+    posession_player = self.choose_player(0.01, 0.2, 0.4)
+    shooting_player = self.choose_player(0.01, 0.1, 0.3)
     print('Team {0} has a chance with {1} on the ball.'.format(self.name, posession_player), end='')
     if random.random() < (posession_player.passing/100):
       print('He passes the ball to {0}.'.format(shooting_player), end='')

@@ -19,6 +19,7 @@ class Player():
     self.goals = 0
     self.points = 0
     self.score = 0
+    self.position = random.choice(['GK', 'FB', 'HB', 'MI', 'HF', 'FF'])
 
   def __repr__(self):
     # ps = '{0} {1}\noverall:{2:d}'.format(self.first_name, self.last_name, self.overall)

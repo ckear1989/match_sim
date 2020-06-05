@@ -3,6 +3,7 @@ import datetime
 import random
 import time
 import math
+import copy
 import numpy as np
 
 from team import Team
@@ -22,8 +23,8 @@ def time_until_next_event(mean=60, sd=10):
 
 class Match():
   def __init__(self, team_a, team_b, date):
-    self.team_a = team_a
-    self.team_b = team_b
+    self.team_a = copy.deepcopy(team_a)
+    self.team_b = copy.deepcopy(team_b)
     self.date = date
     self.time = 0
     self.stopclock_time = stopclock(self.time)
@@ -45,7 +46,7 @@ class Match():
     else:
       posession_player = random.choice(self.team_b.players)
       team = self.team_b.name
-    print('{0} The referee throws the ball in.  {1} wins posession for {2}'.format(self.stopclock_time, posession_player, team))
+    print('{0} The referee throws the ball in.{1} wins posession for {2}'.format(self.stopclock_time, posession_player, team))
 
   def play_half(self, end_time, time_step, tane=time_until_next_event()):
     while self.time <= end_time:
