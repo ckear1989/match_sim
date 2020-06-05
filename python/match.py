@@ -41,7 +41,6 @@ class Match():
     return ps
 
   def throw_in(self):
-    printc(self.stopclock_time)
     if random.random() < 0.5:
       posession_player = random.choice(self.team_a.players)
       team = self.team_a.name
@@ -87,12 +86,11 @@ class Match():
       team_a.chance()
     else:
       team_b.chance()
-    print(self.stopclock_time, end=' ')
     print(self.get_score())
 
   def get_score(self):
-      return 'Score is now {0} {1} {2} {3}'.format(
-        self.team_a.name, self.team_a_score, self.team_b.name, self.team_b_score)
+    return 'Score is now {0} {1} {2} {3}'.format(
+      self.team_a.name, self.team_a.score, self.team_b.name, self.team_b.score)
 
 if __name__ == "__main__":
 

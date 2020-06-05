@@ -32,7 +32,13 @@ class Team():
   def chance(self):
     posession_player = random.choice(self.players)
     shooting_player = random.choice([x for x in self.players if x!= posession_player])
-    self.score += 1
-    print('{0} passes to {1}.  He shoots and scores.  Team {2} scores.'.format(
-      posession_player, shooting_player, self.name))
-
+    print('Team {0} has a chance with {1} on the ball.'.format(self.name, posession_player), end='')
+    if random.random() < (posession_player.passing/100):
+      print('He passes the ball to {0}.'.format(shooting_player), end='')
+      if random.random() < (shooting_player.shooting/100):
+        self.score += 1
+        print('And he scores.', end='')
+      else:
+        print('But he misses.', end='')
+    else:
+        print('But he loses posession with the kick.', end='')
