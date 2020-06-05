@@ -13,7 +13,7 @@ clear = lambda: os.system('cls' if os.name == 'nt' else 'clear')
 
 def home_screen(settings):
   print('hello')
-  options = ['new', 'load', 'settings', 'exit']
+  options = ['(n)ew', '(l)oad', '(s)ettings', '(e)xit']
   print(
     'choose option:',
     '\t'.join(options),
@@ -25,7 +25,7 @@ def home_screen(settings):
   choose_option(a, settings)
 
 def new_game():
-  options = ['easy', 'medium', 'hard']
+  options = ['(e)asy', '(m)edium', '(h)ard']
   print(
     'choose difficulty',
     '\t'.join(options),
@@ -43,12 +43,7 @@ def new_game():
   manager_name = input('manager name:')
   if team_name in default.poss_teams:
     team = Team(team_name, manager_name)
-    print(team)
-    for player in team.players:
-      print(player)
-      print(team.players[player])
   season = Season(team)
-  print(season)
   season.save()
   season.cont()
 
@@ -70,13 +65,13 @@ def load_game():
     season.cont()
 
 def choose_option(txt, settings):
-  if txt == 'new':
+  if txt in ['n', 'new']:
     new_game()
-  elif txt == 'load':
+  elif txt in ['l', 'load']:
     load_game()
-  elif txt == 'settings':
+  elif txt in ['s', 'settings']:
     settings.get_settings()
-  elif txt == 'exit':
+  elif txt in ['e', 'exit']:
     print('bye')
     exit()
 

@@ -30,10 +30,20 @@ class Season():
     self.teams = self.get_teams()
     self.fixtures = self.get_fixtures()
     self.results = copy.deepcopy(self.fixtures)
+    self.update_next_fixture()
 
   def __str__(self):
-    ps = 'current date: {0}\nnext match date: {1}'.format(self.current_date, min(self.fixtures.keys()))
+    ps = 'current date: {0}\nnext match date: {1}\n'.format(self.current_date, self.next_fixture_date)
+    ps += 'current team status: {0}\nnext fixture opponent:{1}\n'.format(self.team, self.next_fixture_opponent)
     return ps
+
+  def update_next_fixture(self):
+    self.next_fixture_date = min(self.fixtures.keys())
+    self.next_fixture = self.fixtures[self.next_fixture_date]
+    next_fixture_opponent = self.next_fixture.team_a.name
+    if next_fixture_opponent == self.team.name:
+      next_fixture_opponent = self.next_fixture.team_b.name
+    self.next_fixture_opponent = copy.deepcopy(self.teams[next_fixture_opponent])
 
   def end(self):
     self.year += 1
@@ -52,8 +62,8 @@ class Season():
       for venue in ['home', 'away']:
         matchups.append((opponent, venue))
     fixtures = {}
-    for i in range(len(matchups)):
-      sunday = sundays[i]
+    sundays = sundays[:len(matchups)]
+    for sunday in sundays:
       matchup = random.choice(matchups)
       if matchup[1] == 'home':
         fixtures[sunday] = Match(self.team, self.teams[matchup[0]], sunday)
@@ -81,14 +91,14 @@ class Season():
       self.save()
     if cmd in ['c', 'continue']:
       self.current_date += datetime.timedelta(1)
-      next_f = min(self.fixtures.keys())
       print(self)
-      if self.current_date == next_f:
-        next_match = self.fixtures.pop(next_f)
-        next_match.play(0.001)
-        self.results[next_f] = next_match
+      if self.current_date == self.next_fixture_date:
+        next_match = self.fixtures.pop(self.next_fixture_date)
+        next_match.play()
+        self.results[self.next_fixture_date] = next_match
         print(self.fixtures)
         print(self.results)
+        self.update_next_fixture()
       if self.fixtures == {}:
         self.end()
 
