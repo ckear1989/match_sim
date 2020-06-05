@@ -16,6 +16,7 @@ class Player():
       self.shooting,
       self.fitness
     ])))
+    self.score = 0
 
   def __repr__(self):
     # ps = '{0} {1}\noverall:{2:d}'.format(self.first_name, self.last_name, self.overall)

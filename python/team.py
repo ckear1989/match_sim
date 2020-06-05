@@ -16,6 +16,8 @@ class Team():
       self.players = players
     self.overall = self.get_overall()
     self.score =  0
+    self.played = 0
+    self.points = 0
 
   def __repr__(self):
     ps = 'team: {0} rating:{1}\n'.format(self.name, self.overall)
@@ -37,6 +39,7 @@ class Team():
       print('He passes the ball to {0}.'.format(shooting_player), end='')
       if random.random() < (shooting_player.shooting/100):
         self.score += 1
+        shooting_player.score += 1
         print('And he scores.', end='')
       else:
         print('But he misses.', end='')

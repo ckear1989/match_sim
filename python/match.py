@@ -53,15 +53,17 @@ class Match():
     while self.time <= end_time:
       self.time += 1
       self.stopclock_time = stopclock(self.time)
+      if self.time % 1e3 == 0:
+        printc(self.stopclock_time)
       if self.time % 60e3 == 0:
-        print(self.stopclock_time)
+        printc(self.stopclock_time)
       if self.time == (tane*1e3):
         self.event()
         tune = time_until_next_event()
         tane += tune
       time.sleep(time_step)
 
-  def play(self, time_step=1e-4):
+  def play(self, time_step=0):
     self.throw_in()
     self.play_half(self.first_half_length, time_step)
     self.half_time()
@@ -72,10 +74,23 @@ class Match():
     self.full_time()
 
   def half_time(self, time_step=1):
+    for player in self.team_a.players:
+      print('{0} {1}'.format(player, player.score))
+    for player in self.team_b.players:
+      print('{0} {1}'.format(player, player.score))
     time.sleep(time_step)
 
   def full_time(self):
     self.half_time()
+    self.team_a.played += 1
+    self.team_b.played += 1
+    if self.team_a.score > self.team_b.score:
+      self.team_a.points += 2
+    elif self.team_a.score < self.team_b.score:
+      self.team_b.points += 2
+    else:
+      self.team_a.points += 1
+      self.team_b.points += 1
 
   def event(self):
     print(self.stopclock_time, end=' ')
@@ -83,9 +98,9 @@ class Match():
     b_tot = self.team_b.overall
     p_team_a_chance = a_tot / (a_tot+b_tot)
     if random.random() < p_team_a_chance:
-      team_a.chance()
+      self.team_a.chance()
     else:
-      team_b.chance()
+      self.team_b.chance()
     print(self.get_score())
 
   def get_score(self):
