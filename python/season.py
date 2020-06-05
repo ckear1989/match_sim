@@ -32,14 +32,17 @@ class Season():
     self.fixtures = self.get_fixtures()
     self.results = copy.deepcopy(self.fixtures)
     self.update_next_fixture()
-    self.update_league_table()
+    self.get_league_table()
 
-  def __str__(self):
+  def __repr__(self):
     ps = 'current date: {0}\nnext match date: {1}\n'.format(self.current_date, self.next_fixture_date)
     ps += 'current team status: {0}\nnext fixture opponent:{1}\n'.format(self.team, self.next_fixture_opponent)
     return ps
 
-  def update_league_table(self):
+  def __str__(self):
+    return self.__repr__()
+
+  def get_league_table(self):
     dat_dtype = {
       'names' : ('team', 'played', 'points'),
       'formats' : ('|S12', 'i', 'i')}
@@ -47,7 +50,7 @@ class Season():
     dat = np.zeros(n_teams, dat_dtype)
     dat['team'] = [x.name for x in self.teams.values()]
     dat['played'] = [x.played for x in self.teams.values()]
-    dat['points'] = [x.points for x in self.teams.values()]
+    dat['points'] = [x.league_points for x in self.teams.values()]
     x = PrettyTable(dat.dtype.names)
     for row in dat:
       x.add_row(row)
@@ -55,6 +58,12 @@ class Season():
     x.align['played'] = 'r'
     x.align['points'] = 'l'
     self.league_table = x
+
+  def update_league_table(self):
+    self.get_league_table()
+    # self.league_table['team'] = [x.name for x in self.teams.values()]
+    # self.league_table['played'] = [x.played for x in self.teams.values()]
+    # self.league_table['points'] = [x.league_points for x in self.teams.values()]
 
   def update_next_fixture(self):
     self.next_fixture_date = min(self.fixtures.keys())
@@ -112,14 +121,21 @@ class Season():
       if self.current_date == self.next_fixture_date:
         next_match = self.fixtures.pop(self.next_fixture_date)
         next_match.play()
+        self.teams[next_match.team_a.name].played += 1
+        self.teams[next_match.team_b.name].played += 1
+        if next_match.team_a.score > next_match.team_b.score:
+          self.teams[next_match.team_a.name].league_points += 2
+        elif next_match.team_a.score < next_match.team_b.score:
+          self.teams[next_match.team_b.name].league_points += 2
+        else:
+          self.teams[next_match.team_a.name].league_points += 1
+          self.teams[next_match.team_b.name].league_points += 1
         self.results[self.next_fixture_date] = next_match
-        print(self.fixtures)
-        print(self.results)
-        self.update_next_fixture()
-        self.update_league_table()
-        print(self.league_table)
       if self.fixtures == {}:
         self.end()
+      self.update_next_fixture()
+      self.update_league_table()
+      print(self.league_table)
 
 if __name__=="__main__":
 

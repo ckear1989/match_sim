@@ -16,6 +16,8 @@ class Player():
       self.shooting,
       self.fitness
     ])))
+    self.goals = 0
+    self.points = 0
     self.score = 0
 
   def __repr__(self):
@@ -25,4 +27,7 @@ class Player():
 
   def __str__(self):
     return self.__repr__()
+
+  def update_score(self):
+    self.score = (self.goals * 3) + self.points
 

@@ -27,18 +27,16 @@ class Match():
     self.date = date
     self.time = 0
     self.stopclock_time = stopclock(self.time)
-    self.team_a_score = 0
-    self.team_b_score = 0
     self.first_half_length = 35 * 60e3
     self.second_half_length = 35 * 60e3
     random.seed()
 
   def __repr__(self):
-    return self.__str__()
+    ps = '{0} {1} {2} {3}'.format(self.team_a.name, self.team_a.score, self.team_b.name, self.team_b.score)
+    return ps
 
   def __str__(self):
-    ps = '{0} {1} {2} {3}'.format(self.team_a.name, self.team_a_score, self.team_b.name, self.team_b_score)
-    return ps
+    return self.__repr__()
 
   def throw_in(self):
     if random.random() < 0.5:
@@ -56,7 +54,7 @@ class Match():
       if self.time % 1e3 == 0:
         printc(self.stopclock_time)
       if self.time % 60e3 == 0:
-        printc(self.stopclock_time)
+        print(self.stopclock_time)
       if self.time == (tane*1e3):
         self.event()
         tune = time_until_next_event()
@@ -82,15 +80,6 @@ class Match():
 
   def full_time(self):
     self.half_time()
-    self.team_a.played += 1
-    self.team_b.played += 1
-    if self.team_a.score > self.team_b.score:
-      self.team_a.points += 2
-    elif self.team_a.score < self.team_b.score:
-      self.team_b.points += 2
-    else:
-      self.team_a.points += 1
-      self.team_b.points += 1
 
   def event(self):
     print(self.stopclock_time, end=' ')
@@ -104,8 +93,10 @@ class Match():
     print(self.get_score())
 
   def get_score(self):
-    return 'Score is now {0} {1} {2} {3}'.format(
-      self.team_a.name, self.team_a.score, self.team_b.name, self.team_b.score)
+    return 'Score is now {0} {1}-{2} ({3}) {4} {5}-{6} ({7})'.format(
+      self.team_a.name, self.team_a.goals, self.team_a.points, self.team_a.score,
+      self.team_b.name, self.team_b.goals, self.team_b.points, self.team_b.score
+    )
 
 if __name__ == "__main__":
 
