@@ -10,13 +10,12 @@ def options_from_list(alist):
 
 class Training():
   def __init__(self, start_date):
-    self.schedule = []
-    self.focus = []
+    self.schedule = {}
     self.fixtures = {}
     self.start_date = start_date
 
   def __repr__(self):
-    ps = '{0} {1} {2}'.format(self.schedule, self.focus, self.fixtures)
+    ps = '{0} {1}'.format(self.schedule, self.fixtures)
     return ps
 
   def __str__(self):
@@ -26,19 +25,14 @@ class Training():
     poss_days = options_from_list(default.dow.keys())
     dow = input('choose day of week to train:\n%s\n' % poss_days)
     if dow in default.dow.keys():
-      if default.dow[dow] not in self.schedule:
-        self.schedule.append(default.dow[dow])
-    self.get_focus()
-    self.get_fixtures()
-
-  def get_focus(self):
-    while len(self.schedule) > len(self.focus):
-      dow = self.schedule[len(self.focus)]
-      dow = [x for x in default.dow.keys() if default.dow[x] == dow][0]
-      poss_focus = options_from_list(default.focus)
-      focus = input('choose training focus for {0}:\n{1}\n'.format(dow, poss_focus))
-      if focus in default.focus:
-        self.focus.append(focus)
+      focus = None
+      while focus not in default.focus:
+        poss_focus = options_from_list(default.focus)
+        focus = input('choose training focus for {0}:\n{1}\n'.format(dow, poss_focus))
+      self.schedule[default.dow[dow]] = focus
+      self.get_fixtures()
+    else:
+      print('sorry, {0} is not an option, try again'.format(dow))
 
   def get_fixtures(self):
     year = self.start_date.year
@@ -47,7 +41,7 @@ class Training():
       if adate.year == year:
         for s in self.schedule:
           if adate.weekday() == s:
-            self.fixtures[adate] = self.focus[self.schedule.index(s)]
+            self.fixtures[adate] = self.schedule[s]
 
 if __name__=="__main__":
   t = Training(datetime.date(2020, 1, 1))
