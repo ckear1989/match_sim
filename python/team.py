@@ -43,7 +43,11 @@ class Team():
     x = PrettyTable()
     x.add_column('last name', [x.last_name for x in self.players])
     x.add_column('first name', [x.first_name for x in self.players])
+    x.add_column('position', [x.position for x in self.players])
     x.add_column('overall', [x.overall for x in self.players])
+    x.add_column('passing', [x.passing for x in self.players])
+    x.add_column('shooting', [x.shooting for x in self.players])
+    x.add_column('fitness', [x.fitness for x in self.players])
     self.player_table = x
 
   def get_overall(self):
