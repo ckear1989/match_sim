@@ -5,6 +5,7 @@ from match import Match
 from training import Training
 
 import datetime
+import calendar
 import random
 import pickle
 import copy
@@ -22,26 +23,47 @@ def get_sundays(year):
 
 class Season():
   def __init__(self, team):
+    random.seed(team.name)
     self.team = team
     self.save_file = '../data/games/%s_%s.dat' % (self.team.name, self.team.manager)
     self.start_date = datetime.date(2020, 1, 1)
     self.current_date = self.start_date
     self.year = self.start_date.year
-    random.seed()
+    self.calendar = calendar.calendar(self.year)
     self.teams = self.get_teams()
     self.fixtures = self.get_fixtures()
-    self.results = copy.deepcopy(self.fixtures)
+    self.results = {}
     self.update_next_fixture()
     self.get_league_table()
-    self.training = None
+    self.training = Training(self.current_date)
+    self.get_upcoming_events()
 
   def __repr__(self):
     ps = 'current date: {0}\nnext match date: {1}\n'.format(self.current_date, self.next_fixture_date)
     ps += 'current team status: {0}\nnext fixture opponent:{1}\n'.format(self.team, self.next_fixture_opponent)
+    ps += 'upcoming events:\n{0}\n'.format(self.upcoming_events)
+    ps += 'league table:\n{0}\n'.format(self.league_table)
+    ps += 'current training schedule:\n{0}\n'.format(self.training)
     return ps
 
   def __str__(self):
     return self.__repr__()
+
+  def get_upcoming_events(self):
+    ps = ''
+    for i in range(5):
+      adate = self.current_date + datetime.timedelta(i)
+      events = []
+      if adate in self.fixtures.keys():
+        events += [self.fixtures[adate]]
+      if adate in self.results.keys():
+        events += [self.results[adate]]
+      if adate in self.training.fixtures.keys():
+        events += [self.training.fixtures[adate]]
+      if events == []:
+        events= ''
+      ps += ('{0} {1}\n'.format(adate, events))
+    self.upcoming_events = ps
 
   def get_league_table(self):
     x = PrettyTable()
@@ -93,20 +115,18 @@ class Season():
     with open(self.save_file, 'wb') as f:
       pickle.dump(self, f)
 
-  def load(self):
-    return pickle.load(self.save_file)
-
   def cont(self):
     options = ['(c)ontinue', '(t)raining', '(s)ave', '(e)xit']
     cmd = ''
     while cmd not in ['exit', 'e']:
+      print(self)
       cmd = input('choose option:\n%s\n' % '\t'.join(options))
       self.process(cmd)
 
   def process_match_result(self, match):
     self.teams[match.team_a.name].played += 1
     self.teams[match.team_b.name].played += 1
-    if match.team_a.score >match.team_b.score:
+    if match.team_a.score > match.team_b.score:
       self.teams[match.team_a.name].league_win += 1
       self.teams[match.team_b.name].league_loss += 1
       self.teams[match.team_a.name].league_points += 2
@@ -124,14 +144,9 @@ class Season():
     if cmd in ['s', 'save']:
       self.save()
     if cmd in ['t', 'training']:
-      if self.training is None:
-        self.training = Training(self.current_date)
-      print('current training schedule\n{0}\n'.format(self.training))
       self.training.get_schedule()
-      print('new training schedule\n{0}\n'.format(self.training))
     if cmd in ['c', 'continue']:
       self.current_date += datetime.timedelta(1)
-      print(self)
       if self.current_date == self.next_fixture_date:
         next_match = self.fixtures.pop(self.next_fixture_date)
         next_match.play()
@@ -141,7 +156,7 @@ class Season():
         self.end()
       self.update_next_fixture()
       self.update_league_table()
-      print(self.league_table)
+      self.get_upcoming_events()
 
 if __name__=="__main__":
 
