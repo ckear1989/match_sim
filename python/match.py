@@ -81,6 +81,7 @@ class Match():
 
   def full_time(self):
     self.half_time()
+    print('Full time score is:\n{0}'.format(self.get_score().replace('Score is now ', '')))
 
   def event(self):
     print(self.stopclock_time, end=' ')
