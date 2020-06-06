@@ -1,6 +1,7 @@
 
 import random
 import numpy as np
+from prettytable import PrettyTable
 
 import default
 from player import Player
@@ -27,15 +28,23 @@ class Team():
     self.defenders = [x for x in self.players if x.position in ['FB', 'HB']]
     self.midfielders = [x for x in self.players if x.position in ['MI']]
     self.forwards = [x for x in self.players if x.position in ['FF', 'HF']]
+    self.get_player_table()
 
   def __repr__(self):
     ps = 'team: {0} rating:{1}\n'.format(self.name, self.overall)
-    ps += '\n'.join([p.__repr__() for p in self.players])
+    ps += self.player_table.__str__()
     ps += '\n'
     return ps
 
   def __str__(self):
     return self.__repr__()
+
+  def get_player_table(self):
+    x = PrettyTable()
+    x.add_column('last name', [x.last_name for x in self.players])
+    x.add_column('first name', [x.first_name for x in self.players])
+    x.add_column('overall', [x.overall for x in self.players])
+    self.player_table = x
 
   def get_overall(self):
     return round(np.mean([p.overall for p in self.players]), 2)
