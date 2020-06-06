@@ -44,18 +44,24 @@ class Season():
 
   def get_league_table(self):
     dat_dtype = {
-      'names' : ('team', 'played', 'points'),
-      'formats' : ('|S12', 'i', 'i')}
+      'names' : ('team', 'played', 'win', 'loss', 'draw', 'points'),
+      'formats' : ('|S12', 'i', 'i', 'i', 'i', 'i')}
     n_teams = len(self.teams)
     dat = np.zeros(n_teams, dat_dtype)
     dat['team'] = [x.name for x in self.teams.values()]
     dat['played'] = [x.played for x in self.teams.values()]
+    dat['win'] = [x.league_win for x in self.teams.values()]
+    dat['loss'] = [x.league_loss for x in self.teams.values()]
+    dat['draw'] = [x.league_draw for x in self.teams.values()]
     dat['points'] = [x.league_points for x in self.teams.values()]
     x = PrettyTable(dat.dtype.names)
     for row in dat:
       x.add_row(row)
     x.align['team'] = 'r'
     x.align['played'] = 'r'
+    x.align['win'] = 'r'
+    x.align['loss'] = 'r'
+    x.align['drau'] = 'r'
     x.align['points'] = 'l'
     self.league_table = x
 
@@ -124,10 +130,16 @@ class Season():
         self.teams[next_match.team_a.name].played += 1
         self.teams[next_match.team_b.name].played += 1
         if next_match.team_a.score > next_match.team_b.score:
+          self.teams[next_match.team_a.name].league_win += 1
+          self.teams[next_match.team_b.name].league_loss += 1
           self.teams[next_match.team_a.name].league_points += 2
         elif next_match.team_a.score < next_match.team_b.score:
+          self.teams[next_match.team_b.name].league_win += 1
+          self.teams[next_match.team_a.name].league_loss += 1
           self.teams[next_match.team_b.name].league_points += 2
         else:
+          self.teams[next_match.team_a.name].league_draw += 1
+          self.teams[next_match.team_b.name].league_draw += 1
           self.teams[next_match.team_a.name].league_points += 1
           self.teams[next_match.team_b.name].league_points += 1
         self.results[self.next_fixture_date] = next_match

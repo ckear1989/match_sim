@@ -19,6 +19,9 @@ class Team():
     self.played = 0
     self.goals = 0
     self.points = 0
+    self.league_win = 0
+    self.league_loss = 0
+    self.league_draw = 0
     self.league_points = 0
     self.goalkeepers = [x for x in self.players if x.position in ['GK']]
     self.defenders = [x for x in self.players if x.position in ['FB', 'HB']]
