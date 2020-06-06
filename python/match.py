@@ -73,10 +73,12 @@ class Match():
     self.full_time()
 
   def half_time(self, time_step=1):
-    for player in self.team_a.players:
-      print('{0} {1}'.format(player, player.score))
-    for player in self.team_b.players:
-      print('{0} {1}'.format(player, player.score))
+    team_a_scorers = sorted(self.team_a.players, key=lambda x: -x.score)
+    team_b_scorers = sorted(self.team_b.players, key=lambda x: -x.score)
+    for player in [x for x in team_a_scorers if x.score > 0]:
+      print('{0} {1}-{2} ({3})'.format(player, player.goals, player.points, player.score))
+    for player in [x for x in team_b_scorers if x.score > 0]:
+      print('{0} {1}-{2} ({3})'.format(player, player.goals, player.points, player.score))
     time.sleep(time_step)
 
   def full_time(self):
