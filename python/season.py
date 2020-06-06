@@ -1,14 +1,14 @@
 
+import default
 from team import Team
 from match import Match
-import default
+from training import Training
 
 import datetime
 import random
 import pickle
 import copy
 from prettytable import PrettyTable
-import numpy as np
 
 def get_sundays(year):
   sundays = []
@@ -33,6 +33,7 @@ class Season():
     self.results = copy.deepcopy(self.fixtures)
     self.update_next_fixture()
     self.get_league_table()
+    self.training = None
 
   def __repr__(self):
     ps = 'current date: {0}\nnext match date: {1}\n'.format(self.current_date, self.next_fixture_date)
@@ -105,6 +106,12 @@ class Season():
   def process(self, cmd):
     if cmd in ['s', 'save']:
       self.save()
+    if cmd in ['t', 'training']:
+      if self.training is None:
+        self.training = Training(self.current_date)
+      print('current training schedule\n{0}\n'.format(self.training))
+      self.training.get_schedule()
+      print('new training schedule\n{0}\n'.format(self.training))
     if cmd in ['c', 'continue']:
       self.current_date += datetime.timedelta(1)
       print(self)
