@@ -43,33 +43,17 @@ class Season():
     return self.__repr__()
 
   def get_league_table(self):
-    dat_dtype = {
-      'names' : ('team', 'played', 'win', 'loss', 'draw', 'points'),
-      'formats' : ('|S12', 'i', 'i', 'i', 'i', 'i')}
-    n_teams = len(self.teams)
-    dat = np.zeros(n_teams, dat_dtype)
-    dat['team'] = [x.name for x in self.teams.values()]
-    dat['played'] = [x.played for x in self.teams.values()]
-    dat['win'] = [x.league_win for x in self.teams.values()]
-    dat['loss'] = [x.league_loss for x in self.teams.values()]
-    dat['draw'] = [x.league_draw for x in self.teams.values()]
-    dat['points'] = [x.league_points for x in self.teams.values()]
-    x = PrettyTable(dat.dtype.names)
-    for row in dat:
-      x.add_row(row)
-    x.align['team'] = 'r'
-    x.align['played'] = 'r'
-    x.align['win'] = 'r'
-    x.align['loss'] = 'r'
-    x.align['drau'] = 'r'
-    x.align['points'] = 'l'
+    x = PrettyTable()
+    x.add_column('team', [x.name for x in self.teams.values()])
+    x.add_column('played', [x.played for x in self.teams.values()])
+    x.add_column('win', [x.league_win for x in self.teams.values()])
+    x.add_column('loss', [x.league_loss for x in self.teams.values()])
+    x.add_column('draw', [x.league_draw for x in self.teams.values()])
+    x.add_column('points', [x.league_points for x in self.teams.values()])
     self.league_table = x
 
   def update_league_table(self):
     self.get_league_table()
-    # self.league_table['team'] = [x.name for x in self.teams.values()]
-    # self.league_table['played'] = [x.played for x in self.teams.values()]
-    # self.league_table['points'] = [x.league_points for x in self.teams.values()]
 
   def update_next_fixture(self):
     self.next_fixture_date = min(self.fixtures.keys())
