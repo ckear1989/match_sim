@@ -1,3 +1,4 @@
 passing
 shooting
 fitness
+rest
