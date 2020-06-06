@@ -103,6 +103,23 @@ class Season():
       cmd = input('choose option:\n%s\n' % '\t'.join(options))
       self.process(cmd)
 
+  def process_match_result(self, match):
+    self.teams[match.team_a.name].played += 1
+    self.teams[match.team_b.name].played += 1
+    if match.team_a.score >match.team_b.score:
+      self.teams[match.team_a.name].league_win += 1
+      self.teams[match.team_b.name].league_loss += 1
+      self.teams[match.team_a.name].league_points += 2
+    elif match.team_a.score < match.team_b.score:
+      self.teams[match.team_b.name].league_win += 1
+      self.teams[match.team_a.name].league_loss += 1
+      self.teams[match.team_b.name].league_points += 2
+    else:
+      self.teams[match.team_a.name].league_draw += 1
+      self.teams[match.team_b.name].league_draw += 1
+      self.teams[match.team_a.name].league_points += 1
+      self.teams[match.team_b.name].league_points += 1
+
   def process(self, cmd):
     if cmd in ['s', 'save']:
       self.save()
@@ -118,21 +135,7 @@ class Season():
       if self.current_date == self.next_fixture_date:
         next_match = self.fixtures.pop(self.next_fixture_date)
         next_match.play()
-        self.teams[next_match.team_a.name].played += 1
-        self.teams[next_match.team_b.name].played += 1
-        if next_match.team_a.score > next_match.team_b.score:
-          self.teams[next_match.team_a.name].league_win += 1
-          self.teams[next_match.team_b.name].league_loss += 1
-          self.teams[next_match.team_a.name].league_points += 2
-        elif next_match.team_a.score < next_match.team_b.score:
-          self.teams[next_match.team_b.name].league_win += 1
-          self.teams[next_match.team_a.name].league_loss += 1
-          self.teams[next_match.team_b.name].league_points += 2
-        else:
-          self.teams[next_match.team_a.name].league_draw += 1
-          self.teams[next_match.team_b.name].league_draw += 1
-          self.teams[next_match.team_a.name].league_points += 1
-          self.teams[next_match.team_b.name].league_points += 1
+        self.process_match_result(next_match)
         self.results[self.next_fixture_date] = next_match
       if self.fixtures == {}:
         self.end()
