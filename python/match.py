@@ -53,11 +53,12 @@ class Match():
       team = self.team_b.name
     print('{0} The referee throws the ball in.{1} wins posession for {2}'.format(self.stopclock_time, posession_player, team))
 
-  def play_half(self, end_time, time_step, tane=time_until_next_event()):
+  def play_half(self, end_time, time_step, tane=time_until_next_event(), silent=False):
     while self.time < end_time:
       self.time += 1
       self.stopclock_time = stopclock(self.time)
-      self.progressbar.update(self.time)
+      if silent is True:
+        self.progressbar.update(self.time)
       if self.time % 1e3 == 0:
         printc(self.stopclock_time)
       if self.time % 60e3 == 0:
@@ -77,12 +78,12 @@ class Match():
     else:
       stdout = sys.stdout
     self.throw_in()
-    self.play_half(self.first_half_length, time_step)
+    self.play_half(self.first_half_length, time_step, silent=silent)
     self.half_time()
     second_half_end = self.first_half_length + self.second_half_length
     second_half_tane = (self.first_half_length*1e-3) + time_until_next_event()
     self.throw_in()
-    self.play_half(second_half_end, time_step, tane=second_half_tane)
+    self.play_half(second_half_end, time_step, tane=second_half_tane, silent=silent)
     self.full_time()
     sys.stdout = stdout
     self.progressbar.finish()
