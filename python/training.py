@@ -2,6 +2,7 @@
 import default
 
 import datetime
+import calendar
 
 def options_from_list(alist):
   x = [xi for xi in alist if len(xi) > 2]
@@ -15,7 +16,8 @@ class Training():
     self.start_date = start_date
 
   def __repr__(self):
-    ps = '{0} {1}'.format(self.schedule, self.fixtures)
+    ps = '\n'.join(['{0}:{1}'.format(
+      calendar.day_name[x[0]], x[1]) for x in self.schedule.items()])
     return ps
 
   def __str__(self):
