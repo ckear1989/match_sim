@@ -85,7 +85,7 @@ class Team():
     for i in [13, 14, 15]:
       player = random.choice([x for x in self.full_forwards if x not in self.lineup.values()])
       player.lineup = i
-      self.lineup[16] = player
+      self.lineup[i] = player
     player = random.choice([x for x in self.goalkeepers if x not in self.lineup.values()])
     player.lineup = 16
     self.lineup[i] = player
