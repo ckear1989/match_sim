@@ -107,7 +107,10 @@ class Season():
     sundays = sundays[:len(matchups)]
     for sunday in sundays:
       matchup = random.choice(matchups)
-      fixtures[sunday] = Match(self.teams[matchup[0]], self.teams[matchup[1]], sunday)
+      silent = True
+      if self.team.name in [self.teams[matchup[0]] , self.teams[matchup[0]]]:
+        silent = False
+      fixtures[sunday] = Match(self.teams[matchup[0]], self.teams[matchup[1]], sunday, silent)
       matchups.remove(matchup)
     return fixtures
 
@@ -149,10 +152,7 @@ class Season():
       self.current_date += datetime.timedelta(1)
       if self.current_date == self.next_fixture_date:
         next_match = self.fixtures.pop(self.next_fixture_date)
-        if self.team.name in [next_match.team_a.name , next_match.team_b.name]:
-          next_match.play()
-        else:
-          next_match.play(silent=True)
+        next_match.play()
         self.process_match_result(next_match)
         self.results[self.next_fixture_date] = next_match
       if self.fixtures == {}:

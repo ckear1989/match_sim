@@ -26,10 +26,11 @@ def time_until_next_event(mean=60, sd=10):
   return max(round(np.random.normal(mean, sd), 0), 1)
 
 class Match():
-  def __init__(self, team_a, team_b, date):
+  def __init__(self, team_a, team_b, date, silent):
     self.team_a = MatchTeam(team_a)
     self.team_b = MatchTeam(team_b)
     self.date = date
+    self.silent = silent
     self.time = 0
     self.stopclock_time = stopclock(self.time)
     self.first_half_length = 35 * 60e3
@@ -54,11 +55,11 @@ class Match():
       team = self.team_b.name
     print('{0} The referee throws the ball in.{1} wins posession for {2}'.format(self.stopclock_time, posession_player, team))
 
-  def play_half(self, end_time, time_step, tane=time_until_next_event(), silent=False):
+  def play_half(self, end_time, time_step, tane=time_until_next_event()):
     while self.time < end_time:
       self.time += 1
       self.stopclock_time = stopclock(self.time)
-      if silent is True:
+      if self.silent is True:
         self.progressbar.update(self.time)
       if self.time % 1e3 == 0:
         printc(self.stopclock_time)
@@ -70,38 +71,50 @@ class Match():
         tane += tune
       time.sleep(time_step)
 
-  def play(self, time_step=0, silent=False):
+  def pause(self):
+    if self.silent is False:
+      x = ''
+      while x not in ['c', 'continue']:
+        x = input(' '.join(['(l)ineup', '(c)ontinue']))
+        if x in ['l', 'lineup']:
+          self.team_a.lineup_change()
+
+  def play(self, time_step=0):
     self.team_a.lineup_check()
     self.team_b.lineup_check()
+    self.pause()
     self.progressbar.start()
-    if silent is True:
+    if self.silent is True:
       stdout = sys.stdout
       f = open(os.devnull, 'w')
       sys.stdout = f
     else:
       stdout = sys.stdout
     self.throw_in()
-    self.play_half(self.first_half_length, time_step, silent=silent)
+    self.play_half(self.first_half_length, time_step)
     self.half_time()
     second_half_end = self.first_half_length + self.second_half_length
     second_half_tane = (self.first_half_length*1e-3) + time_until_next_event()
     self.throw_in()
-    self.play_half(second_half_end, time_step, tane=second_half_tane, silent=silent)
+    self.play_half(second_half_end, time_step, tane=second_half_tane)
     self.full_time()
     sys.stdout = stdout
     self.progressbar.finish()
 
-  def half_time(self, time_step=1):
+  def get_scorers(self):
     team_a_scorers = sorted(self.team_a.players, key=lambda x: -x.score)
     team_b_scorers = sorted(self.team_b.players, key=lambda x: -x.score)
     for player in [x for x in team_a_scorers if x.score > 0]:
       print('{0} {1}-{2} ({3})'.format(player, player.goals, player.points, player.score))
     for player in [x for x in team_b_scorers if x.score > 0]:
       print('{0} {1}-{2} ({3})'.format(player, player.goals, player.points, player.score))
-    time.sleep(time_step)
+
+  def half_time(self, time_step=1):
+    self.get_scorers()
+    self.pause()
 
   def full_time(self):
-    self.half_time()
+    self.get_scorers()
     print('Full time score is:\n{0}'.format(self.get_score().replace('Score is now ', '')))
 
   def event(self):
@@ -125,7 +138,8 @@ if __name__ == "__main__":
 
   team_a = Team('a', 'a')
   team_b = Team('b', 'b')
-  match = Match(team_a, team_b, datetime.date(2020, 1, 1))
+  match = Match(team_a, team_b, datetime.date(2020, 1, 1), False)
   match.play()
-  match.play(silent=True)
+  match = Match(team_a, team_b, datetime.date(2020, 1, 1), True)
+  match.play()
 
