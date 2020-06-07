@@ -43,21 +43,25 @@ class Team():
     self.midfielders = [x for x in self.players if x.position in ['MI']]
     self.full_forwards = [x for x in self.players if x.position in ['FF']]
     self.half_forwards = [x for x in self.players if x.position in ['HF']]
-    print(self)
     while len(self.goalkeepers) < 2:
      random.choice(self.players).position = 'GK'
     while len(self.full_backs) < 3:
      random.choice([x for x in self.players if x.position not in ['GK']]).position = 'FB'
+     self.get_lineup()
     while len(self.half_backs) < 3:
      random.choice([x for x in self.players if x.position not in ['GK', 'FB']]).position = 'HB'
+     self.get_lineup()
     while len(self.midfielders) < 2:
      random.choice([x for x in self.players if x.position not in ['GK', 'FB', 'HB']]).position = 'MI'
+     self.get_lineup()
     while len(self.half_forwards) < 3:
      random.choice([x for x in self.players if x.position not in ['GK', 'FB', 'HB', 'HF']]).position = 'HF'
+     self.get_lineup()
     while len(self.full_forwards) < 3:
      random.choice([x for x in self.players if x.position not in ['GK', 'FB', 'HB', 'HF']]).position = 'FF'
-    self.defenders = [self.full_backs + self.half_backs]
-    self.forwards = [self.full_forwards + self.half_forwards]
+     self.get_lineup()
+    self.defenders = self.full_backs + self.half_backs
+    self.forwards = self.full_forwards + self.half_forwards
     self.lineup = {}
     player = random.choice(self.goalkeepers)
     player.lineup = 1

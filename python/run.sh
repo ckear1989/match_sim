@@ -4,6 +4,7 @@
 # pip3 install numpy
 # pip3 install prettytable
 # pip3 install progressbar
+# pip3 install dill
 
 # python3.6 default.py
 # python3.6 settings.py

@@ -7,7 +7,7 @@ from training import Training
 import datetime
 import calendar
 import random
-import pickle
+import dill as pickle
 import copy
 from prettytable import PrettyTable
 
