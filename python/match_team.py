@@ -3,6 +3,13 @@ from team import Team
 
 import copy
 
+def is_int(x):
+  try:
+    int(x)
+  except:
+     return False
+  return True
+
 class MatchTeam(Team):
   def __init__(self, team):
     self.__dict__ = copy.deepcopy(team.__dict__)
@@ -16,15 +23,22 @@ class MatchTeam(Team):
 
   def lineup_change(self, l_a=None, l_b=None):
     print(self)
-    if l_a is None:
-      l_a = int(input('lineup number to change:'))
     if l_b is None:
-      l_b = input('player to assign lineup number {0} (last, first):'.format(l_a))
-    f = l_b.split(',')[1].strip()
-    l = l_b.split(',')[0].strip()
+      l_b = input('player to assign new lineup number (last, first):')
+    if ',' in l_b:
+      f = l_b.split(',')[1].strip()
+      l = l_b.split(',')[0].strip()
+    else:
+      self.lineup_check()
     players = [x for x in self.players if (x.first_name == f) and (x.last_name == l)]
     if len(players) > 0:
       player = players[0]
+      if l_a is None:
+        l_a = input('lineup number to change {0} to:'.format(player))
+        if is_int(l_a):
+          l_a = int(l_a)
+        else:
+          self.lineup_check()
       player.lineup = l_a
     self.get_player_table()
     self.lineup_check()

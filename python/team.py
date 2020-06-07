@@ -45,6 +45,7 @@ class Team():
     self.half_forwards = [x for x in self.players if x.position in ['HF']]
     while len(self.goalkeepers) < 2:
      random.choice(self.players).position = 'GK'
+     self.get_lineup()
     while len(self.full_backs) < 3:
      random.choice([x for x in self.players if x.position not in ['GK']]).position = 'FB'
      self.get_lineup()
@@ -62,37 +63,36 @@ class Team():
      self.get_lineup()
     self.defenders = self.full_backs + self.half_backs
     self.forwards = self.full_forwards + self.half_forwards
-    self.lineup = {}
-    player = random.choice(self.goalkeepers)
-    player.lineup = 1
-    self.lineup[1] = player
+    if 1 not in [x.lineup for x in self.players]:
+      player = random.choice(self.goalkeepers)
+      player.lineup = 1
     for i in [2, 3, 4]:
-      player = random.choice([x for x in self.full_backs if x not in self.lineup.values()])
-      player.lineup = i
-      self.lineup[i] = player
+      if i not in [x.lineup for x in self.players]:
+        player = random.choice([x for x in self.full_backs if x.lineup == 0])
+        player.lineup = i
     for i in [5, 6, 7]:
-      player = random.choice([x for x in self.half_backs if x not in self.lineup.values()])
-      player.lineup = i
-      self.lineup[i] = player
+      if i not in [x.lineup for x in self.players]:
+        player = random.choice([x for x in self.half_backs if x.lineup == 0])
+        player.lineup = i
     for i in [8, 9]:
-      player = random.choice([x for x in self.midfielders if x not in self.lineup.values()])
-      player.lineup = i
-      self.lineup[i] = player
+      if i not in [x.lineup for x in self.players]:
+        player = random.choice([x for x in self.midfielders if x.lineup == 0])
+        player.lineup = i
     for i in [10, 11, 12]:
-      player = random.choice([x for x in self.half_forwards if x not in self.lineup.values()])
-      player.lineup = i
-      self.lineup[i] = player
+      if i not in [x.lineup for x in self.players]:
+        player = random.choice([x for x in self.half_forwards if x.lineup == 0])
+        player.lineup = i
     for i in [13, 14, 15]:
-      player = random.choice([x for x in self.full_forwards if x not in self.lineup.values()])
-      player.lineup = i
-      self.lineup[i] = player
-    player = random.choice([x for x in self.goalkeepers if x not in self.lineup.values()])
-    player.lineup = 16
-    self.lineup[i] = player
+      if i not in [x.lineup for x in self.players]:
+        player = random.choice([x for x in self.full_forwards if x.lineup == 0])
+        player.lineup = i
+    if 16 not in [x.lineup for x in self.players]:
+      player = random.choice([x for x in self.goalkeepers if x.lineup == 0])
+      player.lineup = 16
     for i in [17, 18, 19, 20]:
-      player = random.choice([x for x in self.players if x not in self.lineup.values()])
-      player.lineup = i
-      self.lineup[i] = player
+      if i not in [x.lineup for x in self.players]:
+        player = random.choice([x for x in self.players if x.lineup == 0])
+        player.lineup = i
     self.get_player_table()
 
   def get_player_table(self):

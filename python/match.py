@@ -10,6 +10,7 @@ import progressbar
 import numpy as np
 
 from team import Team
+from match_team import MatchTeam
 
 def printc(x):
   print('{0}\r'.format(x), end='')
@@ -26,8 +27,8 @@ def time_until_next_event(mean=60, sd=10):
 
 class Match():
   def __init__(self, team_a, team_b, date):
-    self.team_a = copy.deepcopy(team_a)
-    self.team_b = copy.deepcopy(team_b)
+    self.team_a = MatchTeam(team_a)
+    self.team_b = MatchTeam(team_b)
     self.date = date
     self.time = 0
     self.stopclock_time = stopclock(self.time)
@@ -70,6 +71,8 @@ class Match():
       time.sleep(time_step)
 
   def play(self, time_step=0, silent=False):
+    self.team_a.lineup_check()
+    self.team_b.lineup_check()
     self.progressbar.start()
     if silent is True:
       stdout = sys.stdout
