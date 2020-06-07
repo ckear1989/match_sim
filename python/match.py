@@ -4,6 +4,9 @@ import random
 import time
 import math
 import copy
+import sys
+import os
+import progressbar
 import numpy as np
 
 from team import Team
@@ -30,6 +33,8 @@ class Match():
     self.stopclock_time = stopclock(self.time)
     self.first_half_length = 35 * 60e3
     self.second_half_length = 35 * 60e3
+    self.progressbar = progressbar.ProgressBar(maxval=70*60e3, \
+      widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     random.seed()
 
   def __repr__(self):
@@ -49,9 +54,10 @@ class Match():
     print('{0} The referee throws the ball in.{1} wins posession for {2}'.format(self.stopclock_time, posession_player, team))
 
   def play_half(self, end_time, time_step, tane=time_until_next_event()):
-    while self.time <= end_time:
+    while self.time < end_time:
       self.time += 1
       self.stopclock_time = stopclock(self.time)
+      self.progressbar.update(self.time)
       if self.time % 1e3 == 0:
         printc(self.stopclock_time)
       if self.time % 60e3 == 0:
@@ -62,7 +68,14 @@ class Match():
         tane += tune
       time.sleep(time_step)
 
-  def play(self, time_step=0):
+  def play(self, time_step=0, silent=False):
+    self.progressbar.start()
+    if silent is True:
+      stdout = sys.stdout
+      f = open(os.devnull, 'w')
+      sys.stdout = f
+    else:
+      stdout = sys.stdout
     self.throw_in()
     self.play_half(self.first_half_length, time_step)
     self.half_time()
@@ -71,6 +84,8 @@ class Match():
     self.throw_in()
     self.play_half(second_half_end, time_step, tane=second_half_tane)
     self.full_time()
+    sys.stdout = stdout
+    self.progressbar.finish()
 
   def half_time(self, time_step=1):
     team_a_scorers = sorted(self.team_a.players, key=lambda x: -x.score)
@@ -107,5 +122,6 @@ if __name__ == "__main__":
   team_a = Team('a', 'a')
   team_b = Team('b', 'b')
   match = Match(team_a, team_b, datetime.date(2020, 1, 1))
-  match.play(0)
+  match.play()
+  match.play(silent=True)
 

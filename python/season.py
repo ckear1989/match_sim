@@ -149,7 +149,10 @@ class Season():
       self.current_date += datetime.timedelta(1)
       if self.current_date == self.next_fixture_date:
         next_match = self.fixtures.pop(self.next_fixture_date)
-        next_match.play()
+        if self.team.name in [next_match.team_a.name , next_match.team_b.name]:
+          next_match.play()
+        else:
+          next_match.play(silent=True)
         self.process_match_result(next_match)
         self.results[self.next_fixture_date] = next_match
       if self.fixtures == {}:
