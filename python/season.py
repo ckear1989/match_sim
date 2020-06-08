@@ -108,7 +108,7 @@ class Season():
     for sunday in sundays:
       matchup = random.choice(matchups)
       silent = True
-      if self.team.name in [self.teams[matchup[0]] , self.teams[matchup[0]]]:
+      if self.team.name in [self.teams[matchup[0]].name , self.teams[matchup[1]].name]:
         silent = False
       fixtures[sunday] = Match(self.teams[matchup[0]], self.teams[matchup[1]], sunday, silent)
       matchups.remove(matchup)

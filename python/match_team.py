@@ -15,7 +15,7 @@ class MatchTeam(Team):
     self.__dict__ = copy.deepcopy(team.__dict__)
 
   def lineup_check(self):
-    lineups = [x.lineup for x in self.players]
+    lineups = [x.lineup for x in self]
     for i in range(1, 21):
       if lineups.count(i) == 1:
         continue
@@ -34,7 +34,7 @@ class MatchTeam(Team):
       l = l_b.split(',')[0].strip()
     else:
       return None
-    players = [x for x in self.players if (x.first_name == f) and (x.last_name == l)]
+    players = [x for x in self if (x.first_name == f) and (x.last_name == l)]
     if len(players) > 0:
       player = players[0]
       if l_a is None:

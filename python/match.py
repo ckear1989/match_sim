@@ -48,10 +48,10 @@ class Match():
 
   def throw_in(self):
     if random.random() < 0.5:
-      posession_player = random.choice(self.team_a.players)
+      posession_player = random.choice(self.team_a)
       team = self.team_a.name
     else:
-      posession_player = random.choice(self.team_b.players)
+      posession_player = random.choice(self.team_b)
       team = self.team_b.name
     print('{0} The referee throws the ball in.{1} wins posession for {2}'.format(self.stopclock_time, posession_player, team))
 
@@ -106,8 +106,8 @@ class Match():
     self.progressbar.finish()
 
   def get_scorers(self):
-    team_a_scorers = sorted(self.team_a.players, key=lambda x: -x.score)
-    team_b_scorers = sorted(self.team_b.players, key=lambda x: -x.score)
+    team_a_scorers = sorted(self.team_a, key=lambda x: -x.score)
+    team_b_scorers = sorted(self.team_b, key=lambda x: -x.score)
     for player in [x for x in team_a_scorers if x.score > 0]:
       print('{0} {1}-{2} ({3})'.format(player, player.goals, player.points, player.score))
     for player in [x for x in team_b_scorers if x.score > 0]:
