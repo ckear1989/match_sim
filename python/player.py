@@ -18,6 +18,7 @@ class Player():
     self.passing = random_0_100_normal(80, 20)
     self.shooting = random_0_100_normal(70, 20)
     self.fitness = random_0_100_normal(70, 20)
+    self.condition = min(self.fitness, random_0_100_normal(70, 20))
     self.get_overall()
     self.goals = 0
     self.points = 0
@@ -37,7 +38,8 @@ class Player():
       self.defending,
       self.passing,
       self.shooting,
-      self.fitness
+      self.fitness,
+      self.condition
     ])))
 
   def update_score(self):

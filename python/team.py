@@ -66,6 +66,9 @@ class Team():
   def __getitem__(self, i):
     return self.players[i]
 
+  def __add__(self, other):
+    return self.players + other.players
+
   def get_lineup(self):
     self.goalkeepers = [x for x in self if x.position in ['GK']]
     self.full_backs = [x for x in self if x.position in ['FB']]
@@ -136,6 +139,7 @@ class Team():
     x.add_column('passing', [x.passing for x in self])
     x.add_column('shooting', [x.shooting for x in self])
     x.add_column('fitness', [x.fitness for x in self])
+    x.add_column('condition', [x.condition for x in self])
     x.sortby = 'lineup'
     self.player_table = x
 

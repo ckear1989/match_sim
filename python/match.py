@@ -57,6 +57,13 @@ class Match():
       team = self.team_b.name
     print('{0} The referee throws the ball in.{1} wins posession for {2}'.format(self.stopclock_time, posession_player, team))
 
+  def update_team_condition(self):
+    for x in self.team_a + self.team_b:
+      x.condition = max(x.condition, 0)
+      x.get_overall()
+    self.team_a.get_overall()
+    self.team_b.get_overall()
+
   def play_half(self, end_time, time_step, tane=time_until_next_event()):
     self.throw_in()
     while self.time < end_time:
@@ -72,6 +79,7 @@ class Match():
           self.progressbar.update(self.time)
         else:
           print(self.stopclock_time)
+        self.update_team_condition
       if self.time == (tane*1e3):
         self.event()
         tune = time_until_next_event()
