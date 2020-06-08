@@ -2,6 +2,7 @@
 from team import Team
 
 import copy
+import random
 
 def is_int(x):
   try:
@@ -47,6 +48,46 @@ class MatchTeam(Team):
     self.get_player_table()
     self.lineup_check()
     print(self)
+
+  def choose_player(self, p0, p1, p2):
+    p = random.random()
+    if p < p0:
+      player = random.choice(self.goalkeepers)
+    elif p < (p0+p1):
+      player = random.choice(self.defenders)
+    elif p < (p0+p1+p2):
+      player = random.choice(self.midfielders)
+    else:
+      player = random.choice(self.forwards)
+    return player
+
+  def chance(self, opp):
+    posession_player = self.choose_player(0.01, 0.2, 0.4)
+    shooting_player = self.choose_player(0.01, 0.1, 0.3)
+    defending_player = opp.choose_player(0.1, 0.7, 0.15)
+    print('Team {0} has a chance with {1} on the ball.'.format(self.name, posession_player), end='')
+    if random.random() < (posession_player.passing/100):
+      print('He passes the ball to {0}.'.format(shooting_player), end='')
+      if random.random() < ((defending_player.defending-30)/100):
+        print('But {0} wins the ball back for {1}.'.format(defending_player, opp.name))
+      elif random.random() < 0.8:
+        print('He shoots for a point.', end='')
+        if random.random() < (shooting_player.shooting/100):
+          shooting_player.points += 1
+          print('And he scores.', end='')
+        else:
+          print('But he misses.', end='')
+      else:
+        print('He shoots for a goal.', end='')
+        if random.random() < (shooting_player.shooting/100):
+          shooting_player.goals += 1
+          print('And he scores.', end='')
+        else:
+          print('But he misses.', end='')
+    else:
+        print('But he loses posession with the kick.', end='')
+    shooting_player.update_score()
+    self.update_score()
 
 if __name__=="__main__":
   team = Team('a', 'a')

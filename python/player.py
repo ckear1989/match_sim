@@ -14,6 +14,7 @@ class Player():
   def __init__(self):
     self.first_name = random.choice(default.first_names)
     self.last_name = random.choice(default.last_names)
+    self.defending = random_0_100_normal(80, 20)
     self.passing = random_0_100_normal(80, 20)
     self.shooting = random_0_100_normal(70, 20)
     self.fitness = random_0_100_normal(70, 20)
@@ -25,7 +26,6 @@ class Player():
     self.lineup = 0
 
   def __repr__(self):
-    # ps = '{0} {1}\noverall:{2:d}'.format(self.first_name, self.last_name, self.overall)
     ps = '{0} {1}'.format(self.first_name[0], self.last_name)
     return ps
 
@@ -34,6 +34,7 @@ class Player():
 
   def get_overall(self):
     self.overall = int(round(np.mean([
+      self.defending,
       self.passing,
       self.shooting,
       self.fitness

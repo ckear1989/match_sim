@@ -64,6 +64,9 @@ class Match():
       self.stopclock_time = stopclock(self.time)
       if self.time % 1e3 == 0:
         printc(self.stopclock_time)
+        if self.silent is False:
+          if keyboard.is_pressed('space') is True:
+            self.pause()
       if self.time % 60e3 == 0:
         if self.silent is True:
           self.progressbar.update(self.time)
@@ -74,9 +77,6 @@ class Match():
         tune = time_until_next_event()
         tane += tune
       time.sleep(time_step)
-      if self.silent is False:
-        if keyboard.is_pressed('space') is True:
-          self.pause()
 
   def pause(self):
     if self.silent is False:
@@ -131,9 +131,9 @@ class Match():
     b_tot = self.team_b.overall
     p_team_a_chance = a_tot / (a_tot+b_tot)
     if random.random() < p_team_a_chance:
-      self.team_a.chance()
+      self.team_a.chance(self.team_b)
     else:
-      self.team_b.chance()
+      self.team_b.chance(self.team_a)
     print(self.get_score())
 
   def get_score(self):
