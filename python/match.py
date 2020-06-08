@@ -87,6 +87,8 @@ class Match():
         pass
       elif x in ['e', 'exit']:
         exit()
+      else:
+        self.pause()
 
   def play(self, time_step=0):
     self.team_a.lineup_check()
