@@ -1,5 +1,6 @@
 
 import default
+from player import x_0_100_cap, random_0_100_normal
 
 import datetime
 import calendar
@@ -45,10 +46,30 @@ class Training():
           if adate.weekday() == s:
             self.fixtures[adate] = self.schedule[s]
 
-if __name__=="__main__":
-  t = Training(datetime.date(2020, 1, 1))
-  t.get_schedule()
-  t.get_schedule()
-  t
-  print(t)
+  def train(self, ateam, focus):
+    for x in ateam:
+      if focus in ['pa', 'passing']:
+        x.passing = x_0_100_cap(x.passing + random_0_100_normal(5, 1))
+        x.shooting = x_0_100_cap(x.shooting - random_0_100_normal(2, 1))
+        x.fitness = x_0_100_cap(x.fitness - random_0_100_normal(2, 1))
+      elif focus in ['sh', 'shooting']:
+        x.shooting = x_0_100_cap(x.shooting + random_0_100_normal(5, 1))
+        x.passing = x_0_100_cap(x.passing - random_0_100_normal(2, 1))
+        x.fitness = x_0_100_cap(x.fitness - random_0_100_normal(2, 1))
+      elif focus in ['fi', 'fitness']:
+        x.fitness = x_0_100_cap(x.fitness + random_0_100_normal(5, 1))
+        x.passing = x_0_100_cap(x.passing - random_0_100_normal(2, 1))
+        x.shooting = x_0_100_cap(x.shooting - random_0_100_normal(2, 1))
+      x.get_overall()
+    ateam.get_overall()
 
+if __name__=="__main__":
+  from team import Team
+  team = Team('a', 'a')
+  team.get_training_schedule(datetime.date(2020, 1, 1))
+  print(team.training)
+  print(team)
+  team.train('passing')
+  team.train('shooting')
+  team.train('fitness')
+  print(team)

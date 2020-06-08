@@ -81,7 +81,7 @@ class Match():
     if self.silent is False:
       x = ''
       while x not in ['c', 'continue']:
-        x = input(' '.join(['(l)ineup', '(c)ontinue']))
+        x = input('{0}\n'.format('\t'.join(['(l)ineup', '(c)ontinue'])))
         if x in ['l', 'lineup']:
           self.team_a.lineup_change()
 

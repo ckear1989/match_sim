@@ -4,8 +4,11 @@ import random
 
 import default
 
+def x_0_100_cap(x):
+  return int(max(min(round(x, 0), 100), 0))
+
 def random_0_100_normal(mean, sd):
-  return int(max(min(round(np.random.normal(mean, sd), 0), 100), 0))
+  return x_0_100_cap(np.random.normal(mean, sd))
 
 class Player():
   def __init__(self):
@@ -14,11 +17,7 @@ class Player():
     self.passing = random_0_100_normal(80, 20)
     self.shooting = random_0_100_normal(70, 20)
     self.fitness = random_0_100_normal(70, 20)
-    self.overall = int(round(np.mean([
-      self.passing,
-      self.shooting,
-      self.fitness
-    ])))
+    self.get_overall()
     self.goals = 0
     self.points = 0
     self.score = 0
@@ -32,6 +31,13 @@ class Player():
 
   def __str__(self):
     return self.__repr__()
+
+  def get_overall(self):
+    self.overall = int(round(np.mean([
+      self.passing,
+      self.shooting,
+      self.fitness
+    ])))
 
   def update_score(self):
     self.score = (self.goals * 3) + self.points

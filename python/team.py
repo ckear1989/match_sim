@@ -5,6 +5,7 @@ from prettytable import PrettyTable
 
 import default
 from player import Player
+from training import Training
 
 # https://thispointer.com/python-how-to-make-a-class-iterable-create-iterator-class-for-it/
 class TeamIterator:
@@ -34,7 +35,7 @@ class Team():
       self.players = [Player() for i in range(30)]
     else:
       self.players = players
-    self.overall = self.get_overall()
+    self.get_overall()
     self.score =  0
     self.played = 0
     self.goals = 0
@@ -138,7 +139,8 @@ class Team():
     self.player_table = x
 
   def get_overall(self):
-    return round(np.mean([p.overall for p in self]), 2)
+    self.overall = round(np.mean([p.overall for p in self]), 2)
+    self.get_player_table()
 
   def choose_player(self, p0, p1, p2):
     p = random.random()
@@ -182,8 +184,17 @@ class Team():
     self.points = sum([x.points for x in self])
     self.score = (self.goals * 3) + self.points
 
+  def get_training_schedule(self, adate):
+    self.training = Training(adate)
+    self.append_training_schedule()
+
+  def append_training_schedule(self):
+    self.training.get_schedule()
+
+  def train(self, focus):
+    self.training.train(self, focus)
+
 if __name__=="__main__":
   team = Team('a', 'a')
   print(team)
-
 
