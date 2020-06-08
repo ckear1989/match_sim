@@ -8,6 +8,7 @@ import sys
 import os
 import progressbar
 import numpy as np
+import keyboard
 
 from team import Team
 from match_team import MatchTeam
@@ -35,8 +36,9 @@ class Match():
     self.stopclock_time = stopclock(self.time)
     self.first_half_length = 35 * 60e3
     self.second_half_length = 35 * 60e3
-    self.progressbar = progressbar.ProgressBar(maxval=70*60e3, \
-      widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    if self.silent is True:
+      self.progressbar = progressbar.ProgressBar(maxval=70*60e3, \
+        widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     random.seed()
 
   def __repr__(self):
@@ -57,53 +59,53 @@ class Match():
 
   def play_half(self, end_time, time_step, tane=time_until_next_event()):
     self.throw_in()
-    try:
-      while self.time < end_time:
-        self.time += 1
-        self.stopclock_time = stopclock(self.time)
-        if self.time % 1e3 == 0:
-          printc(self.stopclock_time)
-        if self.time % 60e3 == 0:
-          if self.silent is True:
-            self.progressbar.update(self.time)
-          else:
-            print(self.stopclock_time)
-        if self.time == (tane*1e3):
-          self.event()
-          tune = time_until_next_event()
-          tane += tune
-        time.sleep(time_step)
-    except KeyboardInterrupt:
-      self.pause()
-      self.play_half(end_time, time_step, tane)
+    while self.time < end_time:
+      self.time += 1
+      self.stopclock_time = stopclock(self.time)
+      if self.time % 1e3 == 0:
+        printc(self.stopclock_time)
+      if self.time % 60e3 == 0:
+        if self.silent is True:
+          self.progressbar.update(self.time)
+        else:
+          print(self.stopclock_time)
+      if self.time == (tane*1e3):
+        self.event()
+        tune = time_until_next_event()
+        tane += tune
+      time.sleep(time_step)
+      if self.silent is False:
+        if keyboard.is_pressed('space') is True:
+          self.pause()
 
   def pause(self):
     if self.silent is False:
-      x = ''
-      while x not in ['c', 'continue']:
-        x = input('{0}\n'.format('\t'.join(['(l)ineup', '(c)ontinue'])))
-        if x in ['l', 'lineup']:
-          self.team_a.lineup_change()
+      x = input('{0}\n'.format('\t'.join(['(l)ineup', '(c)ontinue', '(e)xit']))).strip()
+      if x in ['l', 'lineup']:
+        self.team_a.lineup_change()
+      elif x in ['c', 'continue']:
+        pass
+      elif x in ['e', 'exit']:
+        exit()
 
   def play(self, time_step=0):
     self.team_a.lineup_check()
     self.team_b.lineup_check()
     self.pause()
-    self.progressbar.start()
     if self.silent is True:
+      self.progressbar.start()
       stdout = sys.stdout
       f = open(os.devnull, 'w')
       sys.stdout = f
-    else:
-      stdout = sys.stdout
     self.play_half(self.first_half_length, time_step)
     self.half_time()
     second_half_end = self.first_half_length + self.second_half_length
     second_half_tane = (self.first_half_length*1e-3) + time_until_next_event()
     self.play_half(second_half_end, time_step, tane=second_half_tane)
     self.full_time()
-    sys.stdout = stdout
-    self.progressbar.finish()
+    if self.silent is True:
+      sys.stdout = stdout
+      self.progressbar.finish()
 
   def get_scorers(self):
     team_a_scorers = sorted(self.team_a, key=lambda x: -x.score)

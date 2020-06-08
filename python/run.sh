@@ -5,13 +5,14 @@
 # pip3 install prettytable
 # pip3 install progressbar
 # pip3 install dill
+# pip3 install keyboard
 
 # python3.6 default.py
 # python3.6 settings.py
-# python3.6 season.py
-# python3.6 match.py
+# sudo python3.6 season.py
+# sudo python3.6 match.py
 # python3.6 training.py
 # python3.6 team.py
 # python3.6 match_team.py
-python3.6 main.py
+sudo python3.6 main.py
 
