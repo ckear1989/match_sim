@@ -32,11 +32,13 @@ class Season():
     self.year = self.start_date.year
     self.calendar = calendar.calendar(self.year)
     self.get_teams()
+    self.get_players()
     self.get_fixtures()
     self.results = {}
     self.teams[self.team].training = Training(self.current_date)
     self.update_next_fixture()
     self.get_league_table()
+    self.get_scorers_table()
     self.get_upcoming_events()
 
   def __repr__(self):
@@ -44,6 +46,7 @@ class Season():
     ps += 'current team status: {0}\nnext fixture opponent:{1}\n'.format(self.teams[self.team], self.teams[self.next_fixture_opponent])
     ps += 'upcoming events:\n{0}\n'.format(self.upcoming_events)
     ps += 'league table:\n{0}\n'.format(self.league_table)
+    ps += 'scorers table:\n{0}\n'.format(self.scorers_table)
     ps += 'current training schedule:\n{0}\n'.format(self.teams[self.team].training)
     return ps
 
@@ -78,8 +81,22 @@ class Season():
     x.reversesort = True
     self.league_table = x
 
+  def get_scorers_table(self):
+    scorers = [x for x in self.players if x.score > 0]
+    x = PrettyTable()
+    x.add_column('player', scorers)
+    x.add_column('team', [x.team for x in scorers])
+    x.add_column('rscore', [x.score for x in scorers])
+    x.add_column('score', ['{0}-{1} ({2})'.format(x.goals, x.points, x.score) for x in scorers])
+    x.sortby = 'rscore'
+    x.title = 'Season %s top scorers' % self.year
+    x.reversesort = True
+    x = x.get_string(fields=['player', 'team', 'score'], end=10)
+    self.scorers_table = x
+
   def update_league_table(self):
     self.get_league_table()
+    self.get_scorers_table()
 
   def update_next_fixture(self):
     self.next_fixture_date = min([x for x in self.fixtures.keys() if x > self.current_date])
@@ -104,6 +121,9 @@ class Season():
       else:
         self.teams[team] = Team(team, 'jim')
         self.teams[team].training = Training(self.current_date, [0, 2, 4], ['fi', 'pa', 'sh'])
+
+  def get_players(self):
+    self.players = [player for team in self.teams for player in self.teams[team].players]
 
   def get_fixtures(self):
     sundays = get_sundays(self.year)
@@ -149,7 +169,13 @@ class Season():
       match.team_b.league_points += 1
     self.teams[match.team_a.name] = copy.deepcopy(match.team_a)
     self.teams[match.team_b.name] = copy.deepcopy(match.team_b)
+    i = 0
     for team in self.teams.keys():
+      for player in self.teams[team]:
+        self.players[i].points += player.points
+        self.players[i].goals += player.goals
+        self.players[i].score += player.score
+        i += 1
       self.teams[team].reset_score()
     self.results[self.current_date] = match
 

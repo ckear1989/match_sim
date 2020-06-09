@@ -32,7 +32,7 @@ class Team():
     self.manager = manager
     if players is None:
       random.seed(name)
-      self.players = [Player() for i in range(30)]
+      self.players = [Player(name) for i in range(30)]
     else:
       self.players = players
     self.get_overall()

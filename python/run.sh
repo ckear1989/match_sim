@@ -3,6 +3,7 @@
 # sudo apt install python3-pip
 # pip3 install numpy
 # pip3 install prettytable
+# pip3 install ptable
 # pip3 install progressbar
 # pip3 install dill
 # pip3 install keyboard

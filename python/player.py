@@ -11,9 +11,10 @@ def random_0_100_normal(mean, sd):
   return x_0_100_cap(np.random.normal(mean, sd))
 
 class Player():
-  def __init__(self):
+  def __init__(self, team=None):
     self.first_name = random.choice(default.first_names)
     self.last_name = random.choice(default.last_names)
+    self.team = team
     self.defending = random_0_100_normal(80, 20)
     self.passing = random_0_100_normal(80, 20)
     self.shooting = random_0_100_normal(70, 20)
@@ -32,6 +33,9 @@ class Player():
 
   def __str__(self):
     return self.__repr__()
+
+  def __lt__(self, other):
+    return(self.__repr__() < other.__repr__())
 
   def get_overall(self):
     self.overall = int(round(np.mean([
