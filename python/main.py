@@ -20,7 +20,7 @@ def home_screen(settings):
 
 def new_game():
   options = ['(e)asy', '(m)edium', '(h)ard']
-  game_diff = input('choose difficulty:\n{0}\n'.format(''.join(options)))
+  game_diff = input('choose difficulty:\n{0}\n'.format(' '.join(options)))
   team_name = input('choose team:\n{0}\n'.format(' '.join(default.poss_teams)))
   manager_name = input('manager name:\n')
   season = Season(team_name, manager_name)

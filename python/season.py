@@ -100,6 +100,8 @@ class Season():
 
   def update_next_fixture(self):
     self.next_fixture_date = min([x for x in self.fixtures.keys() if x > self.current_date])
+    self.last_fixture_date = max([x for x in self.fixtures.keys() if x > self.current_date])
+    self.days_until_next_fixture = (self.next_fixture_date - self.current_date).days
     self.next_fixture = self.fixtures[self.next_fixture_date]
     self.next_fixture_opponent = self.next_fixture[0]
     if self.next_fixture_opponent == self.team:
@@ -187,6 +189,11 @@ class Season():
     elif cmd in ['a', 'append schedule']:
       self.teams[self.team].training.append_schedule()
 
+  def skip(self):
+    sk = input('{0} days until next fixture\nSkip? (y) (n)\n'.format(self.days_until_next_fixture))
+    if sk in ['y', 'yes']:
+      self.current_date += (datetime.timedelta(self.days_until_next_fixture - 2))
+
   def process(self, cmd):
     if cmd in ['s', 'save']:
       self.save()
@@ -214,11 +221,13 @@ class Season():
         next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent, control)
         next_match.play()
         self.process_match_result(next_match)
-      if self.fixtures == {}:
+      if self.last_fixture_date == self.current_date:
         self.end()
     self.update_next_fixture()
     self.update_league_table()
     self.get_upcoming_events()
+    if self.days_until_next_fixture > 9:
+      self.skip()
 
 if __name__=="__main__":
 
