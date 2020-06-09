@@ -152,6 +152,12 @@ class Team():
     self.points = sum([x.points for x in self])
     self.score = (self.goals * 3) + self.points
 
+  def reset_score(self):
+    for x in self:
+      x.goals = 0
+      x.points = 0
+    self.update_score()
+
   def get_training_schedule(self, adate):
     self.training = Training(adate)
     self.append_training_schedule()

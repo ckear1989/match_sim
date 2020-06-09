@@ -22,28 +22,29 @@ def get_sundays(year):
   return sundays
 
 class Season():
-  def __init__(self, team):
-    random.seed(team.name)
-    self.team = team
-    self.save_file = '../data/games/%s_%s.dat' % (self.team.name, self.team.manager)
+  def __init__(self, team_name, manager_name):
+    random.seed(team_name)
+    self.team = team_name
+    self.manager = manager_name
+    self.save_file = '../data/games/%s_%s_%s.dat' % (self.team, self.manager, datetime.datetime.today().strftime('%Y%m%d'))
     self.start_date = datetime.date(2020, 1, 1)
     self.current_date = self.start_date
     self.year = self.start_date.year
     self.calendar = calendar.calendar(self.year)
-    self.teams = self.get_teams()
-    self.fixtures = self.get_fixtures()
+    self.get_teams()
+    self.get_fixtures()
     self.results = {}
-    self.team.training = Training(self.current_date)
+    self.teams[self.team].training = Training(self.current_date)
     self.update_next_fixture()
     self.get_league_table()
     self.get_upcoming_events()
 
   def __repr__(self):
     ps = 'current date: {0}\nnext match date: {1}\n'.format(self.current_date, self.next_fixture_date)
-    ps += 'current team status: {0}\nnext fixture opponent:{1}\n'.format(self.team, self.next_fixture_opponent)
+    ps += 'current team status: {0}\nnext fixture opponent:{1}\n'.format(self.teams[self.team], self.teams[self.next_fixture_opponent])
     ps += 'upcoming events:\n{0}\n'.format(self.upcoming_events)
     ps += 'league table:\n{0}\n'.format(self.league_table)
-    ps += 'current training schedule:\n{0}\n'.format(self.team.training)
+    ps += 'current training schedule:\n{0}\n'.format(self.teams[self.team].training)
     return ps
 
   def __str__(self):
@@ -58,8 +59,8 @@ class Season():
         events += [self.fixtures[adate]]
       if adate in self.results.keys():
         events += [self.results[adate]]
-      if adate in self.team.training.fixtures.keys():
-        events += [self.team.training.fixtures[adate]]
+      if adate in self.teams[self.team].training.fixtures.keys():
+        events += [self.teams[self.team].training.fixtures[adate]]
       if events == []:
         events= ''
       ps += ('{0} {1}\n'.format(adate, events))
@@ -79,26 +80,27 @@ class Season():
     self.get_league_table()
 
   def update_next_fixture(self):
-    self.next_fixture_date = min(self.fixtures.keys())
+    self.next_fixture_date = min([x for x in self.fixtures.keys() if x > self.current_date])
     self.next_fixture = self.fixtures[self.next_fixture_date]
-    next_fixture_opponent = self.next_fixture.team_a.name
-    if next_fixture_opponent == self.team.name:
-      next_fixture_opponent = self.next_fixture.team_b.name
-    self.next_fixture_opponent = copy.deepcopy(self.teams[next_fixture_opponent])
+    self.next_fixture_opponent = self.next_fixture[0]
+    if self.next_fixture_opponent == self.team:
+      self.next_fixture_opponent = self.next_fixture[1]
     self.next_training_date = None
-    upcoming_training = [x for x in self.team.training.fixtures.keys() if x > self.current_date]
+    upcoming_training = [x for x in self.teams[self.team].training.fixtures.keys() if x > self.current_date]
     if len(upcoming_training) > 0:
       self.next_training_date = min(upcoming_training)
 
   def end(self):
     self.year += 1
-    self.fixtures = self.get_fixtures()
+    self.get_fixtures()
 
   def get_teams(self):
-    teams = {}
+    self.teams = {}
     for team in default.poss_teams:
-      teams[team] = Team(team, 'jim')
-    return teams
+      if team == self.team:
+        self.teams[team] = Team(team, self.manager)
+      else:
+        self.teams[team] = Team(team, 'jim')
 
   def get_fixtures(self):
     sundays = get_sundays(self.year)
@@ -107,16 +109,12 @@ class Season():
       for team_b in self.teams.keys():
         if team_a != team_b:
           matchups.append((team_a, team_b))
-    fixtures = {}
+    self.fixtures = {}
     sundays = sundays[:len(matchups)]
     for sunday in sundays:
       matchup = random.choice(matchups)
-      silent = True
-      if self.team.name in [self.teams[matchup[0]].name , self.teams[matchup[1]].name]:
-        silent = False
-      fixtures[sunday] = Match(self.teams[matchup[0]], self.teams[matchup[1]], sunday, silent)
+      self.fixtures[sunday] = matchup
       matchups.remove(matchup)
-    return fixtures
 
   def save(self):
     with open(self.save_file, 'wb') as f:
@@ -131,44 +129,57 @@ class Season():
       self.process(cmd)
 
   def process_match_result(self, match):
-    self.teams[match.team_a.name].played += 1
-    self.teams[match.team_b.name].played += 1
+    match.team_a.played += 1
+    match.team_b.played += 1
     if match.team_a.score > match.team_b.score:
-      self.teams[match.team_a.name].league_win += 1
-      self.teams[match.team_b.name].league_loss += 1
-      self.teams[match.team_a.name].league_points += 2
+      match.team_a.league_win += 1
+      match.team_b.league_loss += 1
+      match.team_a.league_points += 2
     elif match.team_a.score < match.team_b.score:
-      self.teams[match.team_b.name].league_win += 1
-      self.teams[match.team_a.name].league_loss += 1
-      self.teams[match.team_b.name].league_points += 2
+      match.team_b.league_win += 1
+      match.team_a.league_loss += 1
+      match.team_b.league_points += 2
     else:
-      self.teams[match.team_a.name].league_draw += 1
-      self.teams[match.team_b.name].league_draw += 1
-      self.teams[match.team_a.name].league_points += 1
-      self.teams[match.team_b.name].league_points += 1
+      match.team_a.league_draw += 1
+      match.team_b.league_draw += 1
+      match.team_a.league_points += 1
+      match.team_b.league_points += 1
+    self.teams[match.team_a.name] = copy.deepcopy(match.team_a)
+    self.teams[match.team_b.name] = copy.deepcopy(match.team_b)
+    for team in self.teams.keys():
+      self.teams[team].reset_score()
+    self.results[self.current_date] = match
 
   def training(self):
     options = ['(n)ew schedule', '(a)ppend schedule']
     cmd = input('choose option:\n%s\n' % '\t'.join(options))
     if cmd in ['n', 'new schedule']:
-      self.team.training.get_schedule(self.current_date)
+      self.teams[self.team].training.get_schedule(self.current_date)
     elif cmd in ['a', 'append schedule']:
-      self.team.training.append_schedule()
+      self.teams[self.team].training.append_schedule()
 
   def process(self, cmd):
     if cmd in ['s', 'save']:
       self.save()
     if cmd in ['t', 'training']:
-      self.team.training.get_schedule()
+      self.teams[self.team].training.get_schedule()
     if cmd in ['c', 'continue']:
       self.current_date += datetime.timedelta(1)
+      for team in self.teams:
+        for player in self.teams[team]:
+          player.condition = min((player.condition + 10), player.fitness)
+          player.get_overall()
+        self.teams[team].get_overall()
       if self.current_date == self.next_fixture_date:
-        next_match = self.fixtures.pop(self.next_fixture_date)
+        next_match_t = self.fixtures[self.current_date]
+        silent = True
+        if self.team in next_match_t:
+          silent = False
+        next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent)
         next_match.play()
         self.process_match_result(next_match)
-        self.results[self.next_fixture_date] = next_match
       elif self.current_date == self.next_training_date:
-        self.team.train(self.team.training.fixtures[self.current_date])
+        self.teams[self.team].train(self.teams[self.team].training.fixtures[self.current_date])
       if self.fixtures == {}:
         self.end()
     self.update_next_fixture()
@@ -177,7 +188,6 @@ class Season():
 
 if __name__=="__main__":
 
-  team = Team('b', 'bob')
-  season = Season(team)
+  season = Season('a', 'adam')
   season.cont()
 

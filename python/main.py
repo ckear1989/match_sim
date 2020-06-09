@@ -14,36 +14,16 @@ clear = lambda: os.system('cls' if os.name == 'nt' else 'clear')
 def home_screen(settings):
   print('hello')
   options = ['(n)ew', '(l)oad', '(s)ettings', '(e)xit']
-  print(
-    'choose option:',
-    '\t'.join(options),
-    nl,
-    sep=nl
-  )
-  a = input()
+  a = input('choose option:\n{0}\n'.format(' '.join(options)))
   clear()
   choose_option(a, settings)
 
 def new_game():
   options = ['(e)asy', '(m)edium', '(h)ard']
-  print(
-    'choose difficulty',
-    '\t'.join(options),
-    nl,
-    sep=nl
-  )
-  game_diff = input()
-  print(
-    'choose team:',
-    '\t'.join(default.poss_teams),
-    nl,
-    sep=nl
-  )
-  team_name = input()
-  manager_name = input('manager name:')
-  if team_name in default.poss_teams:
-    team = Team(team_name, manager_name)
-  season = Season(team)
+  game_diff = input('choose difficulty:\n{0}\n'.format(''.join(options)))
+  team_name = input('choose team:\n{0}\n'.format(' '.join(default.poss_teams)))
+  manager_name = input('manager name:\n')
+  season = Season(team_name, manager_name)
   season.save()
   season.cont()
 
@@ -53,16 +33,12 @@ def load_game():
   if games == []:
     print('\tno games found\n')
   else:
-    print('choose game:')
-    for game in games:
-      print(game)
-  lg = input()
-  if lg in games:
-    with open('../data/games/%s.dat' % lg, 'rb') as f:
-      season = pickle.load(f)
-    print(season)
-    season.save()
-    season.cont()
+    lg = input('choose game:\n{0}\n'.format(' '.join(games)))
+    if lg in games:
+      with open('../data/games/%s.dat' % lg, 'rb') as f:
+        season = pickle.load(f)
+      season.save()
+      season.cont()
 
 def choose_option(txt, settings):
   if txt in ['n', 'new']:
