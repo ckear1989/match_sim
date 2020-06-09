@@ -74,6 +74,8 @@ class Season():
     x.add_column('loss', [x.league_loss for x in self.teams.values()])
     x.add_column('draw', [x.league_draw for x in self.teams.values()])
     x.add_column('points', [x.league_points for x in self.teams.values()])
+    x.sortby = 'points'
+    x.reversesort = True
     self.league_table = x
 
   def update_league_table(self):

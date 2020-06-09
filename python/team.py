@@ -143,6 +143,13 @@ class Team():
     x.sortby = 'lineup'
     self.player_table = x
 
+  def get_scorer_table(self):
+    scorers = [i for i in sorted(self, key=lambda x: -x.score) if i.score > 0]
+    x = PrettyTable()
+    x.add_column('%s scorers' % self.name, scorers)
+    x.add_column('score', ['{0}-{1} ({2})'.format(x.goals, x.points, x.score) for x in scorers])
+    self.scorer_table = x
+
   def get_overall(self):
     self.overall = round(np.mean([p.overall for p in self]), 2)
     self.get_player_table()
