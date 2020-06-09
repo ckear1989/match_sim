@@ -17,7 +17,7 @@ class Training():
     self.start_date = start_date
     if dow is not None:
       if fs is not None:
-        for i in len(dow):
+        for i in range(len(dow)):
           self.schedule[dow[i]] = fs[i]
         self.get_fixtures()
 

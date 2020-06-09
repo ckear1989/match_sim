@@ -101,7 +101,7 @@ class Season():
         self.teams[team] = Team(team, self.manager)
       else:
         self.teams[team] = Team(team, 'jim')
-        self.teams[team].training = Training(self.current_date, ['mo', 'we'], ['fi', 'pa'])
+        self.teams[team].training = Training(self.current_date, [0, 2, 4], ['fi', 'pa', 'sh'])
 
   def get_fixtures(self):
     sundays = get_sundays(self.year)
@@ -167,6 +167,8 @@ class Season():
     if cmd in ['c', 'continue']:
       self.current_date += datetime.timedelta(1)
       for team in self.teams:
+        if self.current_date in self.teams[team].training.fixtures:
+          self.teams[team].train(self.teams[team].training.fixtures[self.current_date])
         for player in self.teams[team]:
           player.condition = min((player.condition + 10), player.fitness)
           player.get_overall()
@@ -184,8 +186,6 @@ class Season():
         next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent, control)
         next_match.play()
         self.process_match_result(next_match)
-      elif self.current_date == self.next_training_date:
-        self.teams[self.team].train(self.teams[self.team].training.fixtures[self.current_date])
       if self.fixtures == {}:
         self.end()
     self.update_next_fixture()
