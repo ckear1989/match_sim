@@ -11,10 +11,15 @@ def options_from_list(alist):
   return x
 
 class Training():
-  def __init__(self, start_date):
+  def __init__(self, start_date, dow=None, fs=None):
     self.schedule = {}
     self.fixtures = {}
     self.start_date = start_date
+    if dow is not None:
+      if fs is not None:
+        for i in len(dow):
+          self.schedule[dow[i]] = fs[i]
+        self.get_fixtures()
 
   def __repr__(self):
     ps = '\n'.join(['{0}:{1}'.format(
@@ -81,3 +86,4 @@ if __name__=="__main__":
   team.train('shooting')
   team.train('fitness')
   print(team)
+

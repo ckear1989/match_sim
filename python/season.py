@@ -101,6 +101,7 @@ class Season():
         self.teams[team] = Team(team, self.manager)
       else:
         self.teams[team] = Team(team, 'jim')
+        self.teams[team].training = Training(self.current_date, ['mo', 'we'], ['fi', 'pa'])
 
   def get_fixtures(self):
     sundays = get_sundays(self.year)
