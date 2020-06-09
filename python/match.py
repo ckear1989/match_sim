@@ -27,11 +27,12 @@ def time_until_next_event(mean=60, sd=10):
   return max(round(np.random.normal(mean, sd), 0), 1)
 
 class Match():
-  def __init__(self, team_a, team_b, date, silent):
+  def __init__(self, team_a, team_b, date, silent, control=[]):
     self.team_a = MatchTeam(team_a)
     self.team_b = MatchTeam(team_b)
     self.date = date
     self.silent = silent
+    self.control = control
     self.time = 0
     self.stopclock_time = stopclock(self.time)
     self.first_half_length = 35 * 60e3
@@ -71,9 +72,8 @@ class Match():
       self.stopclock_time = stopclock(self.time)
       if self.time % 1e3 == 0:
         printc(self.stopclock_time)
-        if self.silent is False:
-          if keyboard.is_pressed('space') is True:
-            self.pause()
+        if keyboard.is_pressed('space') is True:
+          self.pause()
       if self.time % 60e3 == 0:
         if self.silent is True:
           self.progressbar.update(self.time)
@@ -87,10 +87,13 @@ class Match():
       time.sleep(time_step)
 
   def pause(self):
-    if self.silent is False:
+    if len(self.control) > 0:
       x = input('{0}\n'.format('\t'.join(['(l)ineup', '(c)ontinue', '(e)xit']))).strip()
       if x in ['l', 'lineup']:
-        self.team_a.lineup_change()
+        if 'a' in self.control:
+          self.team_a.lineup_change()
+        if 'b' in self.control:
+          self.team_b.lineup_change()
       elif x in ['c', 'continue']:
         pass
       elif x in ['e', 'exit']:

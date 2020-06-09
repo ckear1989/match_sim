@@ -173,9 +173,14 @@ class Season():
       if self.current_date == self.next_fixture_date:
         next_match_t = self.fixtures[self.current_date]
         silent = True
+        control = []
         if self.team in next_match_t:
           silent = False
-        next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent)
+          if self.team == next_match_t[0]:
+            control = ['a']
+          elif self.team == next_match_t[1]:
+            control = ['b']
+        next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent, control)
         next_match.play()
         self.process_match_result(next_match)
       elif self.current_date == self.next_training_date:
