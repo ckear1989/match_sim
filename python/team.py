@@ -161,11 +161,10 @@ class Team():
     self.points = sum([x.points for x in self])
     self.score = (self.goals * 3) + self.points
 
-  def reset_score(self):
+  def reset_match_stats(self):
     for x in self:
-      x.goals = 0
-      x.points = 0
-    self.update_score()
+      x.reset_match_stats()
+    x.update_score()
 
   def reset_wld(self):
     self.played = 0

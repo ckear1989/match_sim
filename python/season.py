@@ -103,7 +103,7 @@ class Season():
   def end(self):
     self.reset_players()
     for team in self.teams.keys():
-      self.teams[team].reset_score()
+      self.teams[team].reset_match_stats()
       self.teams[team].reset_wld()
     self.year += 1
     self.get_fixtures()
@@ -122,9 +122,7 @@ class Season():
 
   def reset_players(self):
     for player in self.players:
-      player.points = 0
-      player.goals = 0
-      player.score = 0
+      player.reset_match_stats()
 
   def get_fixtures(self):
     self.league1 = Competition('league div 1', 'rr', datetime.date(self.year, 1, 1))
@@ -171,7 +169,7 @@ class Season():
           self.players[i].goals += player.goals
           self.players[i].score += player.score
           i += 1
-        self.teams[team].reset_score()
+        self.teams[team].reset_match_stats()
     self.results[self.current_date] = match
 
   def training(self):

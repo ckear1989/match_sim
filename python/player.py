@@ -27,6 +27,7 @@ class Player():
     self.position = random.choice(['GK', 'FB', 'HB', 'MI', 'HF', 'FF'])
     self.lineup = 0
     self.minutes = 0
+    self.cards = 0
 
   def __repr__(self):
     ps = '{0} {1}'.format(self.first_name[0], self.last_name)
@@ -46,6 +47,13 @@ class Player():
       self.fitness,
       self.condition
     ])))
+
+  def reset_match_stats(self):
+    self.goals = 0
+    self.points = 0
+    self.update_score()
+    self.minutes = 0
+    self.cards = []
 
   def update_score(self):
     self.score = (self.goals * 3) + self.points
