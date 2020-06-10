@@ -128,7 +128,8 @@ class Season():
 
   def get_fixtures(self):
     self.league1 = Competition('league div 1', 'rr', datetime.date(self.year, 1, 1))
-    self.fixtures = self.league1.fixtures
+    self.cup = Competition('cup', 'cup', self.league1.last_fixture_date + datetime.timedelta(1))
+    self.fixtures = {**self.league1.fixtures, **self.cup.fixtures}
 
   def save(self):
     with open(self.save_file, 'wb') as f:
@@ -139,35 +140,38 @@ class Season():
     cmd = ''
     while cmd not in ['exit', 'e']:
       print(self)
-      cmd = input('choose option:\n%s\n' % '\t'.join(options))
+      if self.days_until_next_fixture > 9:
+        self.skip()
+      cmd = input('choose option:\n%s\n' % ' '.join(options))
       self.process(cmd)
 
-  def process_match_result(self, match):
-    match.team_a.played += 1
-    match.team_b.played += 1
-    if match.team_a.score > match.team_b.score:
-      match.team_a.league_win += 1
-      match.team_b.league_loss += 1
-      match.team_a.league_points += 2
-    elif match.team_a.score < match.team_b.score:
-      match.team_b.league_win += 1
-      match.team_a.league_loss += 1
-      match.team_b.league_points += 2
-    else:
-      match.team_a.league_draw += 1
-      match.team_b.league_draw += 1
-      match.team_a.league_points += 1
-      match.team_b.league_points += 1
-    self.teams[match.team_a.name] = copy.deepcopy(match.team_a)
-    self.teams[match.team_b.name] = copy.deepcopy(match.team_b)
-    i = 0
-    for team in self.teams.keys():
-      for player in self.teams[team]:
-        self.players[i].points += player.points
-        self.players[i].goals += player.goals
-        self.players[i].score += player.score
-        i += 1
-      self.teams[team].reset_score()
+  def process_match_result(self, match, comp):
+    if 'league' in comp:
+      match.team_a.played += 1
+      match.team_b.played += 1
+      if match.team_a.score > match.team_b.score:
+        match.team_a.league_win += 1
+        match.team_b.league_loss += 1
+        match.team_a.league_points += 2
+      elif match.team_a.score < match.team_b.score:
+        match.team_b.league_win += 1
+        match.team_a.league_loss += 1
+        match.team_b.league_points += 2
+      else:
+        match.team_a.league_draw += 1
+        match.team_b.league_draw += 1
+        match.team_a.league_points += 1
+        match.team_b.league_points += 1
+      self.teams[match.team_a.name] = copy.deepcopy(match.team_a)
+      self.teams[match.team_b.name] = copy.deepcopy(match.team_b)
+      i = 0
+      for team in self.teams.keys():
+        for player in self.teams[team]:
+          self.players[i].points += player.points
+          self.players[i].goals += player.goals
+          self.players[i].score += player.score
+          i += 1
+        self.teams[team].reset_score()
     self.results[self.current_date] = match
 
   def training(self):
@@ -182,6 +186,7 @@ class Season():
     sk = input('{0} days until next fixture\nSkip? (y) (n)\n'.format(self.days_until_next_fixture))
     if sk in ['y', 'yes']:
       self.current_date += (datetime.timedelta(self.days_until_next_fixture - 2))
+      self.get_upcoming_events()
 
   def process(self, cmd):
     if cmd in ['s', 'save']:
@@ -209,14 +214,12 @@ class Season():
             control = ['b']
         next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent, control)
         next_match.play()
-        self.process_match_result(next_match)
+        self.process_match_result(next_match, next_match_t[2])
       if self.last_fixture_date == self.current_date:
         self.end()
     self.update_next_fixture()
     self.update_league_table()
     self.get_upcoming_events()
-    if self.days_until_next_fixture > 9:
-      self.skip()
 
 if __name__=="__main__":
 

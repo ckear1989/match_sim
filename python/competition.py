@@ -4,11 +4,11 @@ import datetime
 
 import default
 
-def get_sundays(year):
+def get_sundays(start_date):
   sundays = []
-  adate = datetime.date(year, 1, 1)
+  year = start_date.year
   for i in range(366):
-    adate += datetime.timedelta(1)
+    adate = start_date + datetime.timedelta(i)
     if adate.year == year:
       if adate.weekday() == 6:
         sundays.append(adate)
@@ -41,7 +41,7 @@ class Competition():
     self.next_fixture = self.fixtures[self.next_fixture_date]
 
   def get_drr_fixtures(self):
-    sundays = get_sundays(self.year)
+    sundays = get_sundays(self.start_date)
     matchups = []
     for team_a in self.teams:
       for team_b in self.teams:
@@ -51,11 +51,11 @@ class Competition():
     sundays = sundays[:len(matchups)]
     for sunday in sundays:
       matchup = random.choice(matchups)
-      self.fixtures[sunday] = matchup
+      self.fixtures[sunday] = matchup + [self.name]
       matchups.remove(matchup)
 
   def get_rr_fixtures(self):
-    sundays = get_sundays(self.year)
+    sundays = get_sundays(self.start_date)
     matchups = []
     for team_a in self.teams:
       for team_b in self.teams:
@@ -66,14 +66,19 @@ class Competition():
     for sunday in sundays:
       matchup = random.choice(matchups)
       rm = random.sample(matchup, 2)
-      self.fixtures[sunday] = rm
+      self.fixtures[sunday] = rm + [self.name]
       matchups.remove(matchup)
+
+  def get_cup_fixtures(self):
+    self.get_rr_fixtures()
 
   def get_fixtures(self):
     if self.form == 'rr':
       self.get_rr_fixtures()
-    if self.form == 'drr':
+    elif self.form == 'drr':
       self.get_drr_fixtures()
+    elif self.form == 'cup':
+      self.get_cup_fixtures()
 
 if __name__=="__main__":
 
