@@ -40,7 +40,7 @@ class Competition():
     self.days_until_next_fixture = (self.next_fixture_date - current_date).days
     self.next_fixture = self.fixtures[self.next_fixture_date]
 
-  def get_rr_fixtures(self):
+  def get_drr_fixtures(self):
     sundays = get_sundays(self.year)
     matchups = []
     for team_a in self.teams:
@@ -54,9 +54,26 @@ class Competition():
       self.fixtures[sunday] = matchup
       matchups.remove(matchup)
 
+  def get_rr_fixtures(self):
+    sundays = get_sundays(self.year)
+    matchups = []
+    for team_a in self.teams:
+      for team_b in self.teams:
+        if team_a < team_b:
+          matchups.append([team_a, team_b])
+    self.fixtures = {}
+    sundays = sundays[:len(matchups)]
+    for sunday in sundays:
+      matchup = random.choice(matchups)
+      rm = random.sample(matchup, 2)
+      self.fixtures[sunday] = rm
+      matchups.remove(matchup)
+
   def get_fixtures(self):
     if self.form == 'rr':
       self.get_rr_fixtures()
+    if self.form == 'drr':
+      self.get_drr_fixtures()
 
 if __name__=="__main__":
 
