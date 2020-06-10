@@ -104,31 +104,67 @@ class MatchTeam(Team):
       player = random.choice(self.forwards)
     return player
 
+  def shooting_player_goal_attempt(self, shooting_player):
+      p0 = random.random()
+      if p0 < (shooting_player.shooting/100):
+        shooting_player.goals += 1
+        print('And he scores.', end='')
+      else:
+        print('But he misses.', end='')
+
+  def shooting_player_point_attempt(self, shooting_player):
+      p0 = random.random()
+      if p0 < (shooting_player.shooting/100):
+        shooting_player.points += 1
+        print('And he scores.', end='')
+      else:
+        print('But he misses.', end='')
+
+  def shooting_player_posession(self, shooting_player, defending_player):
+    print('He passes the ball to {0}.'.format(shooting_player), end='')
+    p0 = random.random()
+    if p0 < ((defending_player.defending-30)/100):
+      print('But {0} wins the ball back for {1}.'.format(defending_player, defending_player.team))
+    elif p0 < 0.8:
+      print('He shoots for a point.', end='')
+      self.shooting_player_point_attempt(shooting_player)
+    elif p0 < 0.98:
+      print('He shoots for a goal.', end='')
+      self.shooting_player_goal_attempt(shooting_player)
+    else:
+      self.foul(defending_player)
+
+  def free_kick(self):
+    shooting_player = self.choose_player(0.01, 0.1, 0.3)
+    print('{0} steps up to take the free kick.'.format(shooting_player), end='')
+    self.shooting_player_point_attempt(shooting_player)
+
+  def foul(self, defender):
+    print('But he is fouled by {0}.'.format(defender), end='')
+    p0 = random.random()
+    if p0 < 0.3:
+      print('{0} receives a yellow card.'.format(defender), end='')
+      defender.cards.append('y')
+      if defender.cards.count('y') == 2:
+        defender.cards.append('r')
+        print('And it\'s his second yellow.  He is sent off by the referee.', end='')
+        opp.playing.remove(defender)
+    self.free_kick()
+
   def chance(self, opp):
     posession_player = self.choose_player(0.01, 0.2, 0.4)
     shooting_player = self.choose_player(0.01, 0.1, 0.3)
+    while shooting_player == posession_player:
+      shooting_player = self.choose_player(0.01, 0.1, 0.3)
     defending_player = opp.choose_player(0.1, 0.7, 0.15)
     print('Team {0} has a chance with {1} on the ball.'.format(self.name, posession_player), end='')
-    if random.random() < (posession_player.passing/100):
-      print('He passes the ball to {0}.'.format(shooting_player), end='')
-      if random.random() < ((defending_player.defending-30)/100):
-        print('But {0} wins the ball back for {1}.'.format(defending_player, opp.name))
-      elif random.random() < 0.8:
-        print('He shoots for a point.', end='')
-        if random.random() < (shooting_player.shooting/100):
-          shooting_player.points += 1
-          print('And he scores.', end='')
-        else:
-          print('But he misses.', end='')
-      else:
-        print('He shoots for a goal.', end='')
-        if random.random() < (shooting_player.shooting/100):
-          shooting_player.goals += 1
-          print('And he scores.', end='')
-        else:
-          print('But he misses.', end='')
+    p0 = random.random()
+    if p0 < (posession_player.passing/100):
+      self.shooting_player_posession(shooting_player, defending_player)
+    elif p0 < 0.99:
+      print('But he loses posession with the kick.', end='')
     else:
-        print('But he loses posession with the kick.', end='')
+      self.foul(defending_player)
     shooting_player.update_score()
     self.update_score()
 

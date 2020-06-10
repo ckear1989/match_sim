@@ -27,7 +27,7 @@ class Player():
     self.position = random.choice(['GK', 'FB', 'HB', 'MI', 'HF', 'FF'])
     self.lineup = 0
     self.minutes = 0
-    self.cards = 0
+    self.cards = []
 
   def __repr__(self):
     ps = '{0} {1}'.format(self.first_name[0], self.last_name)
