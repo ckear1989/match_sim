@@ -14,6 +14,16 @@ def is_int(x):
 class MatchTeam(Team):
   def __init__(self, team):
     self.__dict__ = copy.deepcopy(team.__dict__)
+    self.playing = [x for x in self if x.lineup in range(1, 16)]
+    self.subs = [x for x in self if x.lineup in range(16, 22)]
+
+  def update_positions(self):
+    self.goalkeepers = [x for x in self.playing if x.position in ['GK']]
+    self.full_backs = [x for x in self.playing if x.position in ['FB']]
+    self.half_backs = [x for x in self.playing if x.position in ['HB']]
+    self.midfielders = [x for x in self.playing if x.position in ['MI']]
+    self.full_forwards = [x for x in self.playing if x.position in ['FF']]
+    self.half_forwards = [x for x in self.playing if x.position in ['HF']]
 
   def lineup_check(self):
     lineups = [x.lineup for x in self]

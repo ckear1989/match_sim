@@ -105,6 +105,8 @@ class Match():
     self.team_a.lineup_check()
     self.team_b.lineup_check()
     self.pause()
+    self.team_a.update_positions()
+    self.team_b.update_positions()
     if self.silent is True:
       self.progressbar.start()
       stdout = sys.stdout
