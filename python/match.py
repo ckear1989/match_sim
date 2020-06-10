@@ -100,7 +100,7 @@ class Match():
       elif x in ['e', 'exit']:
         exit()
       else:
-        self.pause()
+        self.lineup()
 
   def pause(self):
     if len(self.control) > 0:
