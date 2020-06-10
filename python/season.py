@@ -21,21 +21,19 @@ class Season():
     self.current_date = self.start_date
     self.year = self.start_date.year
     self.get_teams()
-    self.get_players()
     self.get_fixtures()
     self.results = {}
     self.teams[self.team].training = Training(self.current_date)
     self.update_next_fixture()
-    self.get_league_table()
-    self.get_scorers_table()
+    self.update_league()
     self.get_upcoming_events()
 
   def __repr__(self):
     ps = 'current date: {0}\nnext match date: {1}\n'.format(self.current_date, self.next_fixture_date)
     ps += 'current team status: {0}\nnext fixture opponent:{1}\n'.format(self.teams[self.team], self.teams[self.next_fixture_opponent])
     ps += 'upcoming events:\n{0}\n'.format(self.upcoming_events)
-    ps += 'league table:\n{0}\n'.format(self.league_table)
-    ps += 'scorers table:\n{0}\n'.format(self.scorers_table)
+    ps += 'league table:\n{0}\n'.format(self.league1.league_table)
+    ps += 'scorers table:\n{0}\n'.format(self.league1.scorers_table)
     ps += 'current training schedule:\n{0}\n'.format(self.teams[self.team].training)
     return ps
 
@@ -58,34 +56,9 @@ class Season():
       ps += ('{0} {1}\n'.format(adate, events))
     self.upcoming_events = ps
 
-  def get_league_table(self):
-    x = PrettyTable()
-    x.add_column('team', [x.name for x in self.teams.values()])
-    x.add_column('played', [x.played for x in self.teams.values()])
-    x.add_column('win', [x.league_win for x in self.teams.values()])
-    x.add_column('loss', [x.league_loss for x in self.teams.values()])
-    x.add_column('draw', [x.league_draw for x in self.teams.values()])
-    x.add_column('points', [x.league_points for x in self.teams.values()])
-    x.sortby = 'points'
-    x.reversesort = True
-    self.league_table = x
-
-  def get_scorers_table(self):
-    scorers = [x for x in self.players if x.score > 0]
-    x = PrettyTable()
-    x.add_column('player', scorers)
-    x.add_column('team', [x.team for x in scorers])
-    x.add_column('rscore', [x.score for x in scorers])
-    x.add_column('score', ['{0}-{1} ({2})'.format(x.goals, x.points, x.score) for x in scorers])
-    x.sortby = 'rscore'
-    x.title = 'Season %s top scorers' % self.year
-    x.reversesort = True
-    x = x.get_string(fields=['player', 'team', 'score'], end=10)
-    self.scorers_table = x
-
-  def update_league_table(self):
-    self.get_league_table()
-    self.get_scorers_table()
+  def update_league(self):
+    self.league1.get_league_table()
+    self.league1.get_scorers_table()
 
   def update_next_fixture(self):
     self.next_fixture_date = min([x for x in self.fixtures.keys() if x > self.current_date])
@@ -102,9 +75,9 @@ class Season():
 
   def end(self):
     self.reset_players()
-    for team in self.teams.keys():
-      self.teams[team].reset_match_stats()
-      self.teams[team].reset_wld()
+    for team in self.league1.teams.keys():
+      self.league1.teams[team].reset_match_stats()
+      self.league1.teams[team].reset_wld()
     self.year += 1
     self.get_fixtures()
 
@@ -117,16 +90,13 @@ class Season():
         self.teams[team] = Team(team, 'jim')
         self.teams[team].training = Training(self.current_date, [0, 2, 4], ['fi', 'pa', 'sh'])
 
-  def get_players(self):
-    self.players = [player for team in self.teams for player in self.teams[team].players]
-
   def reset_players(self):
-    for player in self.players:
+    for player in self.league1.players:
       player.reset_match_stats()
 
   def get_fixtures(self):
-    self.league1 = Competition('league div 1', 'rr', datetime.date(self.year, 1, 1))
-    self.cup = Competition('cup', 'cup', self.league1.last_fixture_date + datetime.timedelta(1))
+    self.league1 = Competition('league div 1', 'rr', datetime.date(self.year, 1, 1), self.teams)
+    self.cup = Competition('cup', 'cup', self.league1.last_fixture_date + datetime.timedelta(1), self.teams)
     self.fixtures = {**self.league1.fixtures, **self.cup.fixtures}
 
   def save(self):
@@ -162,14 +132,17 @@ class Season():
         match.team_b.league_points += 1
       self.teams[match.team_a.name] = copy.deepcopy(match.team_a)
       self.teams[match.team_b.name] = copy.deepcopy(match.team_b)
+      self.league1.teams[match.team_a.name] = copy.deepcopy(match.team_a)
+      self.league1.teams[match.team_b.name] = copy.deepcopy(match.team_b)
       i = 0
-      for team in self.teams.keys():
-        for player in self.teams[team]:
-          self.players[i].points += player.points
-          self.players[i].goals += player.goals
-          self.players[i].score += player.score
+      for team in self.league1.teams.keys():
+        for player in self.league1.teams[team]:
+          self.league1.players[i].points += player.points
+          self.league1.players[i].goals += player.goals
+          self.league1.players[i].score += player.score
           i += 1
         self.teams[team].reset_match_stats()
+        self.league1.teams[team].reset_match_stats()
     self.results[self.current_date] = match
 
   def training(self):
@@ -216,7 +189,7 @@ class Season():
       if self.last_fixture_date == self.current_date:
         self.end()
     self.update_next_fixture()
-    self.update_league_table()
+    self.update_league()
     self.get_upcoming_events()
 
 if __name__=="__main__":
