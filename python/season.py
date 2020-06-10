@@ -3,6 +3,7 @@ import default
 from team import Team
 from match import Match
 from training import Training
+from competition import Competition
 
 import datetime
 import calendar
@@ -128,18 +129,8 @@ class Season():
     self.players = [player for team in self.teams for player in self.teams[team].players]
 
   def get_fixtures(self):
-    sundays = get_sundays(self.year)
-    matchups = []
-    for team_a in self.teams.keys():
-      for team_b in self.teams.keys():
-        if team_a != team_b:
-          matchups.append((team_a, team_b))
-    self.fixtures = {}
-    sundays = sundays[:len(matchups)]
-    for sunday in sundays:
-      matchup = random.choice(matchups)
-      self.fixtures[sunday] = matchup
-      matchups.remove(matchup)
+    self.league1 = Competition('league div 1', 'rr', datetime.date(self.year, 1, 1))
+    self.fixtures = self.league1.fixtures
 
   def save(self):
     with open(self.save_file, 'wb') as f:
