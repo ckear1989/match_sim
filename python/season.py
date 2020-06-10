@@ -6,21 +6,10 @@ from training import Training
 from competition import Competition
 
 import datetime
-import calendar
 import random
 import dill as pickle
 import copy
 from prettytable import PrettyTable
-
-def get_sundays(year):
-  sundays = []
-  adate = datetime.date(year, 1, 1)
-  for i in range(366):
-    adate += datetime.timedelta(1)
-    if adate.year == year:
-      if adate.weekday() == 6:
-        sundays.append(adate)
-  return sundays
 
 class Season():
   def __init__(self, team_name, manager_name):
@@ -31,7 +20,6 @@ class Season():
     self.start_date = datetime.date(2020, 1, 1)
     self.current_date = self.start_date
     self.year = self.start_date.year
-    self.calendar = calendar.calendar(self.year)
     self.get_teams()
     self.get_players()
     self.get_fixtures()
@@ -113,6 +101,10 @@ class Season():
       self.next_training_date = min(upcoming_training)
 
   def end(self):
+    self.reset_players()
+    for team in self.teams.keys():
+      self.teams[team].reset_score()
+      self.teams[team].reset_wld()
     self.year += 1
     self.get_fixtures()
 
@@ -127,6 +119,12 @@ class Season():
 
   def get_players(self):
     self.players = [player for team in self.teams for player in self.teams[team].players]
+
+  def reset_players(self):
+    for player in self.players:
+      player.points = 0
+      player.goals = 0
+      player.score = 0
 
   def get_fixtures(self):
     self.league1 = Competition('league div 1', 'rr', datetime.date(self.year, 1, 1))

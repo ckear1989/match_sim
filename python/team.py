@@ -165,6 +165,13 @@ class Team():
       x.points = 0
     self.update_score()
 
+  def reset_wld(self):
+    self.played = 0
+    self.league_points = 0
+    self.league_win = 0
+    self.league_loss = 0
+    self.league_draw = 0
+
   def get_training_schedule(self, adate):
     self.training = Training(adate)
     self.append_training_schedule()
