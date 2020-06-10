@@ -59,8 +59,9 @@ class Match():
     print('{0} The referee throws the ball in.{1} wins posession for {2}'.format(self.stopclock_time, posession_player, team))
 
   def update_team_condition(self):
-    for x in self.team_a + self.team_b:
-      x.condition = max(x.condition, 0)
+    for x in self.team_a.playing + self.team_b.playing:
+      x.minutes += 1
+      x.condition = max((x.condition - 1), 0)
       x.get_overall()
     self.team_a.get_overall()
     self.team_b.get_overall()
@@ -79,14 +80,14 @@ class Match():
           self.progressbar.update(self.time)
         else:
           print(self.stopclock_time)
-        self.update_team_condition
+        self.update_team_condition()
       if self.time == (tane*1e3):
         self.event()
         tune = time_until_next_event()
         tane += tune
       time.sleep(time_step)
 
-  def pause(self):
+  def lineup(self):
     if len(self.control) > 0:
       x = input('{0}\n'.format('\t'.join(['(l)ineup', '(c)ontinue', '(e)xit']))).strip()
       if x in ['l', 'lineup']:
@@ -101,10 +102,25 @@ class Match():
       else:
         self.pause()
 
+  def pause(self):
+    if len(self.control) > 0:
+      x = input('{0}\n'.format('\t'.join(['(s)ubstitute', '(c)ontinue', '(e)xit']))).strip()
+      if x in ['s', 'substitute']:
+        if 'a' in self.control:
+          self.team_a.substitute()
+        if 'b' in self.control:
+          self.team_b.substitute()
+      elif x in ['c', 'continue']:
+        pass
+      elif x in ['e', 'exit']:
+        exit()
+      else:
+        self.pause()
+
   def play(self, time_step=0):
     self.team_a.lineup_check()
     self.team_b.lineup_check()
-    self.pause()
+    self.lineup()
     self.team_a.update_positions()
     self.team_b.update_positions()
     if self.silent is True:
@@ -157,7 +173,7 @@ if __name__ == "__main__":
 
   team_a = Team('a', 'a')
   team_b = Team('b', 'b')
-  match = Match(team_a, team_b, datetime.date(2020, 1, 1), False)
+  match = Match(team_a, team_b, datetime.date(2020, 1, 1), False, control='a')
   match.play()
   match = Match(team_a, team_b, datetime.date(2020, 1, 1), True)
   match.play()

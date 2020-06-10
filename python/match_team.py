@@ -24,10 +24,12 @@ class MatchTeam(Team):
     self.midfielders = [x for x in self.playing if x.position in ['MI']]
     self.full_forwards = [x for x in self.playing if x.position in ['FF']]
     self.half_forwards = [x for x in self.playing if x.position in ['HF']]
+    self.defenders = self.full_backs + self.half_backs
+    self.forwards = self.full_forwards + self.half_forwards
 
   def lineup_check(self):
     lineups = [x.lineup for x in self]
-    for i in range(1, 21):
+    for i in range(1, 22):
       if lineups.count(i) == 1:
         continue
       elif lineups.count(i) == 0:
@@ -57,6 +59,37 @@ class MatchTeam(Team):
       player.lineup = l_a
     self.get_player_table()
     self.lineup_check()
+    print(self)
+
+  def substitute(self, l_a=None, l_b=None):
+    print(self)
+    if l_b is None:
+      l_b = input('substitute player coming on (last, first):')
+    if ',' in l_b:
+      f = l_b.split(',')[1].strip()
+      l = l_b.split(',')[0].strip()
+    else:
+      return None
+    players = [x for x in self.subs if (x.first_name == f) and (x.last_name == l)]
+    if len(players) > 0:
+      player_on = players[0]
+      if l_a is None:
+        l_a = input('substitute player coming off {(last, first):')
+        if ',' in l_a:
+          f = l_a.split(',')[1].strip()
+          l = l_a.split(',')[0].strip()
+        else:
+          return None
+        players = [x for x in self.playing if (x.first_name == f) and (x.last_name == l)]
+        if len(players) > 0:
+          player_off = players[0]
+        else:
+          return None
+      self.playing.remove(player_off)
+      self.subs.remove(player_on)
+      self.playing.append(player_on)
+    self.update_positions()
+    self.get_player_table()
     print(self)
 
   def choose_player(self, p0, p1, p2):

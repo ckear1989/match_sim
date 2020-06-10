@@ -122,7 +122,7 @@ class Team():
     if 16 not in [x.lineup for x in self]:
       player = random.choice([x for x in self.goalkeepers if x.lineup == 0])
       player.lineup = 16
-    for i in [17, 18, 19, 20]:
+    for i in [17, 18, 19, 20, 21]:
       if i not in [x.lineup for x in self]:
         player = random.choice([x for x in self if x.lineup == 0])
         player.lineup = i
@@ -140,6 +140,8 @@ class Team():
     x.add_column('shooting', [x.shooting for x in self])
     x.add_column('fitness', [x.fitness for x in self])
     x.add_column('condition', [x.condition for x in self])
+    x.add_column('minutes', [x.minutes for x in self])
+    x.add_column('score', [x.format_score() for x in self])
     x.sortby = 'lineup'
     self.player_table = x
 
