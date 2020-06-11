@@ -2,10 +2,13 @@
 import random
 import datetime
 from prettytable import PrettyTable
+from bracket import bracket
 
 import default
 from team import Team
 import copy
+from io import StringIO
+import sys
 
 def get_sundays(start_date):
   sundays = []
@@ -16,6 +19,17 @@ def get_sundays(start_date):
       if adate.weekday() == 6:
         sundays.append(adate)
   return sundays
+
+# https://stackoverflow.com/questions/16571150/how-to-capture-stdout-output-from-a-python-function-call
+class Capturing(list):
+  def __enter__(self):
+    self._stdout = sys.stdout
+    sys.stdout = self._stringio = StringIO()
+    return self
+  def __exit__(self, *args):
+    self.extend(self._stringio.getvalue().splitlines())
+    del self._stringio    # free up some memory
+    sys.stdout = self._stdout
 
 class Competition():
   def __init__(self, name, form, start_date, teams):
@@ -28,12 +42,17 @@ class Competition():
     self.get_players()
     self.get_fixtures()
     self.update_next_fixture(self.start_date)
+    self.get_league_table()
+    self.get_scorers_table()
 
   def __repr__(self):
     ps = '{0}\n'.format(self.fixtures)
     ps += '{0}\n'.format(self.next_fixture_date)
     ps += '{0}\n'.format(self.last_fixture_date)
-    ps += '{0}\n'.format(self.league_table)
+    if 'league' in self.form:
+      ps += '{0}\n'.format(self.league_table)
+    if 'cup' in self.form:
+      ps += '{0}\n'.format(self.bracket_p)
     ps += '{0}\n'.format(self.scorers_table)
     return ps
 
@@ -41,10 +60,17 @@ class Competition():
     return self.__repr__()
 
   def update_next_fixture(self, current_date):
-    self.next_fixture_date = min([x for x in self.fixtures.keys() if x > current_date])
-    self.last_fixture_date = max([x for x in self.fixtures.keys() if x > current_date])
-    self.days_until_next_fixture = (self.next_fixture_date - current_date).days
-    self.next_fixture = self.fixtures[self.next_fixture_date]
+    remaining_fixtures = [x for x in self.fixtures.keys() if x > current_date]
+    if len(remaining_fixtures) > 0:
+      self.next_fixture_date = min([x for x in self.fixtures.keys() if x > current_date])
+      self.last_fixture_date = max([x for x in self.fixtures.keys() if x > current_date])
+      self.days_until_next_fixture = (self.next_fixture_date - current_date).days
+      self.next_fixture = self.fixtures[self.next_fixture_date]
+    else:
+      self.next_fixture_date = None
+      self.last_fixture_date = None
+      self.days_until_next_fixture = None
+      self.next_fixture = None
 
   def get_drr_fixtures(self):
     sundays = get_sundays(self.start_date)
@@ -75,8 +101,62 @@ class Competition():
       self.fixtures[sunday] = rm + [self.name]
       matchups.remove(matchup)
 
+  def update_bracket(self, current_date, roundn=None, winner=None):
+    if roundn is not None:
+      if winner is not None:
+        self.bracket.update(roundn, [winner])
+    with Capturing() as self.bracket_p:
+      self.bracket.show()
+    self.bracket_p = '\n'.join(self.bracket_p)
+    self.update_cup_fixtures(current_date)
+    self.update_next_fixture(current_date)
+    self.get_league_table()
+    self.get_scorers_table()
+
+  def update_cup_fixtures(self, current_date):
+    nt = '-'*self.bracket.max
+    pt = []
+    sundays = get_sundays(current_date)
+    matchups = []
+    for around in self.bracket.rounds:
+      if len(around) > 1:
+        matchups = [[around[i], around[i+1]] for i in range(0, len(around), 2)]
+        matchups = [m for m in matchups if nt not in m]
+        matchups = [m for m in matchups if m + [self.name] not in self.fixtures.values()]
+        if len(matchups) > 0:
+          sundays = [x for x in sundays if x > current_date]
+          sundays = sundays[:len(matchups)]
+          for sunday in sundays:
+            matchup = random.choice(matchups)
+            if matchup not in self.fixtures.values():
+              self.fixtures[sunday] = matchup + [self.name]
+            matchups.remove(matchup)
+
   def get_cup_fixtures(self):
-    self.get_rr_fixtures()
+    # /home/bort/.local/lib/python3.6/site-packages/bracket/bracket.py
+    self.bracket = bracket.Bracket(list(self.teams.keys()))
+    nt = '-'*self.bracket.max
+    pt = []
+    sundays = get_sundays(self.start_date)
+    # progress round 1 byes
+    round1 = self.bracket.rounds[0]
+    matchups = [[round1[i], round1[i+1]] for i in range(0, len(round1), 2)]
+    for matchup in matchups:
+      if matchup[0] == nt:
+        self.bracket.update(2, matchup[1])
+      elif matchup[1] == nt:
+        self.bracket.update(2, matchup[0])
+    matchups = [m for m in matchups if nt not in m]
+    self.fixtures = {}
+    sundays = sundays[:len(matchups)]
+    for sunday in sundays:
+      matchup = random.choice(matchups)
+      self.fixtures[sunday] = matchup + [self.name]
+      matchups.remove(matchup)
+    self.update_bracket(self.start_date)
+    self.update_next_fixture(self.start_date)
+    self.get_league_table()
+    self.get_scorers_table()
 
   def get_fixtures(self):
     if self.form == 'rr':
@@ -116,8 +196,24 @@ class Competition():
 
 if __name__=="__main__":
 
-  league1 = Competition('league div 1', 'rr', datetime.date(2020, 1, 2), [Team('a', 'a'), Team('b', 'b')])
+  teams = {
+    'a': Team('a', 'a'),
+    'b': Team('b', 'b'),
+    'c': Team('c', 'c'),
+    'd': Team('d', 'd'),
+    'e': Team('e', 'e')
+  }
+  league1 = Competition('league div 1', 'rr', datetime.date(2020, 1, 1), teams)
   print(league1)
-  league1.update_next_fixture(datetime.date(2020, 1, 9))
-  print(league1)
+  cup1 = Competition('cup 1', 'cup', datetime.date(2020, 1, 1), teams)
+  print(cup1)
+  current_date = datetime.date(2020, 1, 5)
+  cup1.update_bracket(current_date, 2, 'e')
+  current_date = datetime.date(2020, 1, 12)
+  cup1.update_bracket(current_date, 3, 'b')
+  current_date = datetime.date(2020, 1, 19)
+  cup1.update_bracket(current_date, 3, 'a')
+  current_date = datetime.date(2020, 1, 26)
+  cup1.update_bracket(current_date, 4, 'b')
+  print(cup1)
 
