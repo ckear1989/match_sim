@@ -38,7 +38,7 @@ class Match():
     self.first_half_length = 35 * 60e3
     self.second_half_length = 35 * 60e3
     if self.silent is True:
-      self.progressbar = progressbar.ProgressBar(maxval=70*60e3, \
+      self.progressbar = progressbar.ProgressBar(maxval=80*60e3, \
         widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     random.seed()
 
@@ -66,9 +66,18 @@ class Match():
     self.team_a.get_overall()
     self.team_b.get_overall()
 
+  def added_time(self):
+    at = random.choice(range(1, 7))
+    print('{0} {1} minutes added time indicated by the linesman.'.format(self.stopclock_time, at))
+    at = float(at)
+    at += np.random.normal(0.5, 0.1)
+    at = at * 60e3
+    return at
+
   def play_half(self, end_time, time_step, tane=time_until_next_event()):
     self.throw_in()
-    while self.time < end_time:
+    at = 0
+    while self.time < (end_time + at):
       self.time += 1
       self.stopclock_time = stopclock(self.time)
       if self.time % 1e3 == 0:
@@ -81,11 +90,14 @@ class Match():
         else:
           print(self.stopclock_time)
         self.update_team_condition()
+      if self.time % (34 * 60e3) == 0:
+        at = self.added_time()
       if self.time == (tane*1e3):
         self.event()
         tune = time_until_next_event()
         tane += tune
       time.sleep(time_step)
+    print('{0} And that\'s the end of the half'.format(self.stopclock_time))
 
   def lineup(self):
     if len(self.control) > 0:
@@ -121,6 +133,7 @@ class Match():
     self.team_a.lineup_check()
     self.team_b.lineup_check()
     self.lineup()
+    self.pause()
     self.team_a.update_positions()
     self.team_b.update_positions()
     if self.silent is True:
@@ -144,7 +157,10 @@ class Match():
     print(self.team_a.scorer_table)
     print(self.team_b.scorer_table)
 
-  def half_time(self, time_step=1):
+  def half_time(self):
+    self.time = 35 * 60e3
+    self.first_half_length = 35 * 60e3
+    self.stopclock_time = stopclock(self.time)
     self.get_scorers()
     self.pause()
 
