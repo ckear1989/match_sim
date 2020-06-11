@@ -164,7 +164,8 @@ class Team():
   def reset_match_stats(self):
     for x in self:
       x.reset_match_stats()
-    x.update_score()
+      x.update_score()
+    self.update_score()
 
   def reset_wld(self):
     self.played = 0

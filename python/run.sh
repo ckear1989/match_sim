@@ -7,6 +7,7 @@
 # pip3 install progressbar
 # pip3 install dill
 # pip3 install keyboard
+# pip3 install BracketMaker
 
 # python3.6 default.py
 # python3.6 settings.py

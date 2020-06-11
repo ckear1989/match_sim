@@ -26,6 +26,7 @@ class Season():
     self.teams[self.team].training = Training(self.current_date)
     self.update_next_fixture()
     self.update_league()
+    self.update_cup()
     self.get_upcoming_events()
 
   def __repr__(self):
@@ -33,7 +34,9 @@ class Season():
     ps += 'current team status: {0}\nnext fixture opponent:{1}\n'.format(self.teams[self.team], self.teams[self.next_fixture_opponent])
     ps += 'upcoming events:\n{0}\n'.format(self.upcoming_events)
     ps += 'league table:\n{0}\n'.format(self.league1.league_table)
-    ps += 'scorers table:\n{0}\n'.format(self.league1.scorers_table)
+    ps += 'league scorers table:\n{0}\n'.format(self.league1.scorers_table)
+    ps += 'cup bracket:\n{0}\n'.format(self.cup.bracket_p)
+    ps += 'cup scorers table:\n{0}\n'.format(self.cup.scorers_table)
     ps += 'current training schedule:\n{0}\n'.format(self.teams[self.team].training)
     return ps
 
@@ -60,6 +63,10 @@ class Season():
     self.league1.get_league_table()
     self.league1.get_scorers_table()
 
+  def update_cup(self):
+    self.cup.get_scorers_table()
+    self.cup.update_bracket(self.current_date)
+
   def update_next_fixture(self):
     self.next_fixture_date = min([x for x in self.fixtures.keys() if x > self.current_date])
     self.last_fixture_date = max([x for x in self.fixtures.keys() if x > self.current_date])
@@ -78,6 +85,9 @@ class Season():
     for team in self.league1.teams.keys():
       self.league1.teams[team].reset_match_stats()
       self.league1.teams[team].reset_wld()
+    for team in self.cup.teams.keys():
+      self.cup.teams[team].reset_match_stats()
+      self.cup.teams[team].reset_wld()
     self.year += 1
     self.get_fixtures()
 
@@ -92,6 +102,8 @@ class Season():
 
   def reset_players(self):
     for player in self.league1.players:
+      player.reset_match_stats()
+    for player in self.cup.players:
       player.reset_match_stats()
 
   def get_fixtures(self):
@@ -143,6 +155,28 @@ class Season():
           i += 1
         self.teams[team].reset_match_stats()
         self.league1.teams[team].reset_match_stats()
+    elif 'cup' in comp:
+      # TODO cup progression detect round
+      if match.team_a.score > match.team_b.score:
+        self.cup.update_bracket(self.current_date, 3, match.team_a.name)
+      elif match.team_a.score < match.team_b.score:
+        self.cup.update_bracket(self.current_date, 3, match.team_a.name)
+      else:
+        # TODO cup draws
+        pass
+      self.teams[match.team_a.name] = copy.deepcopy(match.team_a)
+      self.teams[match.team_b.name] = copy.deepcopy(match.team_b)
+      self.cup.teams[match.team_a.name] = copy.deepcopy(match.team_a)
+      self.cup.teams[match.team_b.name] = copy.deepcopy(match.team_b)
+      i = 0
+      for team in self.cup.teams.keys():
+        for player in self.cup.teams[team]:
+          self.cup.players[i].points += player.points
+          self.cup.players[i].goals += player.goals
+          self.cup.players[i].score += player.score
+          i += 1
+        self.teams[team].reset_match_stats()
+        self.cup.teams[team].reset_match_stats()
     self.results[self.current_date] = match
 
   def training(self):
@@ -190,6 +224,7 @@ class Season():
         self.end()
     self.update_next_fixture()
     self.update_league()
+    self.update_cup()
     self.get_upcoming_events()
 
 if __name__=="__main__":
