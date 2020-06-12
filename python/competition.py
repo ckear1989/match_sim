@@ -101,6 +101,19 @@ class Competition():
       self.fixtures[sunday] = rm + [self.name]
       matchups.remove(matchup)
 
+  def schedule_replay(self, team_a, team_b, current_date):
+    self.fixtures[current_date + datetime.timedelta(6)] = [team_a, team_b, '%s replay' % self.name]
+
+  def get_current_round(self):
+    nt = '-'*self.bracket.max
+    r = 1
+    current_round = 1
+    for around in self.bracket.rounds:
+      if nt not in around:
+        current_round = r
+      r += 1
+    return current_round
+
   def update_bracket(self, current_date, roundn=None, winner=None):
     if roundn is not None:
       if winner is not None:
@@ -125,6 +138,7 @@ class Competition():
         matchups = [m for m in matchups if m + [self.name] not in self.fixtures.values()]
         if len(matchups) > 0:
           sundays = [x for x in sundays if x > current_date]
+          sundays = [x for x in sundays if x not in self.fixtures.keys()]
           sundays = sundays[:len(matchups)]
           for sunday in sundays:
             matchup = random.choice(matchups)
@@ -207,13 +221,20 @@ if __name__=="__main__":
   print(league1)
   cup1 = Competition('cup 1', 'cup', datetime.date(2020, 1, 1), teams)
   print(cup1)
+  print(cup1.get_current_round())
   current_date = datetime.date(2020, 1, 5)
   cup1.update_bracket(current_date, 2, 'e')
+  print(cup1.get_current_round())
   current_date = datetime.date(2020, 1, 12)
   cup1.update_bracket(current_date, 3, 'b')
+  print(cup1.get_current_round())
   current_date = datetime.date(2020, 1, 19)
+  cup1.schedule_replay('a', 'e', current_date)
+  print(cup1)
   cup1.update_bracket(current_date, 3, 'a')
+  print(cup1.get_current_round())
   current_date = datetime.date(2020, 1, 26)
   cup1.update_bracket(current_date, 4, 'b')
+  print(cup1.get_current_round())
   print(cup1)
 

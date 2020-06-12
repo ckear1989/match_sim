@@ -31,7 +31,8 @@ class Season():
 
   def __repr__(self):
     ps = 'current date: {0}\nnext match date: {1}\n'.format(self.current_date, self.next_fixture_date)
-    ps += 'current team status: {0}\nnext fixture opponent:{1}\n'.format(self.teams[self.team], self.teams[self.next_fixture_opponent])
+    ps += 'current team status: {0}\n'.format(self.teams[self.team])
+    ps += 'next fixture opponent:{0}\n'.format(self.next_fixture_opponent)
     ps += 'upcoming events:\n{0}\n'.format(self.upcoming_events)
     ps += 'league table:\n{0}\n'.format(self.league1.league_table)
     ps += 'league scorers table:\n{0}\n'.format(self.league1.scorers_table)
@@ -68,19 +69,32 @@ class Season():
     self.cup.update_bracket(self.current_date)
 
   def update_next_fixture(self):
-    self.next_fixture_date = min([x for x in self.fixtures.keys() if x > self.current_date])
-    self.last_fixture_date = max([x for x in self.fixtures.keys() if x > self.current_date])
-    self.days_until_next_fixture = (self.next_fixture_date - self.current_date).days
-    self.next_fixture = self.fixtures[self.next_fixture_date]
-    self.next_fixture_opponent = self.next_fixture[0]
-    if self.next_fixture_opponent == self.team:
-      self.next_fixture_opponent = self.next_fixture[1]
+    self.fixtures = {**self.league1.fixtures, **self.cup.fixtures}
+    remaining_fixtures = [x for x in self.fixtures.keys() if x > self.current_date]
+    self.next_fixture_date = None
+    self.last_fixture_date = None
+    self.days_until_next_fixture = None
+    self.next_fixture = None
+    self.next_fixture_opponent = None
+    if len(remaining_fixtures) > 0:
+      self.next_fixture_date = min([x for x in self.fixtures.keys() if x > self.current_date])
+      self.last_fixture_date = max([x for x in self.fixtures.keys() if x > self.current_date])
+      self.days_until_next_fixture = (self.next_fixture_date - self.current_date).days
+      self.next_fixture = self.fixtures[self.next_fixture_date]
+      next_fixture_opponent = self.next_fixture[0]
+      if next_fixture_opponent == self.team:
+        next_fixture_opponent = self.next_fixture[1]
+      self.next_fixture_opponent = self.teams[next_fixture_opponent]
     self.next_training_date = None
     upcoming_training = [x for x in self.teams[self.team].training.fixtures.keys() if x > self.current_date]
     if len(upcoming_training) > 0:
       self.next_training_date = min(upcoming_training)
+    self.get_upcoming_events()
 
   def end(self):
+    # end of season banner / summary
+    print(self)
+    # get players and fixtures for next year
     self.reset_players()
     for team in self.league1.teams.keys():
       self.league1.teams[team].reset_match_stats()
@@ -90,6 +104,8 @@ class Season():
       self.cup.teams[team].reset_wld()
     self.year += 1
     self.get_fixtures()
+    self.update_next_fixture()
+    self.skip()
 
   def get_teams(self):
     self.teams = {}
@@ -120,6 +136,8 @@ class Season():
     cmd = ''
     while cmd not in ['exit', 'e']:
       print(self)
+      if self.next_fixture_date is None:
+        self.end()
       if self.days_until_next_fixture > 9:
         self.skip()
       cmd = input('choose option:\n%s\n' % ' '.join(options))
@@ -155,15 +173,15 @@ class Season():
           i += 1
         self.teams[team].reset_match_stats()
         self.league1.teams[team].reset_match_stats()
+      self.update_league()
     elif 'cup' in comp:
-      # TODO cup progression detect round
+      current_round = self.cup.get_current_round()
       if match.team_a.score > match.team_b.score:
-        self.cup.update_bracket(self.current_date, 3, match.team_a.name)
+        self.cup.update_bracket(self.current_date, (current_round+1), match.team_a.name)
       elif match.team_a.score < match.team_b.score:
-        self.cup.update_bracket(self.current_date, 3, match.team_a.name)
+        self.cup.update_bracket(self.current_date, (current_round+1), match.team_b.name)
       else:
-        # TODO cup draws
-        pass
+        self.cup.schedule_replay(match.team_a.name, match.team_b.name, self.current_date)
       self.teams[match.team_a.name] = copy.deepcopy(match.team_a)
       self.teams[match.team_b.name] = copy.deepcopy(match.team_b)
       self.cup.teams[match.team_a.name] = copy.deepcopy(match.team_a)
@@ -177,6 +195,7 @@ class Season():
           i += 1
         self.teams[team].reset_match_stats()
         self.cup.teams[team].reset_match_stats()
+      self.update_cup()
     self.results[self.current_date] = match
 
   def training(self):
@@ -188,10 +207,10 @@ class Season():
       self.teams[self.team].training.append_schedule()
 
   def skip(self):
-    sk = input('{0} days until next fixture\nSkip? (y) (n)\n'.format(self.days_until_next_fixture))
+    sk = input('{0} days until next fixture\nSkip? (y)es (n)o\n'.format(self.days_until_next_fixture))
     if sk in ['y', 'yes']:
       self.current_date += (datetime.timedelta(self.days_until_next_fixture - 2))
-      self.get_upcoming_events()
+      self.update_next_fixture()
 
   def process(self, cmd):
     if cmd in ['s', 'save']:
@@ -220,12 +239,7 @@ class Season():
         next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent, control)
         next_match.play()
         self.process_match_result(next_match, next_match_t[2])
-      if self.last_fixture_date == self.current_date:
-        self.end()
-    self.update_next_fixture()
-    self.update_league()
-    self.update_cup()
-    self.get_upcoming_events()
+      self.update_next_fixture()
 
 if __name__=="__main__":
 
