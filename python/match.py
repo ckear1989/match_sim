@@ -9,6 +9,7 @@ import os
 import progressbar
 import numpy as np
 import keyboard
+import pyfiglet
 
 from team import Team
 from match_team import MatchTeam
@@ -129,27 +130,37 @@ class Match():
       else:
         self.pause()
 
+  def banner(self):
+    if self.silent is True:
+      self.progressbar.start()
+      self.stdout = sys.stdout
+      f = open(os.devnull, 'w')
+      sys.stdout = f
+    banner = pyfiglet.figlet_format('{0} vs {1} {2}\n'.format(self.team_a.name, self.team_b.name, self.date))
+    print(banner)
+
+  def banner_end(self):
+    banner = pyfiglet.figlet_format('{0} {1}\n'.format(self.get_score().replace('Score is now ', ''), self.date))
+    print(banner)
+    if self.silent is True:
+      sys.stdout = self.stdout
+      self.progressbar.finish()
+
   def play(self, time_step=0):
+    self.banner()
     self.team_a.lineup_check()
     self.team_b.lineup_check()
     self.lineup()
     self.pause()
     self.team_a.update_positions()
     self.team_b.update_positions()
-    if self.silent is True:
-      self.progressbar.start()
-      stdout = sys.stdout
-      f = open(os.devnull, 'w')
-      sys.stdout = f
     self.play_half(self.first_half_length, time_step)
     self.half_time()
     second_half_end = self.first_half_length + self.second_half_length
     second_half_tane = (self.first_half_length*1e-3) + time_until_next_event()
     self.play_half(second_half_end, time_step, tane=second_half_tane)
     self.full_time()
-    if self.silent is True:
-      sys.stdout = stdout
-      self.progressbar.finish()
+    self.banner_end()
 
   def get_scorers(self):
     self.team_a.get_scorer_table()
