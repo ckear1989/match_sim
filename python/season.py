@@ -105,6 +105,8 @@ class Season():
     self.year += 1
     self.get_fixtures()
     self.update_next_fixture()
+    self.update_league()
+    self.update_cup()
     self.skip()
 
   def get_teams(self):
