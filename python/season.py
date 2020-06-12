@@ -96,6 +96,9 @@ class Season():
     print(self)
     # get players and fixtures for next year
     self.reset_players()
+    for team in self.teams.keys():
+      self.teams[team].reset_match_stats()
+      self.teams[team].reset_wld()
     for team in self.league1.teams.keys():
       self.league1.teams[team].reset_match_stats()
       self.league1.teams[team].reset_wld()

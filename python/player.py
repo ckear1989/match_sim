@@ -1,6 +1,7 @@
 
 import numpy as np
 import random
+import names
 
 import default
 
@@ -12,8 +13,8 @@ def random_0_100_normal(mean, sd):
 
 class Player():
   def __init__(self, team=None):
-    self.first_name = random.choice(default.first_names)
-    self.last_name = random.choice(default.last_names)
+    self.first_name = names.get_first_name(gender='male')
+    self.last_name = names.get_last_name()
     self.team = team
     self.defending = random_0_100_normal(80, 20)
     self.passing = random_0_100_normal(80, 20)
@@ -60,4 +61,9 @@ class Player():
 
   def format_score(self):
     return '{0}-{1} ({2})'.format(self.goals, self.points, self.score)
+
+if __name__=="__main__":
+
+  player = Player('a')
+  print(player)
 
