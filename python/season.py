@@ -4,6 +4,7 @@ from team import Team
 from match import Match
 from training import Training
 from competition import Competition
+import pyfiglet
 
 import datetime
 import random
@@ -30,14 +31,17 @@ class Season():
     self.get_upcoming_events()
 
   def __repr__(self):
-    ps = 'current date: {0}\nnext match date: {1}\n'.format(self.current_date, self.next_fixture_date)
+    ps = 'current date: {0}\nnext match date: {1}\n'.format(self.current_date, self.next_team_fixture_date)
     ps += 'current team status: {0}\n'.format(self.teams[self.team])
-    ps += 'next fixture opponent:{0}\n'.format(self.next_fixture_opponent)
+    ps += 'next fixture opponent:{0}\n'.format(self.next_team_fixture_opponent)
     ps += 'upcoming events:\n{0}\n'.format(self.upcoming_events)
-    ps += 'league table:\n{0}\n'.format(self.league1.league_table)
-    ps += 'league scorers table:\n{0}\n'.format(self.league1.scorers_table)
-    ps += 'cup bracket:\n{0}\n'.format(self.cup.bracket_p)
-    ps += 'cup scorers table:\n{0}\n'.format(self.cup.scorers_table)
+    if self.next_team_fixture is not None:
+      if 'league' in self.next_team_fixture[2]:
+        ps += 'league table:\n{0}\n'.format(self.league1.league_table)
+        ps += 'league scorers table:\n{0}\n'.format(self.league1.scorers_table)
+      elif 'cup' in self.next_team_fixture[2]:
+        ps += 'cup bracket:\n{0}\n'.format(self.cup.bracket_p)
+        ps += 'cup scorers table:\n{0}\n'.format(self.cup.scorers_table)
     ps += 'current training schedule:\n{0}\n'.format(self.teams[self.team].training)
     return ps
 
@@ -71,30 +75,56 @@ class Season():
   def update_next_fixture(self):
     self.fixtures = {**self.league1.fixtures, **self.cup.fixtures}
     remaining_fixtures = [x for x in self.fixtures.keys() if x > self.current_date]
+    remaining_team_fixtures = [x for x in remaining_fixtures if self.team in self.fixtures[x]]
     self.next_fixture_date = None
     self.last_fixture_date = None
     self.days_until_next_fixture = None
     self.next_fixture = None
-    self.next_fixture_opponent = None
+    self.next_team_fixture_date = None
+    self.last_team_fixture_date = None
+    self.days_until_next_team_fixture = None
+    self.next_team_fixture = None
+    self.next_team_fixture_opponent = None
     if len(remaining_fixtures) > 0:
-      self.next_fixture_date = min([x for x in self.fixtures.keys() if x > self.current_date])
-      self.last_fixture_date = max([x for x in self.fixtures.keys() if x > self.current_date])
+      self.next_fixture_date = min(remaining_fixtures)
+      self.last_fixture_date = max(remaining_fixtures)
       self.days_until_next_fixture = (self.next_fixture_date - self.current_date).days
       self.next_fixture = self.fixtures[self.next_fixture_date]
-      next_fixture_opponent = self.next_fixture[0]
-      if next_fixture_opponent == self.team:
-        next_fixture_opponent = self.next_fixture[1]
-      self.next_fixture_opponent = self.teams[next_fixture_opponent]
+      if len(remaining_team_fixtures) > 0:
+        self.next_team_fixture_date = min(remaining_team_fixtures)
+        self.last_team_fixture_date = max(remaining_team_fixtures)
+        self.days_until_next_team_fixture = (self.next_team_fixture_date - self.current_date).days
+        self.next_team_fixture = self.fixtures[self.next_team_fixture_date]
+        next_team_fixture_opponent = self.next_team_fixture[0]
+        if next_team_fixture_opponent == self.team:
+          next_team_fixture_opponent = self.next_team_fixture[1]
+        self.next_team_fixture_opponent = self.teams[next_team_fixture_opponent]
     self.next_training_date = None
     upcoming_training = [x for x in self.teams[self.team].training.fixtures.keys() if x > self.current_date]
     if len(upcoming_training) > 0:
       self.next_training_date = min(upcoming_training)
     self.get_upcoming_events()
 
+  def banner(self):
+    banner = pyfiglet.figlet_format('Season {0}\n{1}\n{2}\n'.format(self.year, self.manager, self.team))
+    print(banner)
+
+  def banner_end(self):
+    max_league_points = max([x.league_points for x in self.league1.teams.values()])
+    league_winners = [x.name for x in self.league1.teams.values() if x.league_points == max_league_points]
+    if len(league_winners) == 1:
+      league_winners = league_winners[0]
+    else:
+      # TODO league tie breaks
+      pass
+    current_round = self.cup.get_current_round()
+    cup_winners = self.cup.bracket.rounds[current_round-1]
+    banner = pyfiglet.figlet_format('Season {0}\n{1}\n{2}\nLeague winners:{3}\nCup winners:\n{4}\n'.format(
+      self.year, self.manager, self.team, league_winners, cup_winners))
+    print(banner)
+
   def end(self):
-    # end of season banner / summary
-    print(self)
-    # get players and fixtures for next year
+    self.banner_end()
     self.reset_players()
     for team in self.teams.keys():
       self.teams[team].reset_match_stats()
@@ -137,6 +167,7 @@ class Season():
       pickle.dump(self, f)
 
   def cont(self):
+    self.banner()
     options = ['(c)ontinue', '(t)raining', '(s)ave', '(e)xit']
     cmd = ''
     while cmd not in ['exit', 'e']:
