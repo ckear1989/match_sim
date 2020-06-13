@@ -4,6 +4,7 @@ import random
 import names
 
 import default
+from injury import Injury
 
 def x_0_100_cap(x):
   return int(max(min(round(x, 0), 100), 0))
@@ -29,6 +30,7 @@ class Player():
     self.lineup = 0
     self.minutes = 0
     self.cards = []
+    self.injury = Injury()
 
   def __repr__(self):
     ps = '{0} {1}'.format(self.first_name[0], self.last_name)
