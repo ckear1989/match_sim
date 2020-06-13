@@ -168,7 +168,7 @@ class Season():
 
   def cont(self):
     self.banner()
-    options = ['(c)ontinue', '(t)raining', '(s)ave', '(e)xit']
+    options = ['(c)ontinue', '(m)anage', '(t)raining', '(s)ave', '(e)xit']
     cmd = ''
     while cmd not in ['exit', 'e']:
       print(self)
@@ -248,9 +248,14 @@ class Season():
       self.current_date += (datetime.timedelta(self.days_until_next_fixture - 2))
       self.update_next_fixture()
 
+  def manage_team(self):
+    self.teams[self.team].manage()
+
   def process(self, cmd):
     if cmd in ['s', 'save']:
       self.save()
+    if cmd in ['m', 'manage']:
+      self.manage_team()
     if cmd in ['t', 'training']:
       self.teams[self.team].training.get_schedule()
     if cmd in ['c', 'continue']:

@@ -69,6 +69,9 @@ class Team():
   def __add__(self, other):
     return self.players + other.players
 
+  def manage(self):
+    pass
+
   def get_lineup(self):
     self.goalkeepers = [x for x in self if x.position in ['GK']]
     self.full_backs = [x for x in self if x.position in ['FB']]

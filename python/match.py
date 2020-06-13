@@ -117,12 +117,12 @@ class Match():
 
   def pause(self):
     if len(self.control) > 0:
-      x = input('{0}\n'.format('\t'.join(['(s)ubstitute', '(c)ontinue', '(e)xit']))).strip()
-      if x in ['s', 'substitute']:
+      x = input('{0}\n'.format('\t'.join(['(m)anage', '(c)ontinue', '(e)xit']))).strip()
+      if x in ['m', 'manage']:
         if 'a' in self.control:
-          self.team_a.substitute()
+          self.team_a.manage()
         if 'b' in self.control:
-          self.team_b.substitute()
+          self.team_b.manage()
       elif x in ['c', 'continue']:
         pass
       elif x in ['e', 'exit']:

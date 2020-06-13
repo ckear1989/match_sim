@@ -1,8 +1,10 @@
 
 from team import Team
+from formation import Formation
 
 import copy
 import random
+import time
 
 def is_int(x):
   try:
@@ -16,6 +18,7 @@ class MatchTeam(Team):
     self.__dict__ = copy.deepcopy(team.__dict__)
     self.playing = [x for x in self if x.lineup in range(1, 16)]
     self.subs = [x for x in self if x.lineup in range(16, 22)]
+    self.formation = Formation()
 
   def update_positions(self):
     self.goalkeepers = [x for x in self.playing if x.position in ['GK']]
@@ -24,6 +27,16 @@ class MatchTeam(Team):
     self.midfielders = [x for x in self.playing if x.position in ['MI']]
     self.full_forwards = [x for x in self.playing if x.position in ['FF']]
     self.half_forwards = [x for x in self.playing if x.position in ['HF']]
+    self.defenders = self.full_backs + self.half_backs
+    self.forwards = self.full_forwards + self.half_forwards
+
+  def update_playing_positions(self):
+    self.goalkeepers = [x for x in self.playing if x.lineup == 1]
+    self.full_backs = [x for x in self.playing if x.lineup in self.formation.full_back_lineups]
+    self.half_backs = [x for x in self.playing if x.lineup in self.formation.half_back_lineups]
+    self.midfielders = [x for x in self.playing if x.lineup in self.formation.midfielders_lineups]
+    self.half_forwards = [x for x in self.playing if x.lineup in self.formation.half_forward_lineups]
+    self.full_forwards = [x for x in self.playing if x.lineup in self.formation.full_forward_lineups]
     self.defenders = self.full_backs + self.half_backs
     self.forwards = self.full_forwards + self.half_forwards
 
@@ -60,6 +73,28 @@ class MatchTeam(Team):
     self.get_player_table()
     self.lineup_check()
     print(self)
+
+  def formation_change(self):
+    self.formation.change()
+    self.update_playing_positions()
+
+  def tactics(self):
+    pass
+
+  def manage(self):
+    x = input('{0}\n'.format('\t'.join(['(l)ineup', '(s)ubstitute', '(f)ormation', '(t)actics']))).strip()
+    if x in ['l', 'lineup']:
+      if len([x for x in self if x.minutes > 0]) > 0:
+        print('can\'t set up lineup during match!\r')
+        time.sleep(1)
+      else:
+        self.lineup_change()
+    if x in ['s', 'substitute']:
+      self.substitute()
+    elif x in ['f', 'formation']:
+      self.formation_change()
+    elif x in ['t', 'tactics']:
+      self.tactics()
 
   def substitute(self, l_a=None, l_b=None):
     print(self)
@@ -171,7 +206,5 @@ class MatchTeam(Team):
 if __name__=="__main__":
   team = Team('a', 'a')
   mteam = MatchTeam(team)
-  mteam.lineup_change()
-  mteam.lineup_change(1, 'Driscoll, Simon')
-  mteam.lineup_change(40, 'Driscoll, Simon')
+  mteam.manage()
 
