@@ -31,3 +31,39 @@ formations = [
   '2-2-1-4-5'
 ]
 
+tactics = [
+  'neutral',
+  'posession',
+  'blanket',
+  'attacking',
+  'gung-ho'
+]
+
+tactics_s = {
+  'neutral': {
+    'attacking': 50,
+    'posession': 50,
+    'defending': 50
+  },
+  'posession': {
+    'attacking': 10,
+    'posession': 60,
+    'defending': 30
+  },
+  'blanket': {
+    'attacking': 10,
+    'posession': 10,
+    'defending': 80
+  },
+  'attacking': {
+    'attacking': 60,
+    'posession': 20,
+    'defending': 20
+  },
+  'gung-ho': {
+    'attacking': 80,
+    'posession': 10,
+    'defending': 10
+  }
+}
+

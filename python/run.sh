@@ -8,7 +8,7 @@
 # pip3 install dill
 # pip3 install keyboard
 # pip3 install BracketMaker
-pip3 uninstall BracketMaker
+# pip3 uninstall BracketMaker
 # pip3 install names
 # pip3 install pyfiglet
 
@@ -20,6 +20,6 @@ pip3 uninstall BracketMaker
 # sudo python3.6 match.py
 # python3.6 training.py
 # python3.6 team.py
-# python3.6 match_team.py
+python3.6 match_team.py
 # sudo python3.6 main.py
 

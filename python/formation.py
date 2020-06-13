@@ -8,7 +8,8 @@ class Formation():
     self.get_pos_lineups()
 
   def __repr__(self):
-    ps = '{0}'.format(self.pos)
+    ps = '{0}\n'.format(self.nlist)
+    ps += '{0}\n'.format(self.pos)
     return ps
 
   def __str__(self):
@@ -21,6 +22,7 @@ class Formation():
       self.nlist = x
       self.get_pos()
       self.get_pos_lineups()
+    print(self)
 
   def get_pos(self):
     self.pos = [int(i) for i in self.nlist.split('-')]

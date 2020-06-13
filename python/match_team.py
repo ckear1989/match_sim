@@ -1,6 +1,7 @@
 
 from team import Team
 from formation import Formation
+from tactics import Tactics
 
 import copy
 import random
@@ -19,6 +20,8 @@ class MatchTeam(Team):
     self.playing = [x for x in self if x.lineup in range(1, 16)]
     self.subs = [x for x in self if x.lineup in range(16, 22)]
     self.formation = Formation()
+    self.tactics = Tactics()
+    self.stats_update()
 
   def update_positions(self):
     self.goalkeepers = [x for x in self.playing if x.position in ['GK']]
@@ -78,8 +81,14 @@ class MatchTeam(Team):
     self.formation.change()
     self.update_playing_positions()
 
-  def tactics(self):
-    pass
+  def tactics_change(self):
+    self.tactics.change()
+    self.stats_update()
+
+  def stats_update(self):
+    self.attacking = self.tactics.s['attacking']
+    self.posession = self.tactics.s['posession']
+    self.defending = self.tactics.s['defending']
 
   def manage(self):
     x = input('{0}\n'.format('\t'.join(['(l)ineup', '(s)ubstitute', '(f)ormation', '(t)actics']))).strip()
@@ -94,7 +103,7 @@ class MatchTeam(Team):
     elif x in ['f', 'formation']:
       self.formation_change()
     elif x in ['t', 'tactics']:
-      self.tactics()
+      self.tactics_change()
 
   def substitute(self, l_a=None, l_b=None):
     print(self)
