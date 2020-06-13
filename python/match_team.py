@@ -53,27 +53,28 @@ class MatchTeam(Team):
     self.get_player_table()
 
   def lineup_change(self, l_a=None, l_b=None):
-    print(self)
-    if l_b is None:
-      l_b = input('player to assign new lineup number (last, first):')
-    if ',' in l_b:
-      f = l_b.split(',')[1].strip()
-      l = l_b.split(',')[0].strip()
-    else:
-      return None
-    players = [x for x in self if (x.first_name == f) and (x.last_name == l)]
-    if len(players) > 0:
-      player = players[0]
-      if l_a is None:
-        l_a = input('lineup number to change {0} to:'.format(player))
-        if is_int(l_a):
-          l_a = int(l_a)
-        else:
-          return None
-      player.lineup = l_a
-    self.get_player_table()
-    self.lineup_check()
-    print(self)
+    if self.control is True:
+      print(self)
+      if l_b is None:
+        l_b = input('player to assign new lineup number (last, first):')
+      if ',' in l_b:
+        f = l_b.split(',')[1].strip()
+        l = l_b.split(',')[0].strip()
+      else:
+        return None
+      players = [x for x in self if (x.first_name == f) and (x.last_name == l)]
+      if len(players) > 0:
+        player = players[0]
+        if l_a is None:
+          l_a = input('lineup number to change {0} to:'.format(player))
+          if is_int(l_a):
+            l_a = int(l_a)
+          else:
+            return None
+        player.lineup = l_a
+      self.get_player_table()
+      self.lineup_check()
+      print(self)
 
   def formation_change(self):
     self.formation.change()

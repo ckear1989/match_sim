@@ -29,8 +29,6 @@ class Event():
       print('But he loses posession with the kick.', end='')
     else:
       self.foul(self.posession_player)
-    # test foul
-    self.foul(self.posession_player)
     self.shooting_player.update_score()
     self.attackers.update_score()
     print(self.match.get_score())
@@ -81,7 +79,7 @@ class Event():
         print('And it\'s his second yellow.  He is sent off by the referee.', end='')
         self.defenders.playing.remove(self.defending_player)
       p1 = random.random()
-      if p1 < 0.99:
+      if p1 < 0.2:
         attacker.gain_injury(self.match.date)
         self.attackers.forced_substitution(attacker)
     self.free_kick()
