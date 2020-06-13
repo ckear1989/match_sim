@@ -67,3 +67,15 @@ tactics_s = {
   }
 }
 
+body_parts = [
+  'hand',
+  'foot',
+  'achilles',
+  'hamstring',
+  'calf',
+  'knee',
+  'back',
+  'head',
+  'penis'
+]
+

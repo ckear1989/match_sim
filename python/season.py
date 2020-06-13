@@ -146,7 +146,7 @@ class Season():
     self.teams = {}
     for team in default.poss_teams:
       if team == self.team:
-        self.teams[team] = Team(team, self.manager)
+        self.teams[team] = Team(team, self.manager, control=True)
       else:
         self.teams[team] = Team(team, 'jim')
         self.teams[team].training = Training(self.current_date, [0, 2, 4], ['fi', 'pa', 'sh'])
@@ -251,6 +251,29 @@ class Season():
   def manage_team(self):
     self.teams[self.team].manage()
 
+  def process_teams_daily(self):
+    for team in self.teams:
+      if self.current_date in self.teams[team].training.fixtures:
+        self.teams[team].train(self.teams[team].training.fixtures[self.current_date])
+      self.process_players_daily(team)
+      self.teams[team].get_overall()
+
+  def process_players_daily(self, team):
+    for player in self.teams[team]:
+      player.check_injury(self.current_date)
+      player.condition = min((player.condition + 5), player.fitness)
+      player.get_overall()
+
+  def process_fixtures_daily(self):
+    if self.current_date == self.next_fixture_date:
+      next_match_t = self.fixtures[self.current_date]
+      silent = True
+      if self.team in next_match_t:
+        silent = False
+      next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent)
+      next_match.play()
+      self.process_match_result(next_match, next_match_t[2])
+
   def process(self, cmd):
     if cmd in ['s', 'save']:
       self.save()
@@ -260,26 +283,8 @@ class Season():
       self.teams[self.team].training.get_schedule()
     if cmd in ['c', 'continue']:
       self.current_date += datetime.timedelta(1)
-      for team in self.teams:
-        if self.current_date in self.teams[team].training.fixtures:
-          self.teams[team].train(self.teams[team].training.fixtures[self.current_date])
-        for player in self.teams[team]:
-          player.condition = min((player.condition + 5), player.fitness)
-          player.get_overall()
-        self.teams[team].get_overall()
-      if self.current_date == self.next_fixture_date:
-        next_match_t = self.fixtures[self.current_date]
-        silent = True
-        control = []
-        if self.team in next_match_t:
-          silent = False
-          if self.team == next_match_t[0]:
-            control = ['a']
-          elif self.team == next_match_t[1]:
-            control = ['b']
-        next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent, control)
-        next_match.play()
-        self.process_match_result(next_match, next_match_t[2])
+      self.process_teams_daily()
+      self.process_fixtures_daily()
       self.update_next_fixture()
 
 if __name__=="__main__":

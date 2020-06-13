@@ -13,6 +13,7 @@ import pyfiglet
 
 from team import Team
 from match_team import MatchTeam
+from event import Event
 
 def printc(x):
   print('{0}\r'.format(x), end='')
@@ -28,12 +29,11 @@ def time_until_next_event(mean=60, sd=10):
   return max(round(np.random.normal(mean, sd), 0), 1)
 
 class Match():
-  def __init__(self, team_a, team_b, date, silent, control=[]):
+  def __init__(self, team_a, team_b, date, silent):
     self.team_a = MatchTeam(team_a)
     self.team_b = MatchTeam(team_b)
     self.date = date
     self.silent = silent
-    self.control = control
     self.time = 0
     self.stopclock_time = stopclock(self.time)
     self.first_half_length = 35 * 60e3
@@ -101,34 +101,14 @@ class Match():
     print('{0} And that\'s the end of the half'.format(self.stopclock_time))
 
   def lineup(self):
-    if len(self.control) > 0:
-      x = input('{0}\n'.format('\t'.join(['(l)ineup', '(c)ontinue', '(e)xit']))).strip()
-      if x in ['l', 'lineup']:
-        if 'a' in self.control:
-          self.team_a.lineup_change()
-        if 'b' in self.control:
-          self.team_b.lineup_change()
-      elif x in ['c', 'continue']:
-        pass
-      elif x in ['e', 'exit']:
-        exit()
-      else:
-        self.lineup()
+    self.team_a.lineup_check()
+    self.team_b.lineup_check()
+    self.team_a.lineup_change()
+    self.team_b.lineup_change()
 
   def pause(self):
-    if len(self.control) > 0:
-      x = input('{0}\n'.format('\t'.join(['(m)anage', '(c)ontinue', '(e)xit']))).strip()
-      if x in ['m', 'manage']:
-        if 'a' in self.control:
-          self.team_a.manage()
-        if 'b' in self.control:
-          self.team_b.manage()
-      elif x in ['c', 'continue']:
-        pass
-      elif x in ['e', 'exit']:
-        exit()
-      else:
-        self.pause()
+    self.team_a.manage()
+    self.team_b.manage()
 
   def banner(self):
     if self.silent is True:
@@ -148,12 +128,8 @@ class Match():
 
   def play(self, time_step=0):
     self.banner()
-    self.team_a.lineup_check()
-    self.team_b.lineup_check()
     self.lineup()
     self.pause()
-    self.team_a.update_positions()
-    self.team_b.update_positions()
     self.play_half(self.first_half_length, time_step)
     self.half_time()
     second_half_end = self.first_half_length + self.second_half_length
@@ -180,15 +156,8 @@ class Match():
     print('Full time score is:\n{0}'.format(self.get_score().replace('Score is now ', '')))
 
   def event(self):
-    print(self.stopclock_time, end=' ')
-    a_tot = self.team_a.overall
-    b_tot = self.team_b.overall
-    p_team_a_chance = a_tot / (a_tot+b_tot)
-    if random.random() < p_team_a_chance:
-      self.team_a.chance(self.team_b)
-    else:
-      self.team_b.chance(self.team_a)
-    print(self.get_score())
+    event = Event(self)
+    event.run()
 
   def get_score(self):
     return 'Score is now {0} {1}-{2} ({3}) {4} {5}-{6} ({7})'.format(
@@ -200,8 +169,8 @@ if __name__ == "__main__":
 
   team_a = Team('a', 'a')
   team_b = Team('b', 'b')
-  match = Match(team_a, team_b, datetime.date(2020, 1, 1), False, control='a')
+  match = Match(team_a, team_b, datetime.date(2020, 1, 1), False)
   match.play()
   match = Match(team_a, team_b, datetime.date(2020, 1, 1), True)
-  match.play()
+  # match.play()
 

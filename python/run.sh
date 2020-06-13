@@ -16,7 +16,8 @@
 # python3.6 settings.py
 # python3.6 player.py
 # python3.6 competition.py
-sudo python3.6 season.py
+# sudo python3.6 season.py
+sudo python3.6 event.py
 # sudo python3.6 match.py
 # python3.6 training.py
 # python3.6 team.py

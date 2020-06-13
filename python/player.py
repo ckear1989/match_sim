@@ -64,8 +64,26 @@ class Player():
   def format_score(self):
     return '{0}-{1} ({2})'.format(self.goals, self.points, self.score)
 
+  def gain_injury(self, current_date):
+    self.injury.gain(current_date)
+
+  def check_injury(self, current_date):
+    if self.injury.return_date is not None:
+      if self.injury.return_date >= current_date:
+        self.reset_injury()
+
+  def reset_injury(self):
+    self.injury.reset()
+
 if __name__=="__main__":
 
   player = Player('a')
   print(player)
+
+  # test injuries
+  import datetime
+  current_date = datetime.date(2020, 1, 1)
+  for i in range(100):
+    player.gain_injury(current_date)
+    print(player.injury)
 

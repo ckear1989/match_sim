@@ -27,7 +27,7 @@ class TeamIterator:
     raise StopIteration
 
 class Team():
-  def __init__(self, name, manager, players=None):
+  def __init__(self, name, manager, players=None, control=False):
     self.name = name
     self.manager = manager
     if players is None:
@@ -35,6 +35,7 @@ class Team():
       self.players = [Player(name) for i in range(30)]
     else:
       self.players = players
+    self.control = control
     self.get_overall()
     self.score =  0
     self.played = 0
@@ -81,6 +82,9 @@ class Team():
     self.half_forwards = [x for x in self if x.position in ['HF']]
     while len(self.goalkeepers) < 2:
      random.choice(self).position = 'GK'
+     self.get_lineup()
+    while len(self.goalkeepers) > 2:
+     random.choice([x for x in self if x.position == 'GK']).position = random.choice(['FB', 'HB', 'MI', 'HF', 'FF'])
      self.get_lineup()
     while len(self.full_backs) < 3:
      random.choice([x for x in self if x.position not in ['GK']]).position = 'FB'
@@ -143,6 +147,7 @@ class Team():
     x.add_column('shooting', [x.shooting for x in self])
     x.add_column('fitness', [x.fitness for x in self])
     x.add_column('condition', [x.condition for x in self])
+    x.add_column('injury', [x.injury for x in self])
     x.add_column('minutes', [x.minutes for x in self])
     x.add_column('score', [x.format_score() for x in self])
     x.sortby = 'lineup'

@@ -22,16 +22,9 @@ class MatchTeam(Team):
     self.formation = Formation()
     self.tactics = Tactics()
     self.stats_update()
-
-  def update_positions(self):
-    self.goalkeepers = [x for x in self.playing if x.position in ['GK']]
-    self.full_backs = [x for x in self.playing if x.position in ['FB']]
-    self.half_backs = [x for x in self.playing if x.position in ['HB']]
-    self.midfielders = [x for x in self.playing if x.position in ['MI']]
-    self.full_forwards = [x for x in self.playing if x.position in ['FF']]
-    self.half_forwards = [x for x in self.playing if x.position in ['HF']]
-    self.defenders = self.full_backs + self.half_backs
-    self.forwards = self.full_forwards + self.half_forwards
+    self.get_lineup()
+    self.lineup_check()
+    self.update_playing_positions()
 
   def update_playing_positions(self):
     self.goalkeepers = [x for x in self.playing if x.lineup == 1]
@@ -47,12 +40,17 @@ class MatchTeam(Team):
     lineups = [x.lineup for x in self]
     for i in range(1, 22):
       if lineups.count(i) == 1:
-        continue
+        p = [x for x in self if x.lineup == i][0]
+        if p.injury.status is not None:
+          print('{0} in number {1} has an injury {2}'.format(p, i, p.injury))
+        else:
+          continue
       elif lineups.count(i) == 0:
         print('No player assigned to number %s' % i)
       elif lineups.count(i) > 1:
         print('{0} players assigned to number {1}'.format(lineups.count(i), i))
       self.lineup_change()
+    self.get_player_table()
 
   def lineup_change(self, l_a=None, l_b=None):
     print(self)
@@ -91,50 +89,79 @@ class MatchTeam(Team):
     self.defending = self.tactics.s['defending']
 
   def manage(self):
-    x = input('{0}\n'.format('\t'.join(['(l)ineup', '(s)ubstitute', '(f)ormation', '(t)actics']))).strip()
-    if x in ['l', 'lineup']:
-      if len([x for x in self if x.minutes > 0]) > 0:
-        print('can\'t set up lineup during match!\r')
-        time.sleep(1)
-      else:
-        self.lineup_change()
-    if x in ['s', 'substitute']:
-      self.substitute()
-    elif x in ['f', 'formation']:
-      self.formation_change()
-    elif x in ['t', 'tactics']:
-      self.tactics_change()
+    if self.control is True:
+      x = input('{0}\n'.format('\t'.join(['(l)ineup', '(s)ubstitute', '(f)ormation', '(t)actics']))).strip()
+      if x in ['l', 'lineup']:
+        if len([x for x in self if x.minutes > 0]) > 0:
+          print('can\'t set up lineup during match!\r')
+          time.sleep(1)
+        else:
+          self.lineup_change()
+      if x in ['s', 'substitute']:
+        self.substitute()
+      elif x in ['f', 'formation']:
+        self.formation_change()
+      elif x in ['t', 'tactics']:
+        self.tactics_change()
+
+  def forced_substitution(self, player):
+    if self.control is True:
+      sub_made = False
+      while sub_made is not True:
+        print('{0} has {1} injured his {2} and needs to be substituted.'.format(player, player.injury.status.lower(), player.injury.part))
+        sub_made = self.substitute(l_a=player)
+    else:
+      self.auto_sub(player)
+
+  def auto_sub(self, player):
+    player_on = [x for x in self.subs if x.position == player.position]
+    if len(player_on) > 0:
+      self.substitute(player, random.choice(player_on))
+    else:
+      self.substitute(player, random.choice(self.subs))
 
   def substitute(self, l_a=None, l_b=None):
     print(self)
     if l_b is None:
       l_b = input('substitute player coming on (last, first):')
-    if ',' in l_b:
-      f = l_b.split(',')[1].strip()
-      l = l_b.split(',')[0].strip()
+      if ',' in l_b:
+        f = l_b.split(',')[1].strip()
+        l = l_b.split(',')[0].strip()
+      else:
+        print('No comma detected in "{0}". Please use (last, first) format'.format(l_b))
+        return None
+      players = [x for x in self.subs if (x.first_name == f) and (x.last_name == l)]
+      if len(players) > 0:
+        player_on = players[0]
+      else:
+        print('Player "{0}" not found in substitutes. Please check player is numbered 16-21.'.format(l_b))
+        return None
     else:
-      return None
-    players = [x for x in self.subs if (x.first_name == f) and (x.last_name == l)]
-    if len(players) > 0:
-      player_on = players[0]
-      if l_a is None:
-        l_a = input('substitute player coming off {(last, first):')
-        if ',' in l_a:
-          f = l_a.split(',')[1].strip()
-          l = l_a.split(',')[0].strip()
-        else:
-          return None
-        players = [x for x in self.playing if (x.first_name == f) and (x.last_name == l)]
-        if len(players) > 0:
-          player_off = players[0]
-        else:
-          return None
-      self.playing.remove(player_off)
-      self.subs.remove(player_on)
-      self.playing.append(player_on)
-    self.update_positions()
+      player_on = l_b
+    if l_a is None:
+      l_a = input('substitute player coming off {(last, first):')
+      if ',' in l_a:
+        f = l_a.split(',')[1].strip()
+        l = l_a.split(',')[0].strip()
+      else:
+        print('No comma detected in "{0}". Please use (last, first) format'.format(l_a))
+        return None
+      players = [x for x in self.playing if (x.first_name == f) and (x.last_name == l)]
+      if len(players) > 0:
+        player_off = players[0]
+      else:
+        print('Player "{0}" not found in currently playing. Please check player is currently on.'.format(l_a))
+        return None
+    else:
+      player_off = l_a
+    print('{0} is coming on for {1}.'.format(player_on, player_off))
+    self.playing.remove(player_off)
+    self.subs.remove(player_on)
+    self.playing.append(player_on)
+    self.update_playing_positions()
     self.get_player_table()
     print(self)
+    return True
 
   def choose_player(self, p0, p1, p2):
     p = random.random()
@@ -147,70 +174,6 @@ class MatchTeam(Team):
     else:
       player = random.choice(self.forwards)
     return player
-
-  def shooting_player_goal_attempt(self, shooting_player):
-      p0 = random.random()
-      if p0 < (shooting_player.shooting/100):
-        shooting_player.goals += 1
-        print('And he scores.', end='')
-      else:
-        print('But he misses.', end='')
-
-  def shooting_player_point_attempt(self, shooting_player):
-      p0 = random.random()
-      if p0 < (shooting_player.shooting/100):
-        shooting_player.points += 1
-        print('And he scores.', end='')
-      else:
-        print('But he misses.', end='')
-
-  def shooting_player_posession(self, shooting_player, defending_player):
-    print('He passes the ball to {0}.'.format(shooting_player), end='')
-    p0 = random.random()
-    if p0 < ((defending_player.defending-30)/100):
-      print('But {0} wins the ball back for {1}.'.format(defending_player, defending_player.team))
-    elif p0 < 0.8:
-      print('He shoots for a point.', end='')
-      self.shooting_player_point_attempt(shooting_player)
-    elif p0 < 0.98:
-      print('He shoots for a goal.', end='')
-      self.shooting_player_goal_attempt(shooting_player)
-    else:
-      self.foul(defending_player)
-
-  def free_kick(self):
-    shooting_player = self.choose_player(0.01, 0.1, 0.3)
-    print('{0} steps up to take the free kick.'.format(shooting_player), end='')
-    self.shooting_player_point_attempt(shooting_player)
-
-  def foul(self, defender):
-    print('But he is fouled by {0}.'.format(defender), end='')
-    p0 = random.random()
-    if p0 < 0.3:
-      print('{0} receives a yellow card.'.format(defender), end='')
-      defender.cards.append('y')
-      if defender.cards.count('y') == 2:
-        defender.cards.append('r')
-        print('And it\'s his second yellow.  He is sent off by the referee.', end='')
-        opp.playing.remove(defender)
-    self.free_kick()
-
-  def chance(self, opp):
-    posession_player = self.choose_player(0.01, 0.2, 0.4)
-    shooting_player = self.choose_player(0.01, 0.1, 0.3)
-    while shooting_player == posession_player:
-      shooting_player = self.choose_player(0.01, 0.1, 0.3)
-    defending_player = opp.choose_player(0.1, 0.7, 0.15)
-    print('Team {0} has a chance with {1} on the ball.'.format(self.name, posession_player), end='')
-    p0 = random.random()
-    if p0 < (posession_player.passing/100):
-      self.shooting_player_posession(shooting_player, defending_player)
-    elif p0 < 0.99:
-      print('But he loses posession with the kick.', end='')
-    else:
-      self.foul(defending_player)
-    shooting_player.update_score()
-    self.update_score()
 
 if __name__=="__main__":
   team = Team('a', 'a')
