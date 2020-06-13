@@ -69,7 +69,7 @@ class Player():
 
   def check_injury(self, current_date):
     if self.injury.return_date is not None:
-      if self.injury.return_date >= current_date:
+      if self.injury.return_date <= current_date:
         self.reset_injury()
 
   def reset_injury(self):

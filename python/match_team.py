@@ -42,7 +42,7 @@ class MatchTeam(Team):
       if lineups.count(i) == 1:
         p = [x for x in self if x.lineup == i][0]
         if p.injury.status is not None:
-          print('{0} in number {1} has an injury {2}'.format(p, i, p.injury))
+          print('{0} in number {1} has an injury.\n{2}'.format(p, i, p.injury))
         else:
           continue
       elif lineups.count(i) == 0:
