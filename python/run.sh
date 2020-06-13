@@ -8,6 +8,7 @@
 # pip3 install dill
 # pip3 install keyboard
 # pip3 install BracketMaker
+pip3 uninstall BracketMaker
 # pip3 install names
 # pip3 install pyfiglet
 
@@ -15,7 +16,7 @@
 # python3.6 settings.py
 # python3.6 player.py
 # python3.6 competition.py
-sudo python3.6 season.py
+# sudo python3.6 season.py
 # sudo python3.6 match.py
 # python3.6 training.py
 # python3.6 team.py
