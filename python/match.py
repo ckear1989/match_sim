@@ -62,7 +62,7 @@ class Match():
   def update_team_condition(self):
     for x in self.team_a.playing + self.team_b.playing:
       x.minutes += 1
-      x.condition = max((x.condition - 1), 0)
+      x.condition = max((x.condition - 0.8), 0)
       x.get_overall()
     self.team_a.get_overall()
     self.team_b.get_overall()

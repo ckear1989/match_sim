@@ -264,7 +264,7 @@ class Season():
         if self.current_date in self.teams[team].training.fixtures:
           self.teams[team].train(self.teams[team].training.fixtures[self.current_date])
         for player in self.teams[team]:
-          player.condition = min((player.condition + 10), player.fitness)
+          player.condition = min((player.condition + 5), player.fitness)
           player.get_overall()
         self.teams[team].get_overall()
       if self.current_date == self.next_fixture_date:

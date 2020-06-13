@@ -146,6 +146,7 @@ class Team():
     x.add_column('minutes', [x.minutes for x in self])
     x.add_column('score', [x.format_score() for x in self])
     x.sortby = 'lineup'
+    x.float_format = '5.2'
     self.player_table = x
 
   def get_scorer_table(self):
