@@ -45,6 +45,7 @@ class Team():
     self.league_loss = 0
     self.league_draw = 0
     self.league_points = 0
+    self.league_points_diff = 0
     self.get_player_table()
     self.get_lineup()
 
@@ -151,6 +152,7 @@ class Team():
     x.add_column('minutes', [x.minutes for x in self])
     x.add_column('score', [x.format_score() for x in self])
     x.sortby = 'lineup'
+    x.title = '{0} {1}'.format(self.name, self.overall)
     x.float_format = '5.2'
     self.player_table = x
 
@@ -179,6 +181,7 @@ class Team():
   def reset_wld(self):
     self.played = 0
     self.league_points = 0
+    self.league_points_diff = 0
     self.league_win = 0
     self.league_loss = 0
     self.league_draw = 0

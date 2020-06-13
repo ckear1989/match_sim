@@ -27,14 +27,15 @@ class MatchTeam(Team):
     self.update_playing_positions()
 
   def update_playing_positions(self):
-    self.goalkeepers = [x for x in self.playing if x.lineup == 1]
+    self.goalkeepers = [x for x in self.playing if x.lineup in self.formation.goalkeeper_lineups]
     self.full_backs = [x for x in self.playing if x.lineup in self.formation.full_back_lineups]
     self.half_backs = [x for x in self.playing if x.lineup in self.formation.half_back_lineups]
-    self.midfielders = [x for x in self.playing if x.lineup in self.formation.midfielders_lineups]
+    self.midfielders = [x for x in self.playing if x.lineup in self.formation.midfielder_lineups]
     self.half_forwards = [x for x in self.playing if x.lineup in self.formation.half_forward_lineups]
     self.full_forwards = [x for x in self.playing if x.lineup in self.formation.full_forward_lineups]
     self.defenders = self.full_backs + self.half_backs
     self.forwards = self.full_forwards + self.half_forwards
+    self.get_player_table()
 
   def lineup_check(self):
     lineups = [x.lineup for x in self]
@@ -43,14 +44,19 @@ class MatchTeam(Team):
         p = [x for x in self if x.lineup == i][0]
         if p.injury.status is not None:
           print('{0} in number {1} has an injury.\n{2}'.format(p, i, p.injury))
+        if p.suspension.status is not None:
+          print('{0} in number {1} is suspended.\n{2}'.format(p, i, p.suspension))
         else:
           continue
       elif lineups.count(i) == 0:
         print('No player assigned to number %s' % i)
       elif lineups.count(i) > 1:
         print('{0} players assigned to number {1}'.format(lineups.count(i), i))
-      self.lineup_change()
-    self.get_player_table()
+      if self.control is True:
+        self.lineup_change()
+      else:
+        self.auto_lineup()
+    self.update_playing_positions()
 
   def lineup_change(self, l_a=None, l_b=None):
     if self.control is True:
@@ -72,7 +78,7 @@ class MatchTeam(Team):
           else:
             return None
         player.lineup = l_a
-      self.get_player_table()
+      self.update_playing_positions()
       self.lineup_check()
       print(self)
 
@@ -83,11 +89,13 @@ class MatchTeam(Team):
   def tactics_change(self):
     self.tactics.change()
     self.stats_update()
+    self.update_playing_positions()
 
   def stats_update(self):
     self.attacking = self.tactics.s['attacking']
     self.posession = self.tactics.s['posession']
     self.defending = self.tactics.s['defending']
+    self.update_playing_positions()
 
   def manage(self):
     if self.control is True:
@@ -109,10 +117,62 @@ class MatchTeam(Team):
     if self.control is True:
       sub_made = False
       while sub_made is not True:
-        print('{0} has {1} injured his {2} and needs to be substituted.'.format(player, player.injury.status.lower(), player.injury.part))
+        print('{0} has {1} injured his {2} and needs to be substituted.'.format(player, player.injury.status, player.injury.part))
         sub_made = self.substitute(l_a=player)
     else:
       self.auto_sub(player)
+
+  def auto_lineup(self):
+    lineups = [x.lineup for x in self]
+    for i in range(1, 22):
+      if lineups.count(i) == 1:
+        p = [x for x in self if x.lineup == i][0]
+        if p.injury.status is not None:
+          player_on = [x for x in self if x.position == player.position and x.lineup not in range(1, 22)]
+          if len(player_on) > 0:
+            random.choice(player_on).lineup = p.lineup
+            p.lineup = 0
+          else:
+            player_on = [x for x in self if x.lineup not in range(1, 22)]
+            if len(player_on) > 0:
+              random.choice(player_on).lineup = p.lineup
+              p.lineup = 0
+            else:
+              raise Exception('team {0} unable to fill lineup due to injury to {1}\n{2}'.format(self.name, p, self))
+        if p.suspension.status is not None:
+          player_on = [x for x in self if x.position == player.position and x.lineup not in range(1, 22)]
+          if len(player_on) > 0:
+            random.choice(player_on).lineup = p.lineup
+            p.lineup = 0
+          else:
+            player_on = [x for x in self if x.lineup not in range(1, 22)]
+            if len(player_on) > 0:
+              random.choice(player_on).lineup = p.lineup
+              p.lineup = 0
+            else:
+              raise Exception('team {0} unable to fill lineup due to suspension to {1}\n{2}'.format(self.name, p, self))
+        else:
+          continue
+      elif lineups.count(i) == 0:
+        preferred_position = self.formation.get_preferred_position(i)
+        player_on = [x for x in self if x.position == preferred_position and x.lineup not in range(1, 22)]
+        if len(player_on) > 0:
+          player_on = random.choice(player_on)
+          player_on.lineup = i
+        else:
+          player_on = [x for x in self if x.lineup not in range(1, 22)]
+          if len(player_on) > 0:
+            player_on = random.choice(player_on)
+            player_on.lineup = i
+          else:
+            raise Exception('team {0} unable to fill lineup number {1}\n{2}'.format(self.name, i, self))
+      elif lineups.count(i) > 1:
+        while lineups.count(i) > 1:
+          player_off = [x for x in self if x.lineup == i]
+          player_off = random.choice(player_off)
+          player_off.lineup = 0
+          lineups = [x.lineup for x in self]
+    self.update_playing_positions()
 
   def auto_sub(self, player):
     player_on = [x for x in self.subs if x.position == player.position]
@@ -159,8 +219,8 @@ class MatchTeam(Team):
     self.playing.remove(player_off)
     self.subs.remove(player_on)
     self.playing.append(player_on)
+    self.formations.ammend(player_off.lineup, player_on.lineup)
     self.update_playing_positions()
-    self.get_player_table()
     print(self)
     return True
 

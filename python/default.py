@@ -1,6 +1,7 @@
 
 with open('../data/defaults/poss_teams.txt', 'r') as f:
   poss_teams = [x.strip() for x in f.readlines()]
+  poss_teams = [x for x in poss_teams if x[0] != '#']
 
 dow = {
   'monday': 0,
@@ -78,4 +79,9 @@ body_parts = [
   'head',
   'penis'
 ]
+
+suspensions = {
+  'yellows': 14,
+  'reds': 28
+}
 

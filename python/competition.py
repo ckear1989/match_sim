@@ -187,9 +187,11 @@ class Competition():
     x.add_column('win', [x.league_win for x in self.teams.values()])
     x.add_column('loss', [x.league_loss for x in self.teams.values()])
     x.add_column('draw', [x.league_draw for x in self.teams.values()])
+    x.add_column('pd', [x.league_points_diff for x in self.teams.values()])
     x.add_column('points', [x.league_points for x in self.teams.values()])
     x.sortby = 'points'
     x.reversesort = True
+    x.title = '%s table' % self.name
     self.league_table = x
 
   def get_players(self):
@@ -203,8 +205,8 @@ class Competition():
     x.add_column('rscore', [x.score for x in scorers])
     x.add_column('score', ['{0}-{1} ({2})'.format(x.goals, x.points, x.score) for x in scorers])
     x.sortby = 'rscore'
-    x.title = '%s top scorers' % self.name
     x.reversesort = True
+    x.title = '%s top scorers' % self.name
     x = x.get_string(fields=['player', 'team', 'score'], end=10)
     self.scorers_table = x
 

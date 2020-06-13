@@ -71,15 +71,25 @@ class Event():
   def foul(self, attacker):
     print('But he is fouled by {0}.'.format(self.defending_player), end='')
     p0 = random.random()
-    if p0 < 0.99:
+    if p0 < 0.2:
       print('{0} receives a yellow card.'.format(self.defending_player), end='')
       self.defending_player.cards.append('y')
       if self.defending_player.cards.count('y') == 2:
         self.defending_player.cards.append('r')
         print('And it\'s his second yellow.  He is sent off by the referee.', end='')
+        self.defending_player.gain_suspension('yellow', self.match.date)
         self.defenders.playing.remove(self.defending_player)
       p1 = random.random()
       if p1 < 0.2:
+        attacker.gain_injury(self.match.date)
+        self.attackers.forced_substitution(attacker)
+    elif p0 < 0.25:
+      print('{0} receives a red card.'.format(self.defending_player), end='')
+      self.defending_player.cards.append('r')
+      self.defending_player.gain_suspension('red', self.match.date)
+      self.defenders.playing.remove(self.defending_player)
+      p2 = random.random()
+      if p2 < 0.5:
         attacker.gain_injury(self.match.date)
         self.attackers.forced_substitution(attacker)
     self.free_kick()

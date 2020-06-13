@@ -22,6 +22,7 @@ class Season():
     self.current_date = self.start_date
     self.year = self.start_date.year
     self.get_teams()
+    self.init_competitions()
     self.get_fixtures()
     self.results = {}
     self.teams[self.team].training = Training(self.current_date)
@@ -40,6 +41,10 @@ class Season():
         ps += 'league table:\n{0}\n'.format(self.league1.league_table)
         ps += 'league scorers table:\n{0}\n'.format(self.league1.scorers_table)
       elif 'cup' in self.next_team_fixture[2]:
+        ps += 'cup bracket:\n{0}\n'.format(self.cup.bracket_p)
+        ps += 'cup scorers table:\n{0}\n'.format(self.cup.scorers_table)
+    else:
+      if 'cup' in self.next_fixture[2]:
         ps += 'cup bracket:\n{0}\n'.format(self.cup.bracket_p)
         ps += 'cup scorers table:\n{0}\n'.format(self.cup.scorers_table)
     ps += 'current training schedule:\n{0}\n'.format(self.teams[self.team].training)
@@ -73,7 +78,7 @@ class Season():
     self.cup.update_bracket(self.current_date)
 
   def update_next_fixture(self):
-    self.fixtures = {**self.league1.fixtures, **self.cup.fixtures}
+    self.get_fixtures()
     remaining_fixtures = [x for x in self.fixtures.keys() if x > self.current_date]
     remaining_team_fixtures = [x for x in remaining_fixtures if self.team in self.fixtures[x]]
     self.next_fixture_date = None
@@ -115,10 +120,12 @@ class Season():
     if len(league_winners) == 1:
       league_winners = league_winners[0]
     else:
-      # TODO league tie breaks
-      pass
+      max_points_difference = max([x.league_points_difference for x in league_winners])
+      league_winners = [x.name for x in league_winners if x.league_points_difference == max_league_points]
+      if len(league_winners) == 1:
+        league_winners = league_winners[0]
     current_round = self.cup.get_current_round()
-    cup_winners = self.cup.bracket.rounds[current_round-1]
+    cup_winners = self.cup.bracket.rounds[current_round-1][0]
     banner = pyfiglet.figlet_format('Season {0}\n{1}\n{2}\nLeague winners:{3}\nCup winners:\n{4}\n'.format(
       self.year, self.manager, self.team, league_winners, cup_winners))
     print(banner)
@@ -136,6 +143,7 @@ class Season():
       self.cup.teams[team].reset_match_stats()
       self.cup.teams[team].reset_wld()
     self.year += 1
+    self.init_competitions()
     self.get_fixtures()
     self.update_next_fixture()
     self.update_league()
@@ -157,10 +165,28 @@ class Season():
     for player in self.cup.players:
       player.reset_match_stats()
 
+  def init_competitions(self):
+    n_teams = len(self.teams.keys())
+    poss_teams = random.sample(self.teams.keys(), n_teams)
+    teams_per_div = int(n_teams / 4)
+    teams_1 = poss_teams[:teams_per_div]
+    teams_2 = poss_teams[teams_per_div:teams_per_div+4]
+    teams_3 = poss_teams[teams_per_div+4:teams_per_div+8]
+    teams_4 = poss_teams[teams_per_div+8:]
+    self.league1 = Competition('league div 1', 'rr', datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams_1})
+    self.league2 = Competition('league div 2', 'rr', self.league1.last_fixture_date + datetime.timedelta(1), {x:self.teams[x] for x in self.teams if x in teams_2})
+    self.league3 = Competition('league div 3', 'rr', self.league2.last_fixture_date + datetime.timedelta(1), {x:self.teams[x] for x in self.teams if x in teams_3})
+    self.league4 = Competition('league div 4', 'rr', self.league3.last_fixture_date + datetime.timedelta(1), {x:self.teams[x] for x in self.teams if x in teams_4})
+    self.cup = Competition('cup', 'cup', self.league4.last_fixture_date + datetime.timedelta(1), self.teams)
+
   def get_fixtures(self):
-    self.league1 = Competition('league div 1', 'rr', datetime.date(self.year, 1, 1), self.teams)
-    self.cup = Competition('cup', 'cup', self.league1.last_fixture_date + datetime.timedelta(1), self.teams)
-    self.fixtures = {**self.league1.fixtures, **self.cup.fixtures}
+    self.fixtures = {
+      **self.league1.fixtures,
+      **self.league2.fixtures,
+      **self.league3.fixtures,
+      **self.league4.fixtures,
+      **self.cup.fixtures
+    }
 
   def save(self):
     with open(self.save_file, 'wb') as f:
@@ -183,6 +209,8 @@ class Season():
     if 'league' in comp:
       match.team_a.played += 1
       match.team_b.played += 1
+      match.team_a.league_points_diff += (match.team_a.points - match.team_b.points)
+      match.team_b.league_points_diff += (match.team_b.points - match.team_a.points)
       if match.team_a.score > match.team_b.score:
         match.team_a.league_win += 1
         match.team_b.league_loss += 1
@@ -261,6 +289,7 @@ class Season():
   def process_players_daily(self, team):
     for player in self.teams[team]:
       player.check_injury(self.current_date)
+      player.check_suspension(self.current_date)
       player.condition = min((player.condition + 5), player.fitness)
       player.get_overall()
 

@@ -5,6 +5,7 @@ import names
 
 import default
 from injury import Injury
+from suspension import Suspension
 
 def x_0_100_cap(x):
   return int(max(min(round(x, 0), 100), 0))
@@ -31,6 +32,7 @@ class Player():
     self.minutes = 0
     self.cards = []
     self.injury = Injury()
+    self.suspension = Suspension()
 
   def __repr__(self):
     ps = '{0} {1}'.format(self.first_name[0], self.last_name)
@@ -74,6 +76,17 @@ class Player():
 
   def reset_injury(self):
     self.injury.reset()
+
+  def gain_suspension(self, status, current_date):
+    self.suspension.gain(status, current_date)
+
+  def check_suspension(self, current_date):
+    if self.suspension.return_date is not None:
+      if self.suspension.return_date <= current_date:
+        self.reset_suspension()
+
+  def reset_injury(self):
+    self.suspension.reset()
 
 if __name__=="__main__":
 
