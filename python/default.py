@@ -32,6 +32,8 @@ formations = [
   '2-2-1-4-5'
 ]
 
+formations_ascii = {x:open('../data/formations/{0}.txt'.format(x)).read() for x in formations}
+
 tactics = [
   'neutral',
   'posession',

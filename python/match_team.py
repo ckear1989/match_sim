@@ -57,6 +57,7 @@ class MatchTeam(Team):
       else:
         self.auto_lineup()
     self.update_playing_positions()
+    self.formation.update_ascii(self)
 
   def lineup_change(self, l_a=None, l_b=None):
     if self.control is True:
@@ -83,7 +84,7 @@ class MatchTeam(Team):
       print(self)
 
   def formation_change(self):
-    self.formation.change()
+    self.formation.change(team)
     self.update_playing_positions()
 
   def tactics_change(self):
@@ -237,7 +238,7 @@ class MatchTeam(Team):
     return player
 
 if __name__=="__main__":
-  team = Team('a', 'a')
+  team = Team('a', 'a', control=True)
   mteam = MatchTeam(team)
   mteam.manage()
 

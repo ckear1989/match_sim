@@ -1,27 +1,31 @@
 
-from default import formations
+from default import formations, formations_ascii
 
 class Formation():
   def __init__(self):
     self.nlist = formations[0]
     self.get_pos()
     self.get_pos_lineups()
+    self.get_ascii()
 
   def __repr__(self):
     ps = '{0}\n'.format(self.nlist)
     ps += '{0}\n'.format(self.pos)
+    ps += '{0}\n'.format(self.ascii)
     return ps
 
   def __str__(self):
     return self.__repr__()
 
-  def change(self):
+  def change(self, team):
     print(self)
-    x = input('choose formation:\n{0}\n'.format('\t'.join(formations))).strip()
+    x = input('choose formation:\n{0}\n'.format(', '.join(sorted(formations)))).strip()
     if x in formations:
       self.nlist = x
       self.get_pos()
       self.get_pos_lineups()
+      self.get_ascii()
+      self.update_ascii(team)
     print(self)
 
   def get_pos(self):
@@ -73,4 +77,14 @@ class Formation():
     elif lineup in self.full_forward_lineups + [21]:
       p = 'FF'
     return p
+
+  def get_ascii(self):
+    self.ascii = formations_ascii[self.nlist]
+
+  def update_ascii(self, team):
+    for i in range(16):
+      p = [x for x in team if x.lineup == i]
+      postr = '<-----P{:02d}----->'.format(i)
+      plstr = str(p).center(15).replace('[', ' ').replace(']', ' ')
+      self.ascii = self.ascii.replace(postr, plstr)
 
