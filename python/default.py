@@ -83,7 +83,7 @@ body_parts = [
 ]
 
 suspensions = {
-  'yellows': 14,
-  'reds': 28
+  'yellow': 14,
+  'red': 28
 }
 

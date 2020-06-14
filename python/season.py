@@ -80,7 +80,7 @@ class Season():
   def update_next_fixture(self):
     self.get_fixtures()
     remaining_fixtures = [x for x in self.fixtures.keys() if x > self.current_date]
-    remaining_team_fixtures = [x for x in remaining_fixtures if self.team in self.fixtures[x]]
+    remaining_team_fixtures = [x for x in remaining_fixtures if any(self.team in y for y in self.fixtures[x])]
     self.next_fixture_date = None
     self.last_fixture_date = None
     self.days_until_next_fixture = None
@@ -99,7 +99,10 @@ class Season():
         self.next_team_fixture_date = min(remaining_team_fixtures)
         self.last_team_fixture_date = max(remaining_team_fixtures)
         self.days_until_next_team_fixture = (self.next_team_fixture_date - self.current_date).days
-        self.next_team_fixture = self.fixtures[self.next_team_fixture_date]
+        next_team_fixture = self.fixtures[self.next_team_fixture_date]
+        for f in next_team_fixture:
+          if self.team in f:
+            self.next_team_fixture = f
         next_team_fixture_opponent = self.next_team_fixture[0]
         if next_team_fixture_opponent == self.team:
           next_team_fixture_opponent = self.next_team_fixture[1]
@@ -295,13 +298,13 @@ class Season():
 
   def process_fixtures_daily(self):
     if self.current_date == self.next_fixture_date:
-      next_match_t = self.fixtures[self.current_date]
-      silent = True
-      if self.team in next_match_t:
-        silent = False
-      next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent)
-      next_match.play()
-      self.process_match_result(next_match, next_match_t[2])
+      for next_match_t in self.fixtures[self.current_date]:
+        silent = True
+        if self.team in next_match_t:
+          silent = False
+        next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent)
+        next_match.play()
+        self.process_match_result(next_match, next_match_t[2])
 
   def process(self, cmd):
     if cmd in ['s', 'save']:
