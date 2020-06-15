@@ -312,12 +312,14 @@ class Season():
   def process_fixtures_daily(self):
     if self.current_date == self.next_fixture_date:
       for next_match_t in self.fixtures[self.current_date]:
-        silent = True
-        if self.team in next_match_t:
-          silent = False
-        if silent is True:
+        silent = False
+        if self.team not in next_match_t:
+          silent = True
           print('processing match {0}...'.format(next_match_t))
-        next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent)
+        extra_time_required = False
+        if 'replay' in next_match_t[2]:
+          extra_time_required = True
+        next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent, extra_time_required)
         next_match.play()
         self.process_match_result(next_match, next_match_t[2])
 
