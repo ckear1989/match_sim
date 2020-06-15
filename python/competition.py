@@ -143,7 +143,7 @@ class Competition():
   def update_cup_fixtures(self, current_date):
     nt = '-'*self.bracket.max
     pt = []
-    sunday = get_sundays(current_date)[0]
+    sunday = [x for x in get_sundays(current_date) if x > self.start_date][0]
     around = self.bracket.rounds[self.get_current_round()-1]
     if len(around) > 1:
       matchups = [[around[i], around[i+1]] for i in range(0, len(around), 2)]

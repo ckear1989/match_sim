@@ -7,6 +7,8 @@ class Event():
     a_tot = match.team_a.overall
     b_tot = match.team_b.overall
     p_team_a_chance = a_tot / (a_tot+b_tot)
+    p_team_a_posession = match.team_a.posession / (match.team_a.posession + match.team_b.posession)
+    p_team_a_chance = p_team_a_chance * p_team_a_posession
     if random.random() < p_team_a_chance:
       self.attackers = match.team_a
       self.defenders = match.team_b
@@ -21,17 +23,26 @@ class Event():
 
   def run(self):
     print(self.match.stopclock_time, end=' ')
-    print('Team {0} has a chance with {1} on the ball.'.format(self.attackers.name, self.posession_player), end='')
+    attack_propensity = self.attackers.attacking / (self.attackers.attacking+self.attackers.defending)
+    print('Team {0} has posession with {1} on the ball.'.format(self.attackers.name, self.posession_player), end='')
     p0 = random.random()
-    if p0 < (self.posession_player.passing/100):
-      self.shooting_player_posession()
-    elif p0 < 0.99:
-      print('But he loses posession with the kick.', end='')
+    if p0 < attack_propensity:
+      self.attack()
     else:
-      self.foul(self.posession_player)
-    self.shooting_player.update_score()
-    self.attackers.update_score()
-    print(self.match.get_score())
+      print('He cycles back to retain posession.')
+
+  def attack(self):
+      print('He looks forward to attack.'.format(self.attackers.name, self.posession_player), end='')
+      p0 = random.random()
+      if p0 < (self.posession_player.passing/100):
+        self.shooting_player_posession()
+      elif p0 < 0.99:
+        print('But he loses posession with the kick.', end='')
+      else:
+        self.foul(self.posession_player)
+      self.shooting_player.update_score()
+      self.attackers.update_score()
+      print(self.match.get_score())
 
   def shooting_player_goal_attempt(self):
       p0 = random.random()

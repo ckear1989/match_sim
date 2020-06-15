@@ -59,9 +59,9 @@ class Season():
       adate = self.current_date + datetime.timedelta(i)
       events = []
       if adate in self.fixtures.keys():
-        events += [self.fixtures[adate]]
+        events += self.fixtures[adate]
       if adate in self.results.keys():
-        events += [self.results[adate]]
+        events += self.results[adate]
       if adate in self.teams[self.team].training.fixtures.keys():
         events += [self.teams[self.team].training.fixtures[adate]]
       if events == []:
@@ -72,6 +72,12 @@ class Season():
   def update_league(self):
     self.league1.get_league_table()
     self.league1.get_scorers_table()
+    self.league2.get_league_table()
+    self.league2.get_scorers_table()
+    self.league3.get_league_table()
+    self.league3.get_scorers_table()
+    self.league4.get_league_table()
+    self.league4.get_scorers_table()
 
   def update_cup(self):
     self.cup.get_scorers_table()
@@ -176,20 +182,32 @@ class Season():
     teams_2 = poss_teams[teams_per_div:teams_per_div+4]
     teams_3 = poss_teams[teams_per_div+4:teams_per_div+8]
     teams_4 = poss_teams[teams_per_div+8:]
-    self.league1 = Competition('league div 1', 'rr', datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams_1})
-    self.league2 = Competition('league div 2', 'rr', self.league1.last_fixture_date + datetime.timedelta(1), {x:self.teams[x] for x in self.teams if x in teams_2})
-    self.league3 = Competition('league div 3', 'rr', self.league2.last_fixture_date + datetime.timedelta(1), {x:self.teams[x] for x in self.teams if x in teams_3})
-    self.league4 = Competition('league div 4', 'rr', self.league3.last_fixture_date + datetime.timedelta(1), {x:self.teams[x] for x in self.teams if x in teams_4})
-    self.cup = Competition('cup', 'cup', self.league4.last_fixture_date + datetime.timedelta(1), self.teams)
+    self.league1 = Competition('league1', 'rr', datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams_1})
+    self.league2 = Competition('league2', 'rr', datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams_2})
+    self.league3 = Competition('league3', 'rr', datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams_3})
+    self.league4 = Competition('league4', 'rr', datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams_4})
+    last_league_fixture_date = max([
+      self.league1.last_fixture_date,
+      self.league2.last_fixture_date,
+      self.league3.last_fixture_date,
+      self.league4.last_fixture_date
+    ])
+    self.cup = Competition('cup', 'cup', last_league_fixture_date + datetime.timedelta(1), self.teams)
 
   def get_fixtures(self):
     self.fixtures = {
       **self.league1.fixtures,
-      **self.league2.fixtures,
-      **self.league3.fixtures,
-      **self.league4.fixtures,
       **self.cup.fixtures
     }
+    for f in self.league2.fixtures.keys():
+      if f in self.fixtures.keys():
+        self.fixtures[f] = self.fixtures[f] + self.league2.fixtures[f]
+    for f in self.league3.fixtures.keys():
+      if f in self.fixtures.keys():
+        self.fixtures[f] = self.fixtures[f] + self.league3.fixtures[f]
+    for f in self.league4.fixtures.keys():
+      if f in self.fixtures.keys():
+        self.fixtures[f] = self.fixtures[f] + self.league4.fixtures[f]
 
   def save(self):
     with open(self.save_file, 'wb') as f:
@@ -197,7 +215,7 @@ class Season():
 
   def cont(self):
     self.banner()
-    options = ['(c)ontinue', '(m)anage', '(t)raining', '(s)ave', '(e)xit']
+    options = ['(c)ontinue', '(m)anage', '(t)raining', '(st)ats', '(sa)ve', '(se)ttings', '(e)xit']
     cmd = ''
     while cmd not in ['exit', 'e']:
       print(self)
@@ -209,7 +227,12 @@ class Season():
       self.process(cmd)
 
   def process_match_result(self, match, comp):
-    if 'league' in comp:
+    compo = [x for x in [self.league1, self.league2, self.league3, self.league4, self.cup] if x.name in comp]
+    if len(compo) != 1:
+      raise Exception('problem with competition {0}'.format(comp))
+    else:
+      compo = compo[0]
+    if compo.form in ['rr', 'drr']:
       match.team_a.played += 1
       match.team_b.played += 1
       match.team_a.league_points_diff += (match.team_a.points - match.team_b.points)
@@ -227,43 +250,33 @@ class Season():
         match.team_b.league_draw += 1
         match.team_a.league_points += 1
         match.team_b.league_points += 1
-      self.teams[match.team_a.name] = copy.deepcopy(match.team_a)
-      self.teams[match.team_b.name] = copy.deepcopy(match.team_b)
-      self.league1.teams[match.team_a.name] = copy.deepcopy(match.team_a)
-      self.league1.teams[match.team_b.name] = copy.deepcopy(match.team_b)
-      i = 0
-      for team in self.league1.teams.keys():
-        for player in self.league1.teams[team]:
-          self.league1.players[i].points += player.points
-          self.league1.players[i].goals += player.goals
-          self.league1.players[i].score += player.score
-          i += 1
-        self.teams[team].reset_match_stats()
-        self.league1.teams[team].reset_match_stats()
-      self.update_league()
-    elif 'cup' in comp:
+    elif compo.form == 'cup':
       current_round = self.cup.get_current_round()
       if match.team_a.score > match.team_b.score:
-        self.cup.update_bracket(self.current_date, (current_round+1), match.team_a.name)
+        compo.update_bracket(self.current_date, (current_round+1), match.team_a.name)
       elif match.team_a.score < match.team_b.score:
-        self.cup.update_bracket(self.current_date, (current_round+1), match.team_b.name)
+        compo.update_bracket(self.current_date, (current_round+1), match.team_b.name)
       else:
-        self.cup.schedule_replay(match.team_a.name, match.team_b.name, self.current_date)
-      self.teams[match.team_a.name] = copy.deepcopy(match.team_a)
-      self.teams[match.team_b.name] = copy.deepcopy(match.team_b)
-      self.cup.teams[match.team_a.name] = copy.deepcopy(match.team_a)
-      self.cup.teams[match.team_b.name] = copy.deepcopy(match.team_b)
-      i = 0
-      for team in self.cup.teams.keys():
-        for player in self.cup.teams[team]:
-          self.cup.players[i].points += player.points
-          self.cup.players[i].goals += player.goals
-          self.cup.players[i].score += player.score
-          i += 1
-        self.teams[team].reset_match_stats()
-        self.cup.teams[team].reset_match_stats()
-      self.update_cup()
-    self.results[self.current_date] = match
+        compo.schedule_replay(match.team_a.name, match.team_b.name, self.current_date)
+    self.teams[match.team_a.name] = copy.deepcopy(match.team_a)
+    self.teams[match.team_b.name] = copy.deepcopy(match.team_b)
+    compo.teams[match.team_a.name] = copy.deepcopy(match.team_a)
+    compo.teams[match.team_b.name] = copy.deepcopy(match.team_b)
+    i = 0
+    for team in compo.teams.keys():
+      for player in compo.teams[team]:
+        compo.players[i].points += player.points
+        compo.players[i].goals += player.goals
+        compo.players[i].score += player.score
+        i += 1
+      self.teams[team].reset_match_stats()
+      compo.teams[team].reset_match_stats()
+    self.update_league()
+    self.update_cup()
+    if self.current_date in self.results.keys():
+      self.results[self.current_date].append(match)
+    else:
+      self.results[self.current_date] = [match]
 
   def training(self):
     options = ['(n)ew schedule', '(a)ppend schedule']
@@ -302,18 +315,30 @@ class Season():
         silent = True
         if self.team in next_match_t:
           silent = False
+        if silent is True:
+          print('processing match {0}...'.format(next_match_t))
         next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent)
         next_match.play()
         self.process_match_result(next_match, next_match_t[2])
 
+  def settings(self):
+    pass
+
+  def stats(self):
+    pass
+
   def process(self, cmd):
-    if cmd in ['s', 'save']:
+    if cmd in ['sa', 'save']:
       self.save()
-    if cmd in ['m', 'manage']:
+    if cmd in ['se', 'settings']:
+      self.settings()
+    if cmd in ['st', 'stats']:
+      self.stats()
+    elif cmd in ['m', 'manage']:
       self.manage_team()
-    if cmd in ['t', 'training']:
+    elif cmd in ['t', 'training']:
       self.teams[self.team].training.get_schedule()
-    if cmd in ['c', 'continue']:
+    elif cmd in ['c', 'continue']:
       self.current_date += datetime.timedelta(1)
       self.process_teams_daily()
       self.process_fixtures_daily()
