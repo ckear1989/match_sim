@@ -115,13 +115,17 @@ class MatchTeam(Team):
         self.tactics_change()
 
   def forced_substitution(self, player):
-    if self.control is True:
-      sub_made = False
+    subs_used = len([x for x in self.playing if x.lineup not in range(1, 16)])
+    if subs_used > 4:
+      self.playing.remove(player)
+    else:
+      if self.control is True:
+        sub_made = False
       while sub_made is not True:
         print('{0} has {1} injured his {2} and needs to be substituted.'.format(player, player.injury.status, player.injury.part))
         sub_made = self.substitute(l_a=player)
-    else:
-      self.auto_sub(player)
+      else:
+        self.auto_sub(player)
 
   def auto_lineup(self):
     lineups = [x.lineup for x in self]
@@ -183,47 +187,51 @@ class MatchTeam(Team):
       self.substitute(player, random.choice(self.subs))
 
   def substitute(self, l_a=None, l_b=None):
-    print(self)
-    if l_b is None:
-      l_b = input('substitute player coming on (last, first):')
-      if ',' in l_b:
-        f = l_b.split(',')[1].strip()
-        l = l_b.split(',')[0].strip()
+    subs_used = len([x for x in self.playing if x.lineup not in range(1, 16)])
+    if subs_used < 5:
+      print(self)
+      if l_b is None:
+        l_b = input('substitute player coming on (last, first):')
+        if ',' in l_b:
+          f = l_b.split(',')[1].strip()
+          l = l_b.split(',')[0].strip()
+        else:
+          print('No comma detected in "{0}". Please use (last, first) format'.format(l_b))
+          return None
+        players = [x for x in self.subs if (x.first_name == f) and (x.last_name == l)]
+        if len(players) > 0:
+          player_on = players[0]
+        else:
+          print('Player "{0}" not found in substitutes. Please check player is numbered 16-21.'.format(l_b))
+          return None
       else:
-        print('No comma detected in "{0}". Please use (last, first) format'.format(l_b))
-        return None
-      players = [x for x in self.subs if (x.first_name == f) and (x.last_name == l)]
-      if len(players) > 0:
-        player_on = players[0]
+        player_on = l_b
+      if l_a is None:
+        l_a = input('substitute player coming off {(last, first):')
+        if ',' in l_a:
+          f = l_a.split(',')[1].strip()
+          l = l_a.split(',')[0].strip()
+        else:
+          print('No comma detected in "{0}". Please use (last, first) format'.format(l_a))
+          return None
+        players = [x for x in self.playing if (x.first_name == f) and (x.last_name == l)]
+        if len(players) > 0:
+          player_off = players[0]
+        else:
+          print('Player "{0}" not found in currently playing. Please check player is currently on.'.format(l_a))
+          return None
       else:
-        print('Player "{0}" not found in substitutes. Please check player is numbered 16-21.'.format(l_b))
-        return None
+        player_off = l_a
+      print('{0} is coming on for {1}.'.format(player_on, player_off))
+      self.playing.remove(player_off)
+      self.subs.remove(player_on)
+      self.playing.append(player_on)
+      self.formations.ammend(player_off.lineup, player_on.lineup)
+      self.update_playing_positions()
+      print(self)
+      return True
     else:
-      player_on = l_b
-    if l_a is None:
-      l_a = input('substitute player coming off {(last, first):')
-      if ',' in l_a:
-        f = l_a.split(',')[1].strip()
-        l = l_a.split(',')[0].strip()
-      else:
-        print('No comma detected in "{0}". Please use (last, first) format'.format(l_a))
-        return None
-      players = [x for x in self.playing if (x.first_name == f) and (x.last_name == l)]
-      if len(players) > 0:
-        player_off = players[0]
-      else:
-        print('Player "{0}" not found in currently playing. Please check player is currently on.'.format(l_a))
-        return None
-    else:
-      player_off = l_a
-    print('{0} is coming on for {1}.'.format(player_on, player_off))
-    self.playing.remove(player_off)
-    self.subs.remove(player_on)
-    self.playing.append(player_on)
-    self.formations.ammend(player_off.lineup, player_on.lineup)
-    self.update_playing_positions()
-    print(self)
-    return True
+      print('{0} substitutes already used'.format(subs_used))
 
   def choose_player(self, p0, p1, p2):
     p = random.random()

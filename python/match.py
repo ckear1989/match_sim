@@ -100,6 +100,18 @@ class Match():
       time.sleep(time_step)
     print('{0} And that\'s the end of the half'.format(self.stopclock_time))
 
+  def abandon(self):
+    n_team_a = len(self.team_a.playing)
+    n_team_b = len(self.team_b.playing)
+    if (n_team_a < 11) or (n_team_b < 11):
+      self.team_a.reset_match_stats()
+      self.team_b.reset_match_stats()
+      if n_team_a < 11:
+        self.team_b.points = 1
+      if n_team_b < 11:
+        self.team_a.points = 1
+      self.time = 80*60e3
+
   def lineup(self):
     self.team_a.lineup_check()
     self.team_b.lineup_check()
