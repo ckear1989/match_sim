@@ -85,7 +85,7 @@ class Player():
       if self.suspension.return_date <= current_date:
         self.reset_suspension()
 
-  def reset_injury(self):
+  def reset_suspension(self):
     self.suspension.reset()
 
 if __name__=="__main__":

@@ -133,7 +133,7 @@ class MatchTeam(Team):
       if lineups.count(i) == 1:
         p = [x for x in self if x.lineup == i][0]
         if p.injury.status is not None:
-          player_on = [x for x in self if x.position == player.position and x.lineup not in range(1, 22)]
+          player_on = [x for x in self if x.position == p.position and x.lineup not in range(1, 22)]
           if len(player_on) > 0:
             random.choice(player_on).lineup = p.lineup
             p.lineup = 0
@@ -145,7 +145,7 @@ class MatchTeam(Team):
             else:
               raise Exception('team {0} unable to fill lineup due to injury to {1}\n{2}'.format(self.name, p, self))
         if p.suspension.status is not None:
-          player_on = [x for x in self if x.position == player.position and x.lineup not in range(1, 22)]
+          player_on = [x for x in self if x.position == p.position and x.lineup not in range(1, 22)]
           if len(player_on) > 0:
             random.choice(player_on).lineup = p.lineup
             p.lineup = 0
@@ -226,7 +226,7 @@ class MatchTeam(Team):
       self.playing.remove(player_off)
       self.subs.remove(player_on)
       self.playing.append(player_on)
-      self.formations.ammend(player_off.lineup, player_on.lineup)
+      self.formation.ammend(player_off.lineup, player_on.lineup)
       self.update_playing_positions()
       print(self)
       return True
@@ -234,16 +234,19 @@ class MatchTeam(Team):
       print('{0} substitutes already used'.format(subs_used))
 
   def choose_player(self, p0, p1, p2):
-    p = random.random()
-    if p < p0:
-      player = random.choice(self.goalkeepers)
-    elif p < (p0+p1):
-      player = random.choice(self.defenders)
-    elif p < (p0+p1+p2):
-      player = random.choice(self.midfielders)
-    else:
-      player = random.choice(self.forwards)
-    return player
+    try:
+      p = random.random()
+      if p < p0:
+        player = random.choice(self.goalkeepers)
+      elif p < (p0+p1):
+        player = random.choice(self.defenders)
+      elif p < (p0+p1+p2):
+        player = random.choice(self.midfielders)
+      else:
+        player = random.choice(self.forwards)
+      return player
+    except IndexError:
+      return self.choose_player(p0, p1, p2)
 
 if __name__=="__main__":
   team = Team('a', 'a', control=True)

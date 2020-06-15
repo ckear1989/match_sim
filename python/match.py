@@ -28,8 +28,8 @@ def time_until_next_event(mean=60, sd=10):
 
 class Match():
   def __init__(self, team_a, team_b, date, silent, extra_time_required):
-    self.team_a = MatchTeam(team_a)
-    self.team_b = MatchTeam(team_b)
+    self.team_a = team_a
+    self.team_b = team_b
     self.date = date
     self.silent = silent
     self.extra_time_required = extra_time_required

@@ -43,10 +43,6 @@ class Season():
       elif 'cup' in self.next_team_fixture[2]:
         ps += 'cup bracket:\n{0}\n'.format(self.cup.bracket_p)
         ps += 'cup scorers table:\n{0}\n'.format(self.cup.scorers_table)
-    else:
-      if 'cup' in self.next_fixture[2]:
-        ps += 'cup bracket:\n{0}\n'.format(self.cup.bracket_p)
-        ps += 'cup scorers table:\n{0}\n'.format(self.cup.scorers_table)
     ps += 'current training schedule:\n{0}\n'.format(self.teams[self.team].training)
     return ps
 
@@ -86,6 +82,7 @@ class Season():
   def update_next_fixture(self):
     self.get_fixtures()
     remaining_fixtures = [x for x in self.fixtures.keys() if x > self.current_date]
+    print(remaining_fixtures)
     remaining_team_fixtures = [x for x in remaining_fixtures if any(self.team in y for y in self.fixtures[x])]
     self.next_fixture_date = None
     self.last_fixture_date = None
@@ -163,7 +160,8 @@ class Season():
     self.teams = {}
     for team in default.poss_teams:
       if team == self.team:
-        self.teams[team] = MatchTeam(Team(team, self.manager, control=True))
+        # debug test self.teams[team] = MatchTeam(Team(team, self.manager, control=True))
+        self.teams[team] = MatchTeam(Team(team, self.manager, control=False))
       else:
         self.teams[team] = MatchTeam(Team(team, 'jim'))
         self.teams[team].training = Training(self.current_date, [0, 2, 4], ['fi', 'pa', 'sh'])
@@ -251,7 +249,11 @@ class Season():
         match.team_a.league_points += 1
         match.team_b.league_points += 1
     elif compo.form == 'cup':
-      current_round = self.cup.get_current_round()
+      current_round = compo.get_current_round()
+      print(current_round)
+      print(compo.bracket_p)
+      print(compo.fixtures)
+      print(self.fixtures)
       if match.team_a.score > match.team_b.score:
         compo.update_bracket(self.current_date, (current_round+1), match.team_a.name)
       elif match.team_a.score < match.team_b.score:
@@ -312,7 +314,8 @@ class Season():
   def process_fixtures_daily(self):
     if self.current_date == self.next_fixture_date:
       for next_match_t in self.fixtures[self.current_date]:
-        silent = False
+        silent = True
+        # silent = False
         if self.team not in next_match_t:
           silent = True
           print('processing match {0}...'.format(next_match_t))
@@ -322,6 +325,7 @@ class Season():
         next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent, extra_time_required)
         next_match.play()
         self.process_match_result(next_match, next_match_t[2])
+        self.update_next_fixture()
 
   def settings(self):
     pass

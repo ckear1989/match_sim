@@ -12,7 +12,7 @@ class Suspension():
     if self.status is None:
       return ''
     else:
-      ps = '{0} suspension.\nReturn date {2}.'.format(self.status, self.return_date)
+      ps = '{0} suspension.\nReturn date {1}.'.format(self.status, self.return_date)
       return ps
 
   def gain(self, status, current_date):

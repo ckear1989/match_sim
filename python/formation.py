@@ -35,19 +35,19 @@ class Formation():
     self.goalkeeper_lineups = [1]
     i = 2
     j = self.pos[0] + i
-    self.full_back_lineups = range(i, j)
+    self.full_back_lineups = list(range(i, j))
     i = j
     j = self.pos[1] + i
-    self.half_back_lineups = range(i, j)
+    self.half_back_lineups = list(range(i, j))
     i = j
     j = self.pos[2] + i
-    self.midfielder_lineups = range(i, j)
+    self.midfielder_lineups = list(range(i, j))
     i = j
     j = self.pos[3] + i
-    self.half_forward_lineups = range(i, j)
+    self.half_forward_lineups = list(range(i, j))
     i = j
     j = self.pos[4] + i
-    self.full_forward_lineups = range(i, j)
+    self.full_forward_lineups = list(range(i, j))
 
   def ammend(self, off, on):
     if off in self.goalkeeper_lineups:
