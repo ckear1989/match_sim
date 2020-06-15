@@ -37,10 +37,10 @@ class Match():
     self.silent = silent
     self.extra_time_required = extra_time_required
     self.time = 0
-    self.stopclock_time = stopclock(self.time*1e-0)
-    self.first_half_length = 35 * 60e0
-    self.second_half_length = 35 * 60e0
-    self.get_progressbar(80*60e0)
+    self.stopclock_time = stopclock(self.time)
+    self.first_half_length = 35 * 60
+    self.second_half_length = 35 * 60
+    self.get_progressbar(80*60)
     random.seed()
 
   def __repr__(self):
@@ -72,7 +72,7 @@ class Match():
     print('{0} {1} minutes added time indicated by the linesman.'.format(self.stopclock_time, at))
     at = float(at)
     at += np.random.normal(0.5, 0.1)
-    at = at * 60e0
+    at = at * 60
     return at
 
   def play_half(self, end_time, time_step, tane=time_until_next_event()):
@@ -80,20 +80,20 @@ class Match():
     at = 0
     while self.time < (end_time + at):
       self.time += 1
-      if self.time % 1e0 == 0:
-        self.stopclock_time = stopclock(self.time*1e-0)
+      if self.time % 1 == 0:
+        self.stopclock_time = stopclock(self.time)
         printc(self.stopclock_time)
         if keyboard.is_pressed('space') is True:
           self.pause()
-      if self.time % 60e0 == 0:
+      if self.time % 60 == 0:
         if self.silent is True:
           self.progressbar.update(self.time)
         else:
           print(self.stopclock_time)
         self.update_team_condition()
-      if self.time % (34 * 60e0) == 0:
+      if self.time % (34 * 60) == 0:
         at = self.added_time()
-      if self.time == (tane*1e0):
+      if self.time == tane:
         self.event()
         tune = time_until_next_event()
         tane += tune
@@ -111,7 +111,7 @@ class Match():
         self.team_b.points = 1
       if n_team_b < 11:
         self.team_a.points = 1
-      self.time = 80*60e0
+      self.time = 80*60
 
   def lineup(self):
     self.team_a.lineup_check()
@@ -158,16 +158,16 @@ class Match():
     if self.extra_time_required is True:
       if self.team_a.score == self.team_b.score:
         print('The match is going to extra time.')
-        self.get_progressbar(100*60e0)
+        self.get_progressbar(100*60)
         self.half_time()
-        self.time = 70 * 60e0
-        self.stopclock_time = stopclock(self.time*1e0)
-        tane = (self.time*1e-0) + time_until_next_event()
-        self.play_half(self.time + (10*60e0), time_step, tane=tane)
+        self.time = 70 * 60
+        self.stopclock_time = stopclock(self.time)
+        tane = (self.time) + time_until_next_event()
+        self.play_half(self.time + (10*60), time_step, tane=tane)
         self.half_time()
-        self.time = (70 * 60e0) + (10*60e1)
-        tane = (self.time*1e-0) + time_until_next_event()
-        self.play_hailf(self.time + (10*60e0), time_step, tane=tane)
+        self.time = (70 * 60) + (10*60)
+        tane = (self.time) + time_until_next_event()
+        self.play_hailf(self.time + (10*60), time_step, tane=tane)
         self.full_time()
         if self.team_a.score == self.team_b.score:
           self.shootout()
@@ -179,7 +179,7 @@ class Match():
     self.play_half(self.first_half_length, time_step)
     self.half_time()
     second_half_end = self.first_half_length + self.second_half_length
-    second_half_tane = (self.first_half_length*1e-0) + time_until_next_event()
+    second_half_tane = (self.first_half_length) + time_until_next_event()
     self.play_half(second_half_end, time_step, tane=second_half_tane)
     self.full_time()
     self.extra_time(time_step)
@@ -193,9 +193,9 @@ class Match():
     print(self.team_b.scorer_table)
 
   def half_time(self):
-    self.time = 35 * 60e0
-    self.first_half_length = 35 * 60e0
-    self.stopclock_time = stopclock(self.time*1e-0)
+    self.time = 35 * 60
+    self.first_half_length = 35 * 60
+    self.stopclock_time = stopclock(self.time)
     self.get_scorers()
     self.pause()
 
@@ -215,23 +215,10 @@ class Match():
 
 if __name__ == "__main__":
 
-  import cProfile
-  import pstats
   team_a = Team('a', 'a')
   team_b = Team('b', 'b')
+  match = Match(team_a, team_b, datetime.date(2020, 1, 1), False, False)
+  match.play()
   match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)
-  cProfile.run('match.play();print(match)', 'profile4.txt')
-  p0 = pstats.Stats('profile0.txt')
-  p0.strip_dirs().sort_stats('time').print_stats(20)
-  p1 = pstats.Stats('profile1.txt')
-  p1.strip_dirs().sort_stats('time').print_stats(20)
-  p2 = pstats.Stats('profile2.txt')
-  p2.strip_dirs().sort_stats('time').print_stats(20)
-  p3 = pstats.Stats('profile3.txt')
-  p3.strip_dirs().sort_stats('time').print_stats(20)
-  p4 = pstats.Stats('profile4.txt')
-  p4.strip_dirs().sort_stats('time').print_stats(20)
-  # match.play()
-  # match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)
-  # match.play()
+  match.play()
 
