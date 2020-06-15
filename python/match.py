@@ -2,7 +2,6 @@
 import datetime
 import random
 import time
-import math
 import copy
 import sys
 import os
@@ -22,8 +21,6 @@ def stopclock(a):
   t = datetime.timedelta(seconds=a)
   s = t.seconds
   m, s = divmod(s, 60)
-  # m = int(math.floor(s / 60))
-  # s = s - 60 * m
   return '%02d:%02d' % (m, s)
 
 def time_until_next_event(mean=60, sd=10):
@@ -215,8 +212,8 @@ class Match():
 
 if __name__ == "__main__":
 
-  team_a = Team('a', 'a')
-  team_b = Team('b', 'b')
+  team_a = MatchTeam(Team('a', 'a'))
+  team_b = MatchTeam(Team('b', 'b'))
   match = Match(team_a, team_b, datetime.date(2020, 1, 1), False, False)
   match.play()
   match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)

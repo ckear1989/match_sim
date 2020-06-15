@@ -1,6 +1,7 @@
 
 import default
 from team import Team
+from match_team import MatchTeam
 from match import Match
 from training import Training
 from competition import Competition
@@ -10,7 +11,6 @@ import datetime
 import random
 import dill as pickle
 import copy
-from prettytable import PrettyTable
 
 class Season():
   def __init__(self, team_name, manager_name):
@@ -163,9 +163,9 @@ class Season():
     self.teams = {}
     for team in default.poss_teams:
       if team == self.team:
-        self.teams[team] = Team(team, self.manager, control=True)
+        self.teams[team] = MatchTeam(Team(team, self.manager, control=True))
       else:
-        self.teams[team] = Team(team, 'jim')
+        self.teams[team] = MatchTeam(Team(team, 'jim'))
         self.teams[team].training = Training(self.current_date, [0, 2, 4], ['fi', 'pa', 'sh'])
 
   def reset_players(self):

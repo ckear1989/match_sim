@@ -121,9 +121,9 @@ class MatchTeam(Team):
     else:
       if self.control is True:
         sub_made = False
-      while sub_made is not True:
-        print('{0} has {1} injured his {2} and needs to be substituted.'.format(player, player.injury.status, player.injury.part))
-        sub_made = self.substitute(l_a=player)
+        while sub_made is not True:
+          print('{0} has {1} injured his {2} and needs to be substituted.'.format(player, player.injury.status, player.injury.part))
+          sub_made = self.substitute(l_a=player)
       else:
         self.auto_sub(player)
 
