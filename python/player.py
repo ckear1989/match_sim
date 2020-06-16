@@ -27,6 +27,8 @@ class Player():
     self.goals = 0
     self.points = 0
     self.score = 0
+    self.scoref = ''
+    self.assists = 0
     self.position = random.choice(['GK', 'FB', 'HB', 'MI', 'HF', 'FF'])
     self.lineup = 0
     self.minutes = 0
@@ -62,6 +64,7 @@ class Player():
 
   def update_score(self):
     self.score = (self.goals * 3) + self.points
+    self.scoref = '{0}-{1} ({2})'.format(self.goals, self.points, self.score)
 
   def format_score(self):
     return '{0}-{1} ({2})'.format(self.goals, self.points, self.score)

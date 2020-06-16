@@ -201,18 +201,21 @@ class Competition():
   def get_players(self):
     self.players = [copy.deepcopy(player) for team in self.teams for player in self.teams[team].players]
 
-  def get_scorers_table(self):
-    scorers = [x for x in self.players if x.score > 0]
+  def get_stat_table(self, stat, sortby=None):
+    players = [x for x in self.players if x.__dict__[sortby] > 0]
     x = PrettyTable()
-    x.add_column('player', scorers)
-    x.add_column('team', [x.team for x in scorers])
-    x.add_column('rscore', [x.score for x in scorers])
-    x.add_column('score', ['{0}-{1} ({2})'.format(x.goals, x.points, x.score) for x in scorers])
-    x.sortby = 'rscore'
+    x.add_column('top {0}'.format(stat), players)
+    x.add_column('team', [x.team for x in players])
+    x.add_column(stat, [x.__dict__[stat] for x in players])
+    x.add_column(sortby, [x.__dict__[sortby] for x in players])
+    x.sortby = stat
     x.reversesort = True
-    x.title = '%s top scorers' % self.name
-    x = x.get_string(fields=['player', 'team', 'score'], end=10)
-    self.scorers_table = x
+    x.title = '{0} top {1}'.format(self.name, stat)
+    x = x.get_string(fields=['top {0}'.format(stat), 'team', stat], end=10)
+    return(x)
+
+  def get_scorers_table(self):
+    self.scorers_table = self.get_stat_table('scoref', 'score')
 
 if __name__=="__main__":
 
