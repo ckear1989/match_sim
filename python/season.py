@@ -6,6 +6,7 @@ from match import Match
 from training import Training
 from competition import Competition
 from settings import Settings
+from utils import print_side_by_side
 
 import pyfiglet
 from prettytable import PrettyTable
@@ -16,27 +17,6 @@ import dill as pickle
 import copy
 from progressbar import Counter, Timer, ProgressBar
 import time
-
-# https://stackoverflow.com/questions/53401383/how-to-print-two-strings-large-text-side-by-side-in-python
-def print_side_by_side(a, b, size=60, space=4):
-  pstr = ''
-  astr0 = str(a).split('\n')
-  bstr0 = str(b).split('\n')
-  for i in range(max(len(astr0), len(bstr0))):
-    if len(astr0) > i:
-      astr = astr0[i]
-    else:
-      astr = ''
-    if len(bstr0) > i:
-      bstr = bstr0[i]
-    else:
-      bstr = ''
-    while astr or bstr:
-      pstr += astr[:size].ljust(size) + " " * space + bstr[:size]
-      astr = astr[size:]
-      bstr = bstr[size:]
-    pstr += '\n'
-  return pstr
 
 def relegation(league):
   min_league_points = min([x.league_points for x in league.teams.values()])
@@ -76,11 +56,11 @@ class Season():
     ps += '{0}\n'.format(self.teams[self.team])
     if self.next_team_fixture is not None:
       if 'league' in self.next_team_fixture[2]:
-        ps += print_side_by_side(self.team_league.league_table, self.team_league.scorers_table)
+        ps += '{0}\n'.format(self.team_league)
       elif 'cup' in self.next_team_fixture[2]:
-        ps += print_side_by_side(self.cup.bracket_p, self.cup.scorers_table)
+        ps += '{0}\n'.format(sef.cup)
     else:
-      ps += print_side_by_side(self.cup.bracket_p, self.cup.scorers_table)
+      ps += '{0}\n'.format(sef.cup)
     return ps
 
   def get_upcoming_events(self):
@@ -357,7 +337,7 @@ class Season():
       for player in compo.teams[team]:
         compo.players[i].points += player.points
         compo.players[i].goals += player.goals
-        compo.players[i].score += player.score
+        compo.players[i].update_score()
         i += 1
       self.teams[team].reset_match_stats()
       compo.teams[team].reset_match_stats()
@@ -421,13 +401,15 @@ class Season():
 
   def process_match_tuple(self, match_t):
     silent = False
+    time_step = 1/self.settings.match_speed
     if self.team not in match_t:
       silent = True
+      time_step = 0
     extra_time_required = False
     if 'replay' in match_t[2]:
       extra_time_required = True
     match = Match(self.teams[match_t[0]], self.teams[match_t[1]], self.current_date, silent, extra_time_required)
-    match.play()
+    match.play(time_step)
     self.process_match_result(match, match_t[2])
     self.update_next_fixture()
 

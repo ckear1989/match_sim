@@ -4,12 +4,13 @@ import datetime
 from prettytable import PrettyTable
 from bracket import bracket
 from itertools import permutations, combinations
-
-import default
-from team import Team
 import copy
 from io import StringIO
 import sys
+
+import default
+from team import Team
+from utils import print_side_by_side
 
 def get_sundays(start_date):
   sundays = []
@@ -47,18 +48,16 @@ class Competition():
     self.get_scorers_table()
 
   def __repr__(self):
-    ps = '{0}\n'.format(self.fixtures)
-    ps += '{0}\n'.format(self.next_fixture_date)
-    ps += '{0}\n'.format(self.last_fixture_date)
-    if 'league' in self.form:
-      ps += '{0}\n'.format(self.league_table)
-    if 'cup' in self.form:
-      ps += '{0}\n'.format(self.bracket_p)
-    ps += '{0}\n'.format(self.scorers_table)
-    return ps
-
-  def __str__(self):
-    return self.__repr__()
+    if self.form in ['rr', 'drr']:
+      return print_side_by_side(print_side_by_side(
+        self.league_table,
+        self.scorers_table),
+        self.overall_table)
+    elif self.form == 'cup':
+      return print_side_by_side(print_side_by_side(
+          self.bracket_p,
+          self.scorers_table),
+          self.overall_table)
 
   def update_next_fixture(self, current_date):
     remaining_fixtures = [x for x in self.fixtures.keys() if x > current_date]
@@ -201,21 +200,21 @@ class Competition():
   def get_players(self):
     self.players = [copy.deepcopy(player) for team in self.teams for player in self.teams[team].players]
 
-  def get_stat_table(self, stat, sortby=None):
-    players = [x for x in self.players if x.__dict__[sortby] > 0]
+  def get_stat_table(self, stat, sortby=None, n=10):
+    if sortby is None:
+      sortby = stat
+    players = sorted([x for x in self.players if x.__dict__[sortby] > 0], key=lambda x: -x.__dict__[sortby])
     x = PrettyTable()
-    x.add_column('top {0}'.format(stat), players)
+    x.add_column('player', players)
     x.add_column('team', [x.team for x in players])
     x.add_column(stat, [x.__dict__[stat] for x in players])
-    x.add_column(sortby, [x.__dict__[sortby] for x in players])
-    x.sortby = stat
-    x.reversesort = True
     x.title = '{0} top {1}'.format(self.name, stat)
-    x = x.get_string(fields=['top {0}'.format(stat), 'team', stat], end=10)
+    x = x.get_string(end=n)
     return(x)
 
   def get_scorers_table(self):
-    self.scorers_table = self.get_stat_table('scoref', 'score')
+    self.scorers_table = self.get_stat_table('score', 'scoren')
+    self.overall_table = self.get_stat_table('overall')
 
 if __name__=="__main__":
 

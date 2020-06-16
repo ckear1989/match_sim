@@ -26,8 +26,8 @@ class Player():
     self.get_overall()
     self.goals = 0
     self.points = 0
-    self.score = 0
-    self.scoref = ''
+    self.scoren = 0
+    self.score = ''
     self.assists = 0
     self.position = random.choice(['GK', 'FB', 'HB', 'MI', 'HF', 'FF'])
     self.lineup = 0
@@ -63,11 +63,8 @@ class Player():
     self.cards = []
 
   def update_score(self):
-    self.score = (self.goals * 3) + self.points
-    self.scoref = '{0}-{1} ({2})'.format(self.goals, self.points, self.score)
-
-  def format_score(self):
-    return '{0}-{1} ({2})'.format(self.goals, self.points, self.score)
+    self.scoren = (self.goals * 3) + self.points
+    self.score = '{0}-{1} ({2})'.format(self.goals, self.points, self.scoren)
 
   def gain_injury(self, current_date):
     self.injury.gain(current_date)

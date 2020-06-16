@@ -148,17 +148,17 @@ class Team():
     x.add_column('condition', [x.condition for x in self])
     x.add_column('injury', [x.injury for x in self])
     x.add_column('minutes', [x.minutes for x in self])
-    x.add_column('score', [x.format_score() for x in self])
+    x.add_column('score', [x.score for x in self])
     x.sortby = 'lineup'
     x.title = '{0} {1} {2}'.format(self.name, self.manager, self.overall)
     x.float_format = '5.2'
     self.player_table = x
 
   def get_scorer_table(self):
-    scorers = [i for i in sorted(self, key=lambda x: -x.score) if i.score > 0]
+    scorers = [i for i in sorted(self, key=lambda x: -x.scoren) if i.scoren > 0]
     x = PrettyTable()
     x.add_column('%s scorers' % self.name, scorers)
-    x.add_column('score', ['{0}-{1} ({2})'.format(x.goals, x.points, x.score) for x in scorers])
+    x.add_column('score', ['{0}-{1} ({2})'.format(x.goals, x.points, x.scoren) for x in scorers])
     self.scorer_table = x
 
   def get_overall(self):

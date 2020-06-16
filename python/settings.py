@@ -10,11 +10,14 @@ class Settings():
     with open(self.defaults_file, 'r') as f:
       self.defaults = json.load(f)
     self.autosave = self.defaults['autosave']
+    self.match_speed = self.defaults['match_speed']
 
   def update_setting(self, setting, value):
     if setting == 'autosave':
       self.autosave = value
-      self.defaults['autosave'] = value
+      # self.defaults['autosave'] = value
+    if setting == 'match_speed':
+      self.match_speed = value
     # with open(self.defaults_file, 'w') as f:
     #   json.dump(self.defaults, f)
 
@@ -22,6 +25,7 @@ class Settings():
     print(
       'settings',
       'autosave: %r' % self.autosave,
+      'match_speed: %d' % self.match_speed,
       sep=nl
     )
     setting = input()
@@ -29,6 +33,8 @@ class Settings():
       self.update_setting('autosave', False)
     elif setting == 'autosave: True':
       self.update_setting('autosave', True)
+    elif setting == 'match_speed: 30x':
+      self.update_setting('match_speed', 30)
 
 def test_settings():
   s = Settings()
