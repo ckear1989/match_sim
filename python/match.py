@@ -5,7 +5,6 @@ import time
 import copy
 import sys
 import os
-import progressbar
 import numpy as np
 import keyboard
 import pyfiglet
@@ -37,7 +36,7 @@ class Match():
     self.stopclock_time = stopclock(self.time)
     self.first_half_length = 35 * 60
     self.second_half_length = 35 * 60
-    self.get_progressbar(80*60)
+    self.get_output()
     random.seed()
 
   def __repr__(self):
@@ -86,9 +85,7 @@ class Match():
         if keyboard.is_pressed('space') is True:
           self.pause()
       if self.time % 60 == 0:
-        if self.silent is True:
-          self.progressbar.update(self.time)
-        else:
+        if self.silent is False:
           print(self.stopclock_time)
         self.update_team_condition()
       if self.time % (34 * 60) == 0:
@@ -131,11 +128,6 @@ class Match():
     banner = pyfiglet.figlet_format('{0} {1}\n'.format(self.get_score().replace('Score is now ', ''), self.date))
     print(banner)
 
-  def end_progressbar(self):
-    if self.silent is True:
-      sys.stdout = self.stdout
-      self.progressbar.finish()
-
   def shootout(self):
     p0 = random.random()
     if p0 < 0.5:
@@ -145,20 +137,20 @@ class Match():
       print('{0} wins the shootout.'.format(self.team_b.name))
       self.team_b.score += 1
 
-  def get_progressbar(self, end_time):
+  def get_output(self):
     if self.silent is True:
-      self.progressbar = progressbar.ProgressBar(maxval=end_time, \
-        widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-      self.progressbar.start()
       self.stdout = sys.stdout
       f = open(os.devnull, 'w')
       sys.stdout = f
+
+  def reset_output(self):
+    if self.silent is True:
+      sys.stdout = self.stdout
 
   def extra_time(self, time_step):
     if self.extra_time_required is True:
       if self.team_a.score == self.team_b.score:
         print('The match is going to extra time.')
-        self.get_progressbar(100*60)
         self.half_time()
         self.time = 70 * 60
         self.stopclock_time = stopclock(self.time)
@@ -184,7 +176,7 @@ class Match():
     self.full_time()
     self.extra_time(time_step)
     self.banner_end()
-    self.end_progressbar()
+    self.reset_output()
 
   def get_scorers(self):
     self.team_a.get_scorer_table()

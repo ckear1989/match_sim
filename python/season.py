@@ -14,6 +14,8 @@ import calendar
 import random
 import dill as pickle
 import copy
+from progressbar import Counter, Timer, ProgressBar
+import time
 
 def relegation(league):
   min_league_points = min([x.league_points for x in league.teams.values()])
@@ -268,10 +270,15 @@ class Season():
     for f in self.league4.fixtures.keys():
       if f in self.fixtures.keys():
         self.fixtures[f] = self.fixtures[f] + self.league4.fixtures[f]
+    for adate in self.fixtures.keys():
+      self.fixtures[adate].sort(key=lambda x: self.team in x)
 
   def save(self):
-    with open(self.save_file, 'wb') as f:
-      pickle.dump(self, f)
+    widgets = ['Saving game...', Timer()]
+    pbar = ProgressBar(widgets=widgets)
+    for i in pbar([0]):
+      with open(self.save_file, 'wb') as f:
+        pickle.dump(self, f)
 
   def cont(self):
     self.banner()
@@ -374,18 +381,34 @@ class Season():
 
   def process_fixtures_daily(self):
     if self.current_date == self.next_fixture_date:
-      for next_match_t in self.fixtures[self.current_date]:
-        silent = False
-        if self.team not in next_match_t:
-          silent = True
-          print('processing match {0}...'.format(next_match_t))
-        extra_time_required = False
-        if 'replay' in next_match_t[2]:
-          extra_time_required = True
-        next_match = Match(self.teams[next_match_t[0]], self.teams[next_match_t[1]], self.current_date, silent, extra_time_required)
-        next_match.play()
-        self.process_match_result(next_match, next_match_t[2])
-        self.update_next_fixture()
+      fixtures = self.fixtures[self.current_date]
+      if len(fixtures) > 1:
+        if self.team in fixtures[-1]:
+          widgets = ['Processed: ', Counter(), ' matches (', Timer(), ')']
+          pbar = ProgressBar(widgets=widgets)
+          for match_t in pbar(fixtures[:-1]):
+            self.process_match_tuple(match_t)
+          time.sleep(0.1)
+          next_match_t = fixtures[-1]
+          self.process_match_tuple(next_match_t)
+        else:
+          for match_t in fixtures:
+            self.process_match_tuple(match_t)
+      else:
+        for match_t in fixtures:
+          self.process_match_tuple(match_t)
+
+  def process_match_tuple(self, match_t):
+    silent = False
+    if self.team not in match_t:
+      silent = True
+    extra_time_required = False
+    if 'replay' in match_t[2]:
+      extra_time_required = True
+    match = Match(self.teams[match_t[0]], self.teams[match_t[1]], self.current_date, silent, extra_time_required)
+    match.play()
+    self.process_match_result(match, match_t[2])
+    self.update_next_fixture()
 
   def stats(self):
     pass

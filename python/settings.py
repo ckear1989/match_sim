@@ -15,8 +15,8 @@ class Settings():
     if setting == 'autosave':
       self.autosave = value
       self.defaults['autosave'] = value
-    with open(self.defaults_file, 'w') as f:
-      json.dump(self.defaults, f)
+    # with open(self.defaults_file, 'w') as f:
+    #   json.dump(self.defaults, f)
 
   def get_settings(self):
     print(
