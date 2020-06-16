@@ -17,6 +17,27 @@ import copy
 from progressbar import Counter, Timer, ProgressBar
 import time
 
+# https://stackoverflow.com/questions/53401383/how-to-print-two-strings-large-text-side-by-side-in-python
+def print_side_by_side(a, b, size=60, space=4):
+  pstr = ''
+  astr0 = str(a).split('\n')
+  bstr0 = str(b).split('\n')
+  for i in range(max(len(astr0), len(bstr0))):
+    if len(astr0) > i:
+      astr = astr0[i]
+    else:
+      astr = ''
+    if len(bstr0) > i:
+      bstr = bstr0[i]
+    else:
+      bstr = ''
+    while astr or bstr:
+      pstr += astr[:size].ljust(size) + " " * space + bstr[:size]
+      astr = astr[size:]
+      bstr = bstr[size:]
+    pstr += '\n'
+  return pstr
+
 def relegation(league):
   min_league_points = min([x.league_points for x in league.teams.values()])
   league_rel = [x for x in league.teams.values() if x.league_points == min_league_points]
@@ -51,21 +72,16 @@ class Season():
     self.settings = Settings()
 
   def __repr__(self):
-    ps = 'current date: {0}\nnext match date: {1}\n'.format(self.current_date, self.next_team_fixture_date)
+    ps = '{0}\n'.format(self.upcoming_events)
     ps += '{0}\n'.format(self.teams[self.team])
-    ps += 'next fixture opponent:{0}\n'.format(self.next_team_fixture_opponent)
-    ps += 'upcoming events:\n{0}\n'.format(self.upcoming_events)
     if self.next_team_fixture is not None:
       if 'league' in self.next_team_fixture[2]:
-        ps += '{0}\n'.format(self.team_league.league_table)
-        ps += '{0}\n'.format(self.team_league.scorers_table)
+        ps += print_side_by_side(self.team_league.league_table, self.team_league.scorers_table)
       elif 'cup' in self.next_team_fixture[2]:
-        ps += '{0}\n'.format(self.cup.bracket_p)
-        ps += '{0}\n'.format(self.cup.scorers_table)
+        ps += print_side_by_side(self.cup.bracket_p, self.cup.scorers_table)
+    else:
+      ps += print_side_by_side(self.cup.bracket_p, self.cup.scorers_table)
     return ps
-
-  def __str__(self):
-    return self.__repr__()
 
   def get_upcoming_events(self):
     #Color
