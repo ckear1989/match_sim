@@ -5,6 +5,7 @@ from match_team import MatchTeam
 from match import Match
 from training import Training
 from competition import Competition
+from settings import Settings
 
 import pyfiglet
 from prettytable import PrettyTable
@@ -45,6 +46,7 @@ class Season():
     self.update_league()
     self.update_cup()
     self.get_upcoming_events()
+    self.settings = Settings()
 
   def __repr__(self):
     ps = 'current date: {0}\nnext match date: {1}\n'.format(self.current_date, self.next_team_fixture_date)
@@ -283,6 +285,8 @@ class Season():
         self.skip()
       cmd = input('choose option:\n%s\n' % ' '.join(options))
       self.process(cmd)
+      if self.settings.autosave is True:
+        self.save()
 
   def process_match_result(self, match, comp):
     compo = [x for x in [self.league1, self.league2, self.league3, self.league4, self.cup] if x.name in comp]
@@ -383,9 +387,6 @@ class Season():
         self.process_match_result(next_match, next_match_t[2])
         self.update_next_fixture()
 
-  def settings(self):
-    pass
-
   def stats(self):
     pass
 
@@ -393,7 +394,7 @@ class Season():
     if cmd in ['sa', 'save']:
       self.save()
     if cmd in ['se', 'settings']:
-      self.settings()
+      self.settings.get_settings()
     if cmd in ['st', 'stats']:
       self.stats()
     elif cmd in ['m', 'manage']:

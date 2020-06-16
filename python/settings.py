@@ -27,6 +27,8 @@ class Settings():
     setting = input()
     if setting == 'autosave: False':
       self.update_setting('autosave', False)
+    elif setting == 'autosave: True':
+      self.update_setting('autosave', True)
 
 def test_settings():
   s = Settings()

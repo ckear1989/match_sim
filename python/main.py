@@ -2,7 +2,6 @@
 import os
 import pickle
 
-from settings import Settings
 from team import Team
 from season import Season
 import default
@@ -11,12 +10,12 @@ nl = '\n'
 cl = 2 * (chr(27) + '[2J')
 clear = lambda: os.system('cls' if os.name == 'nt' else 'clear')
 
-def home_screen(settings):
+def home_screen():
   print('hello')
-  options = ['(n)ew', '(l)oad', '(s)ettings', '(e)xit']
+  options = ['(n)ew', '(l)oad', '(e)xit']
   a = input('choose option:\n{0}\n'.format(' '.join(options)))
   clear()
-  choose_option(a, settings)
+  choose_option(a)
 
 def new_game():
   options = ['(e)asy', '(m)edium', '(h)ard']
@@ -40,13 +39,11 @@ def load_game():
       season.save()
       season.cont()
 
-def choose_option(txt, settings):
+def choose_option(txt):
   if txt in ['n', 'new']:
     new_game()
   elif txt in ['l', 'load']:
     load_game()
-  elif txt in ['s', 'settings']:
-    settings.get_settings()
   elif txt in ['e', 'exit']:
     print('bye')
     exit()
@@ -54,6 +51,5 @@ def choose_option(txt, settings):
 if __name__=="__main__":
 
   while True:
-    settings = Settings()
-    home_screen(settings)
+    home_screen()
 
