@@ -102,7 +102,12 @@ class Season():
     training = ['shooting' if x == 'sh' else x for x in training]
     training = ['fitness' if x == 'fi' else x for x in training]
     i = list(range(-1, 7))
+    today = dates.index(self.current_date)
     dates = [G+str(x)+N if x == self.current_date else str(x) for x in dates]
+    weekdays[today] = '{0}{1}{2}'.format(G, weekdays[today], N)
+    fixtures[today] = '{0}{1}{2}'.format(G, fixtures[today], N)
+    results[today] = '{0}{1}{2}'.format(G, results[today], N)
+    training[today] = '{0}{1}{2}'.format(G, training[today], N)
     x = PrettyTable()
     x.add_column('i', i)
     x.add_column('date', dates)
