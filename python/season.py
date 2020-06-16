@@ -6,7 +6,6 @@ from match import Match
 from training import Training
 from competition import Competition
 from settings import Settings
-from utils import print_side_by_side
 
 import pyfiglet
 from prettytable import PrettyTable
@@ -338,6 +337,7 @@ class Season():
         compo.players[i].points += player.points
         compo.players[i].goals += player.goals
         compo.players[i].update_score()
+        compo.players[i].assists += player.assists
         i += 1
       self.teams[team].reset_match_stats()
       compo.teams[team].reset_match_stats()

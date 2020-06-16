@@ -51,8 +51,7 @@ class Player():
       self.defending,
       self.passing,
       self.shooting,
-      self.fitness,
-      self.condition
+      self.fitness
     ])))
 
   def reset_match_stats(self):
@@ -60,6 +59,7 @@ class Player():
     self.points = 0
     self.update_score()
     self.minutes = 0
+    self.assists = 0
     self.cards = []
 
   def update_score(self):
@@ -87,6 +87,9 @@ class Player():
 
   def reset_suspension(self):
     self.suspension.reset()
+
+  def assist(self):
+    self.assists += 1
 
 if __name__=="__main__":
 

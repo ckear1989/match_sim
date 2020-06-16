@@ -49,15 +49,17 @@ class Competition():
 
   def __repr__(self):
     if self.form in ['rr', 'drr']:
-      return print_side_by_side(print_side_by_side(
+      return print_side_by_side(print_side_by_side(print_side_by_side(
         self.league_table,
         self.scorers_table),
+        self.assist_table),
         self.overall_table)
     elif self.form == 'cup':
-      return print_side_by_side(print_side_by_side(
-          self.bracket_p,
-          self.scorers_table),
-          self.overall_table)
+      return print_side_by_side(print_side_by_side(print_side_by_side(
+        self.bracket_p,
+        self.scorers_table),
+        self.assist_table),
+        self.overall_table)
 
   def update_next_fixture(self, current_date):
     remaining_fixtures = [x for x in self.fixtures.keys() if x > current_date]
@@ -215,6 +217,7 @@ class Competition():
   def get_scorers_table(self):
     self.scorers_table = self.get_stat_table('score', 'scoren')
     self.overall_table = self.get_stat_table('overall')
+    self.assist_table = self.get_stat_table('assists')
 
 if __name__=="__main__":
 

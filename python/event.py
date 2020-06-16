@@ -48,6 +48,7 @@ class Event():
       p0 = random.random()
       if p0 < (self.shooting_player.shooting/100):
         self.shooting_player.goals += 1
+        self.posession_player.assist()
         print('And he scores.', end='')
       else:
         print('But he misses.', end='')
@@ -56,6 +57,7 @@ class Event():
       p0 = random.random()
       if p0 < (self.shooting_player.shooting/100):
         self.shooting_player.points += 1
+        self.posession_player.assist()
         print('And he scores.', end='')
       else:
         print('But he misses.', end='')
