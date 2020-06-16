@@ -149,32 +149,13 @@ class Competition():
   def update_cup_fixtures(self, current_date, roundn):
     nt = '-'*self.bracket.max
     pt = []
-    # sunday = [x for x in get_sundays(current_date) if x > self.start_date]
-    sunday = [x for x in get_sundays(self.start_date) if x > self.start_date][0]
-    # sunday = [x for x in sunday if x > current_date][0]
-    # around = self.bracket.rounds[roundn-1]
-    # print('debug1')
-    # print(around)
+    sunday = get_sundays(self.start_date)[0]
     for around in self.bracket.rounds:
       if len(around) > 1:
         matchups = [[around[i], around[i+1]] for i in range(0, len(around), 2)]
-        # matchups = [m for m in matchups if nt not in m]
-        # print('debug2')
-        # print(matchups)
         if len(matchups) > 0:
-          print('debug3')
-          print(sunday)
-          print(matchups)
           self.fixtures[sunday] = [x + [self.name] for x in matchups]
       sunday = sunday + datetime.timedelta(7)
-    # around = self.bracket.rounds[self.get_current_round()]
-    # sunday = sunday + datetime.timedelta(7)
-    # if len(around) > 1:
-    #   matchups = [[around[i], around[i+1]] for i in range(0, len(around), 2)]
-    #   matchups = [m for m in matchups if nt not in m]
-    #   if len(matchups) > 0:
-    #     if sunday not in self.fixtures.keys():
-    #       self.fixtures[sunday] = [x + [self.name] for x in matchups]
 
   def get_cup_fixtures(self):
     self.bracket = bracket.Bracket(list(self.teams.keys()))
