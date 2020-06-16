@@ -5,9 +5,11 @@ from match_team import MatchTeam
 from match import Match
 from training import Training
 from competition import Competition
-import pyfiglet
 
+import pyfiglet
+from prettytable import PrettyTable
 import datetime
+import calendar
 import random
 import dill as pickle
 import copy
@@ -51,32 +53,46 @@ class Season():
     ps += 'upcoming events:\n{0}\n'.format(self.upcoming_events)
     if self.next_team_fixture is not None:
       if 'league' in self.next_team_fixture[2]:
-        ps += 'league table:\n{0}\n'.format(self.team_league.league_table)
-        ps += 'league scorers table:\n{0}\n'.format(self.team_league.scorers_table)
+        ps += '{0}\n'.format(self.team_league.league_table)
+        ps += '{0}\n'.format(self.team_league.scorers_table)
       elif 'cup' in self.next_team_fixture[2]:
-        ps += 'cup bracket:\n{0}\n'.format(self.cup.bracket_p)
-        ps += 'cup scorers table:\n{0}\n'.format(self.cup.scorers_table)
-    ps += 'current training schedule:\n{0}\n'.format(self.teams[self.team].training)
+        ps += '{0}\n'.format(self.cup.bracket_p)
+        ps += '{0}\n'.format(self.cup.scorers_table)
     return ps
 
   def __str__(self):
     return self.__repr__()
 
   def get_upcoming_events(self):
-    ps = ''
-    for i in range(5):
-      adate = self.current_date + datetime.timedelta(i)
-      events = []
-      if adate in self.fixtures.keys():
-        events += self.fixtures[adate]
-      if adate in self.results.keys():
-        events += self.results[adate]
-      if adate in self.teams[self.team].training.fixtures.keys():
-        events += [self.teams[self.team].training.fixtures[adate]]
-      if events == []:
-        events= ''
-      ps += ('{0} {1}\n'.format(adate, events))
-    self.upcoming_events = ps
+    #Color
+    R = "\033[0;31;40m" #RED
+    G = "\033[0;32;40m" # GREEN
+    Y = "\033[0;33;40m" # Yellow
+    B = "\033[0;34;40m" # Blue
+    N = "\033[0m" # Reset
+    dates = [self.current_date + datetime.timedelta(i) for i in range(-1, 7)]
+    weekdays =[calendar.day_name[x.weekday()] for x in dates]
+    fixtures = [self.fixtures[x] if x in self.fixtures.keys() else None for x in dates]
+    fixtures = ['\n'.join(['{0} {1} v {2}'.format(x[i][2], x[i][0], x[i][1]) for i in range(len(x))]) if x else ' ' for x in fixtures]
+    results = [self.results[x] if x in self.results.keys() else None for x in dates]
+    results = ['\n'.join([x[i].__repr__() for i in range(len(x))]) if x else ' ' for x in results]
+    training = [self.teams[self.team].training.fixtures[x] if x in self.teams[self.team].training.fixtures.keys() else ' ' for x in dates]
+    training = ['defending' if x == 'de' else x for x in training]
+    training = ['passing' if x == 'pa' else x for x in training]
+    training = ['shooting' if x == 'sh' else x for x in training]
+    training = ['fitness' if x == 'fi' else x for x in training]
+    i = list(range(-1, 7))
+    dates = [G+str(x)+N if x == self.current_date else str(x) for x in dates]
+    x = PrettyTable()
+    x.add_column('i', i)
+    x.add_column('date', dates)
+    x.add_column('weekday', weekdays)
+    x.add_column('fixtures', fixtures)
+    x.add_column('results', results)
+    x.add_column('training', training)
+    x.sortby = 'i'
+    x.title = '{0} upcoming events'.format(self.current_date)
+    self.upcoming_events = x
 
   def update_league(self):
     self.league1.get_league_table()
@@ -327,6 +343,7 @@ class Season():
       self.teams[self.team].training.get_schedule(self.current_date)
     elif cmd in ['a', 'append schedule']:
       self.teams[self.team].training.append_schedule()
+    self.get_upcoming_events()
 
   def skip(self):
     sk = input('{0} days until next fixture\nSkip? (y)es (n)o\n'.format(self.days_until_next_fixture))

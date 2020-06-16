@@ -114,18 +114,23 @@ class MatchTeam(Team):
       elif x in ['t', 'tactics']:
         self.tactics_change()
 
-  def forced_substitution(self, player):
+  def forced_substitution(self, player, preferred_position=None, reason=None):
     subs_used = len([x for x in self.playing if x.lineup not in range(1, 16)])
     if subs_used > 4:
       self.playing.remove(player)
     else:
+      if preferred_position is None:
+        preferred_position = player.position
+      if reason is None:
+        reason = '{0} {1} has {2} injured his {3} and needs to be substituted.'.format(
+          player.position, player, player.injury.status.lower(), player.injury.part)
       if self.control is True:
         sub_made = False
         while sub_made is not True:
-          print('{0} has {1} injured his {2} and needs to be substituted.'.format(player, player.injury.status, player.injury.part))
+          print(reason)
           sub_made = self.substitute(l_a=player)
       else:
-        self.auto_sub(player)
+        self.auto_sub(player, preferred_position)
 
   def auto_lineup(self):
     lineups = [x.lineup for x in self]
@@ -179,7 +184,9 @@ class MatchTeam(Team):
           lineups = [x.lineup for x in self]
     self.update_playing_positions()
 
-  def auto_sub(self, player):
+  def auto_sub(self, player, preferred_position=None):
+    if preferred_position is None:
+      preferred_position = player.position
     player_on = [x for x in self.subs if x.position == player.position]
     if len(player_on) > 0:
       self.substitute(player, random.choice(player_on))

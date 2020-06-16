@@ -99,6 +99,10 @@ class Event():
       self.defending_player.cards.append('r')
       self.defending_player.gain_suspension('red', self.match.date)
       self.defenders.playing.remove(self.defending_player)
+      if self.defending_player.position == 'GK':
+        player_off = random.choice(self.defenders.playing)
+        self.defenders.forced_substitution(player_off, 'GK',
+          '{0} has been sent off. {1} is being substituted to bring on a GK'.format(self.defending_player, player_off))
       p2 = random.random()
       if p2 < 0.5:
         attacker.gain_injury(self.match.date)

@@ -41,7 +41,10 @@ class Match():
     random.seed()
 
   def __repr__(self):
-    ps = '{0} {1} {2} {3}'.format(self.team_a.name, self.team_a.score, self.team_b.name, self.team_b.score)
+    ps = '{0} {1}-{2} ({3}) {4}-{5} ({6}) {7}'.format(
+      self.team_a.name, self.team_a.goals, self.team_a.points, self.team_a.score,
+      self.team_b.goals, self.team_b.points, self.team_b.score, self.team_b.name
+    )
     return ps
 
   def __str__(self):

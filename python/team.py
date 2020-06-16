@@ -50,9 +50,7 @@ class Team():
     self.get_lineup()
 
   def __repr__(self):
-    ps = 'team: {0} rating:{1}\n'.format(self.name, self.overall)
-    ps += self.player_table.__str__()
-    ps += '\n'
+    ps = self.player_table.__str__()
     return ps
 
   def __str__(self):
@@ -152,7 +150,7 @@ class Team():
     x.add_column('minutes', [x.minutes for x in self])
     x.add_column('score', [x.format_score() for x in self])
     x.sortby = 'lineup'
-    x.title = '{0} {1}'.format(self.name, self.overall)
+    x.title = '{0} {1} {2}'.format(self.name, self.manager, self.overall)
     x.float_format = '5.2'
     self.player_table = x
 

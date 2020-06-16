@@ -138,7 +138,7 @@ class Competition():
         self.bracket.update(roundn, [winner])
     with Capturing() as self.bracket_p:
       self.bracket.show()
-    self.bracket_p = '\n'.join(self.bracket_p)
+    self.bracket_p = '{0} bracket\n'.format(self.name) + '\n'.join(self.bracket_p)
     if roundn is None:
       roundn = self.get_current_round()
     self.update_cup_fixtures(current_date, roundn)
