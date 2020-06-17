@@ -32,8 +32,8 @@ class Player():
     self.position = random.choice(['GK', 'FB', 'HB', 'MI', 'HF', 'FF'])
     self.lineup = 0
     self.minutes = 0
-    self.match_rating = 5.0
-    self.average_match_rating = 5.0
+    self.match_rating = 0.0
+    self.average_match_rating = 0.0
     self.match_ratings = []
     self.cards = []
     self.injury = Injury()
@@ -63,7 +63,7 @@ class Player():
     self.update_score()
     self.minutes = 0
     self.assists = 0
-    self.match_rating = 0.5
+    self.match_rating = 0.0
     self.cards = []
 
   def update_score(self):

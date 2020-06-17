@@ -57,9 +57,9 @@ class Competition():
     elif self.form == 'cup':
       return print_side_by_side(print_side_by_side(print_side_by_side(
         self.bracket_p,
-        self.match_rating_table, 30),
-        self.scorers_table), 80,
-        self.assist_table, 100)
+        self.match_rating_table, 50),
+        self.scorers_table, 99),
+        self.assist_table, 135)
 
   def update_next_fixture(self, current_date):
     remaining_fixtures = [x for x in self.fixtures.keys() if x > current_date]

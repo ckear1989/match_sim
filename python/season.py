@@ -99,18 +99,18 @@ class Season():
     self.upcoming_events = x
 
   def update_league(self):
-    self.league1.get_league_table()
-    self.league1.get_stats_tables()
-    self.league2.get_league_table()
-    self.league2.get_stats_tables()
-    self.league3.get_league_table()
-    self.league3.get_stats_tables()
-    self.league4.get_league_table()
-    self.league4.get_stats_tables()
+    self.competitions['league1'].get_league_table()
+    self.competitions['league1'].get_stats_tables()
+    self.competitions['league2'].get_league_table()
+    self.competitions['league2'].get_stats_tables()
+    self.competitions['league3'].get_league_table()
+    self.competitions['league3'].get_stats_tables()
+    self.competitions['league4'].get_league_table()
+    self.competitions['league4'].get_stats_tables()
 
   def update_cup(self):
-    self.cup.update_bracket(self.current_date)
-    self.cup.get_stats_tables()
+    self.competitions['cup'].update_bracket(self.current_date)
+    self.competitions['cup'].get_stats_tables()
 
   def update_next_fixture(self):
     self.get_fixtures()
@@ -153,8 +153,8 @@ class Season():
 
   def banner_end(self):
     league_winners = promotion(self.team_league)
-    current_round = self.cup.get_current_round()
-    cup_winners = self.cup.bracket.rounds[current_round-1][0]
+    current_round = self.competitions['cup'].get_current_round()
+    cup_winners = self.competitions['cup'].bracket.rounds[current_round-1][0]
     banner = pyfiglet.figlet_format('Season {0}\n{1}\n{2}\n{3} winners:\n{4}\nCup winners:\n{5}\n'.format(
       self.year, self.manager, self.team, self.team_league.name, league_winners, cup_winners))
     print(banner)
@@ -164,24 +164,13 @@ class Season():
     self.year += 1
     self.promotion_relegation()
     self.reset_players()
+    for comp in self.competitions.keys():
+      for team in self.competitions[comp].teams:
+        self.competitions[comp].teams[team].reset_match_stats()
+        self.competitions[comp].teams[team].reset_wld_stats()
     for team in self.teams.keys():
       self.teams[team].reset_match_stats()
       self.teams[team].reset_wld()
-    for team in self.league1.teams.keys():
-      self.league1.teams[team].reset_match_stats()
-      self.league1.teams[team].reset_wld()
-    for team in self.league2.teams.keys():
-      self.league2.teams[team].reset_match_stats()
-      self.league2.teams[team].reset_wld()
-    for team in self.league3.teams.keys():
-      self.league3.teams[team].reset_match_stats()
-      self.league3.teams[team].reset_wld()
-    for team in self.league4.teams.keys():
-      self.league4.teams[team].reset_match_stats()
-      self.league4.teams[team].reset_wld()
-    for team in self.cup.teams.keys():
-      self.cup.teams[team].reset_match_stats()
-      self.cup.teams[team].reset_wld()
     self.get_fixtures()
     self.update_next_fixture()
     self.update_league()
@@ -205,43 +194,38 @@ class Season():
     self.init_competitions(teams1, teams2, teams3, teams4)
 
   def reset_players(self):
-    for player in self.league1.players:
-      player.reset_match_stats()
-    for player in self.cup.players:
-      player.reset_match_stats()
+    for comp in self.competitions.keys():
+      for team in self.competitions[comp].teams:
+        for player in self.competitions[comp].players:
+          player.reset_match_stats()
 
   def init_competitions(self, teams1, teams2, teams3, teams4):
-    self.league1 = Competition('league1', 'rr', datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams1})
-    self.league2 = Competition('league2', 'rr', datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams2})
-    self.league3 = Competition('league3', 'rr', datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams3})
-    self.league4 = Competition('league4', 'rr', datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams4})
-    if self.team in self.league1.teams.keys():
-      self.team_league = self.league1
-    elif self.team in self.league2.teams.keys():
-      self.team_league = self.league2
-    elif self.team in self.league3.teams.keys():
-      self.team_league = self.league3
-    elif self.team in self.league4.teams.keys():
-      self.team_league = self.league4
-    last_league_fixture_date = max([
-      self.league1.last_fixture_date,
-      self.league2.last_fixture_date,
-      self.league3.last_fixture_date,
-      self.league4.last_fixture_date
-    ])
-    self.cup = Competition('cup', 'cup', last_league_fixture_date + datetime.timedelta(1), self.teams)
+    self.competitions = {}
+    self.competitions['league1'] = Competition('league1', 'rr',
+      datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams1})
+    self.competitions['league2'] = Competition('league2', 'rr',
+      datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams2})
+    self.competitions['league3'] = Competition('league3', 'rr',
+      datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams3})
+    self.competitions['league4'] = Competition('league4', 'rr',
+      datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams4})
+    for league in self.competitions.values():
+      if self.team in league.teams.keys():
+        self.team_league = league
+    last_league_fixture_date = max([x.last_fixture_date for x in self.competitions.values()])
+    self.competitions['cup'] = Competition('cup', 'cup', last_league_fixture_date + datetime.timedelta(1), self.teams)
 
   def promotion_relegation(self):
-    teams1 = list(self.league1.teams.keys())
-    teams2 = list(self.league2.teams.keys())
-    teams3 = list(self.league3.teams.keys())
-    teams4 = list(self.league4.teams.keys())
-    rel1 = relegation(self.league1)
-    rel2 = relegation(self.league2)
-    rel3 = relegation(self.league3)
-    pro2 = promotion(self.league2)
-    pro3 = promotion(self.league3)
-    pro4 = promotion(self.league4)
+    teams1 = list(self.competitions['league1'].teams.keys())
+    teams2 = list(self.competitions['league2'].teams.keys())
+    teams3 = list(self.competitions['league3'].teams.keys())
+    teams4 = list(self.competitions['league4'].teams.keys())
+    rel1 = relegation(self.competitions['league1'])
+    rel2 = relegation(self.competitions['league2'])
+    rel3 = relegation(self.competitions['league3'])
+    pro2 = promotion(self.competitions['league2'])
+    pro3 = promotion(self.competitions['league3'])
+    pro4 = promotion(self.competitions['league4'])
     teams1.remove(rel1)
     teams1.append(pro2)
     teams2.remove(pro2)
@@ -257,19 +241,13 @@ class Season():
     self.init_competitions(teams1, teams2, teams3, teams4)
 
   def get_fixtures(self):
-    self.fixtures = {
-      **self.league1.fixtures,
-      **self.cup.fixtures
-    }
-    for f in self.league2.fixtures.keys():
-      if f in self.fixtures.keys():
-        self.fixtures[f] = self.fixtures[f] + self.league2.fixtures[f]
-    for f in self.league3.fixtures.keys():
-      if f in self.fixtures.keys():
-        self.fixtures[f] = self.fixtures[f] + self.league3.fixtures[f]
-    for f in self.league4.fixtures.keys():
-      if f in self.fixtures.keys():
-        self.fixtures[f] = self.fixtures[f] + self.league4.fixtures[f]
+    self.fixtures = {}
+    for comp in self.competitions:
+      for f in self.competitions[comp].fixtures.keys():
+        if f in self.fixtures.keys():
+          self.fixtures[f] = self.fixtures[f] + self.competitions[comp].fixtures[f]
+        else:
+          self.fixtures[f] = self.competitions[comp].fixtures[f]
     for adate in self.fixtures.keys():
       self.fixtures[adate].sort(key=lambda x: self.team in x)
 
@@ -296,7 +274,7 @@ class Season():
         self.save()
 
   def process_match_result(self, match, comp):
-    compo = [x for x in [self.league1, self.league2, self.league3, self.league4, self.cup] if x.name in comp]
+    compo = [x for x in self.competitions.values() if x.name in comp]
     if len(compo) != 1:
       raise Exception('problem with competition {0}'.format(comp))
     else:
@@ -337,7 +315,10 @@ class Season():
         compo.players[i].points += player.points
         compo.players[i].goals += player.goals
         compo.players[i].assists += player.assists
-        compo.players[i].match_ratings.append(player.match_rating)
+        if compo.players[i].match_ratings == [0.0]:
+          compo.players[i].match_ratings = [player.match_rating]
+        else:
+          compo.players[i].match_ratings.append(player.match_rating)
         compo.players[i].update_score()
         i += 1
       self.teams[team].reset_match_stats()
@@ -426,14 +407,31 @@ class Season():
             if x.last_name == cmd1.split(',')[0].strip():
               if x.first_name == cmd1.split(',')[1].strip():
                 print(x)
-          self.get_player_stats()
-      self.get_player_stats()
+        else:
+          return
+    else:
+      return
+    self.get_player_stats()
 
   def get_team_stats(self):
-    pass
+    options = [x for x in self.teams.keys()]
+    cmd = input('choose team:\n{0}\n'.format(options + ['(c)ontinue']))
+    if cmd not in ['c', '(c)ontinue']:
+      if cmd in self.teams.keys():
+        print(self.teams[cmd])
+    else:
+      return
+    self.get_team_stats()
 
   def get_competition_stats(self):
-    pass
+    options = [x for x in self.competitions.keys()]
+    cmd = input('choose competition:\n{0}\n'.format(options + ['(c)ontinue']))
+    if cmd not in ['c', '(c)ontinue']:
+      if cmd in self.competitions.keys():
+        print(self.competitions[cmd])
+    else:
+      return
+    self.get_competition_stats()
 
   def stats(self):
     options = ['(p)layers', '(t)eams', '(c)ompetitions']
