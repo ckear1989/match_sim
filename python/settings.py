@@ -38,7 +38,7 @@ class Settings():
         self.update_setting('autosave', True)
       elif setting0 == 'match_speed':
         if is_int(setting1):
-          if int(setting1) <= 70:
+          if 0 < int(setting1) <= 70:
             self.update_setting('match_speed', int(setting1))
 
 def test_settings():

@@ -415,7 +415,19 @@ class Season():
     self.update_next_fixture()
 
   def get_player_stats(self):
-    pass
+    options = [x for x in self.teams.keys()]
+    cmd0 = input('choose team:\n{0}\n'.format(options + ['(c)ontinue']))
+    if cmd0 not in ['c', '(c)ontinue']:
+      if cmd0 in self.teams.keys():
+        options = ['{0}, {1}'.format(x.last_name, x.first_name) for x in self.teams[cmd0]]
+        cmd1 = input('choose player:\n{0}\n'.format(options + ['(c)ontinue']))
+        if cmd1 not in ['c', '(c)ontinue']:
+          for x in self.teams[cmd0]:
+            if x.last_name == cmd1.split(',')[0].strip():
+              if x.first_name == cmd1.split(',')[1].strip():
+                print(x)
+          self.get_player_stats()
+      self.get_player_stats()
 
   def get_team_stats(self):
     pass
