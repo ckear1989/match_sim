@@ -83,7 +83,7 @@ class Formation():
 
   def update_ascii(self, team):
     for i in range(16):
-      p = [x for x in team if x.lineup == i]
+      p = [x for x in team if x.match.lineup == i]
       postr = '<-----P{:02d}----->'.format(i)
       plstr = str(p).center(15).replace('[', ' ').replace(']', ' ')
       self.ascii = self.ascii.replace(postr, plstr)

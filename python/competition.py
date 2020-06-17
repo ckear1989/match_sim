@@ -51,9 +51,9 @@ class Competition():
     if self.form in ['rr', 'drr']:
       return print_side_by_side(print_side_by_side(print_side_by_side(
         self.league_table,
-        self.match_rating_table, 51),
-        self.scorers_table, 100),
-        self.assist_table, 136)
+        self.match_rating_table, 57),
+        self.scorers_table, 106),
+        self.assist_table, 142)
     elif self.form == 'cup':
       return print_side_by_side(print_side_by_side(print_side_by_side(
         self.bracket_p,
@@ -200,25 +200,44 @@ class Competition():
   def get_players(self):
     self.players = [copy.deepcopy(player) for team in self.teams for player in self.teams[team].players]
 
-  def get_stat_table(self, stat, sortby=None, n=10):
-    if sortby is None:
-      sortby = stat
-    players = sorted([x for x in self.players if x.__dict__[sortby] > 0], key=lambda x: -x.__dict__[sortby])
+  def get_stats_tables(self, n=10):
+    players = sorted([x for x in self.players if x.match.score.scoren], key=lambda x: -x.match.score.score)
     x = PrettyTable()
     x.add_column('player', players)
     x.add_column('team', [x.team for x in players])
-    x.add_column(stat, [x.__dict__[stat] for x in players])
-    x.title = '{0} top {1}'.format(self.name, stat)
+    x.add_column('score', [x.match.score.score for x in players])
+    x.title = '{0} top {1}'.format(self.name, 'score')
     x = x.get_string(end=n)
-    return(x)
+    self.scorers_table = x
 
-  def get_stats_tables(self):
-    self.scorers_table = self.get_stat_table('score', 'scoren')
-    self.match_rating_table = self.get_stat_table('average_match_rating')
-    self.overall_table = self.get_stat_table('overall')
-    self.assist_table = self.get_stat_table('assists')
+    players = sorted([x for x in self.players], key=lambda x: -x.season.average_match_rating)
+    x = PrettyTable()
+    x.add_column('player', players)
+    x.add_column('team', [x.team for x in players])
+    x.add_column('average_match_rating', [x.season.average_match_rating for x in players])
+    x.title = '{0} top {1}'.format(self.name, 'average_match_rating')
+    x = x.get_string(end=n)
+    self.match_rating_table = x
 
-if __name__=="__main__":
+    players = sorted([x for x in self.players], key=lambda x: -x.physical.overall)
+    x = PrettyTable()
+    x.add_column('player', players)
+    x.add_column('team', [x.team for x in players])
+    x.add_column('overall', [x.physical.overall for x in players])
+    x.title = '{0} top {1}'.format(self.name, 'overall')
+    x = x.get_string(end=n)
+    self.overall_table = x
+
+    players = sorted([x for x in self.players], key=lambda x: -x.match.assists)
+    x = PrettyTable()
+    x.add_column('player', players)
+    x.add_column('team', [x.team for x in players])
+    x.add_column('assists', [x.match.assists for x in players])
+    x.title = '{0} top {1}'.format(self.name, 'assists')
+    x = x.get_string(end=n)
+    self.assist_table = x
+
+if __name__ == "__main__":
 
   teams = {
     'a': Team('a', 'a'),
@@ -249,4 +268,3 @@ if __name__=="__main__":
   cup1.update_bracket(current_date, 4, 'b')
   print(cup1.get_current_round())
   print(cup1)
-

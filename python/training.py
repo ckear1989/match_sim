@@ -1,6 +1,6 @@
 
 import default
-from player import x_0_100_cap, random_0_100_normal
+from utils import x_0_100_cap, random_0_100_normal
 
 import datetime
 import calendar
@@ -76,7 +76,7 @@ class Training():
       x.get_overall()
     ateam.get_overall()
 
-if __name__=="__main__":
+if __name__ == "__main__":
   from team import Team
   team = Team('a', 'a')
   team.get_training_schedule(datetime.date(2020, 1, 1))

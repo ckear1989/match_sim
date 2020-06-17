@@ -357,10 +357,7 @@ class Season():
 
   def process_players_daily(self, team):
     for player in self.teams[team]:
-      player.check_injury(self.current_date)
-      player.check_suspension(self.current_date)
-      player.condition = min((player.condition + 5), player.fitness)
-      player.get_overall()
+      player.process_daily(self.current_date)
 
   def process_fixtures_daily(self):
     if self.current_date == self.next_fixture_date:
@@ -460,8 +457,8 @@ class Season():
       self.process_fixtures_daily()
       self.update_next_fixture()
 
-if __name__=="__main__":
+if __name__ == "__main__":
 
-  season = Season('a', 'adam')
+  season = Season('Sharples', 'adam')
   season.cont()
 

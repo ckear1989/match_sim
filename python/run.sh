@@ -12,12 +12,13 @@
 # pip3 install names
 # pip3 install pyfiglet
 # pip3 install pylint
+# pip3 install barnum
 
 # python3.6 default.py
 # python3.6 settings.py
 # python3.6 player.py
 # python3.6 competition.py
-# sudo python3.6 season.py
+sudo python3.6 season.py
 # sudo python3.6 event.py
 # sudo python3.6 match.py
 # python3.6 training.py
@@ -25,5 +26,5 @@
 # python3.6 match_team.py
 # sudo python3.6 main.py
 
-pylint --disable=bad-continuation,bad-indentation settings.py > pylint1.txt
+# pylint --disable=bad-continuation --indent-string='  ' player.py > pylint2.txt
 

@@ -1,8 +1,9 @@
 '''Store default parameters for game mechanics'''
+import barnum
+import random
 
-with open('../data/defaults/poss_teams.txt', 'r') as f:
-  poss_teams = [x.strip() for x in f.readlines()]
-  poss_teams = [x for x in poss_teams if x[0] != '#']
+random.seed(12345)
+poss_teams = [barnum.create_city_state_zip()[1] for i in range(16)]
 
 dow = {
   'monday': 0,

@@ -73,83 +73,83 @@ class Team():
     pass
 
   def get_lineup(self):
-    self.goalkeepers = [x for x in self if x.position in ['GK']]
-    self.full_backs = [x for x in self if x.position in ['FB']]
-    self.half_backs = [x for x in self if x.position in ['HB']]
-    self.midfielders = [x for x in self if x.position in ['MI']]
-    self.full_forwards = [x for x in self if x.position in ['FF']]
-    self.half_forwards = [x for x in self if x.position in ['HF']]
+    self.goalkeepers = [x for x in self if x.physical.position in ['GK']]
+    self.full_backs = [x for x in self if x.physical.position in ['FB']]
+    self.half_backs = [x for x in self if x.physical.position in ['HB']]
+    self.midfielders = [x for x in self if x.physical.position in ['MI']]
+    self.full_forwards = [x for x in self if x.physical.position in ['FF']]
+    self.half_forwards = [x for x in self if x.physical.position in ['HF']]
     while len(self.goalkeepers) < 2:
-     random.choice(self).position = 'GK'
+     random.choice(self).physical.position = 'GK'
      self.get_lineup()
     while len(self.goalkeepers) > 2:
-     random.choice([x for x in self if x.position == 'GK']).position = random.choice(['FB', 'HB', 'MI', 'HF', 'FF'])
+     random.choice([x for x in self if x.physical.position == 'GK']).physical.position = random.choice(['FB', 'HB', 'MI', 'HF', 'FF'])
      self.get_lineup()
     while len(self.full_backs) < 3:
-     random.choice([x for x in self if x.position not in ['GK']]).position = 'FB'
+     random.choice([x for x in self if x.physical.position not in ['GK']]).physical.position = 'FB'
      self.get_lineup()
     while len(self.half_backs) < 3:
-     random.choice([x for x in self if x.position not in ['GK', 'FB']]).position = 'HB'
+     random.choice([x for x in self if x.physical.position not in ['GK', 'FB']]).physical.position = 'HB'
      self.get_lineup()
     while len(self.midfielders) < 2:
-     random.choice([x for x in self if x.position not in ['GK', 'FB', 'HB']]).position = 'MI'
+     random.choice([x for x in self if x.physical.position not in ['GK', 'FB', 'HB']]).physical.position = 'MI'
      self.get_lineup()
     while len(self.half_forwards) < 3:
-     random.choice([x for x in self if x.position not in ['GK', 'FB', 'HB', 'HF']]).position = 'HF'
+     random.choice([x for x in self if x.physical.position not in ['GK', 'FB', 'HB', 'HF']]).physical.position = 'HF'
      self.get_lineup()
     while len(self.full_forwards) < 3:
-     random.choice([x for x in self if x.position not in ['GK', 'FB', 'HB', 'HF']]).position = 'FF'
+     random.choice([x for x in self if x.physical.position not in ['GK', 'FB', 'HB', 'HF']]).physical.position = 'FF'
      self.get_lineup()
     self.defenders = self.full_backs + self.half_backs
     self.forwards = self.full_forwards + self.half_forwards
-    if 1 not in [x.lineup for x in self]:
+    if 1 not in [x.match.lineup for x in self]:
       player = random.choice(self.goalkeepers)
-      player.lineup = 1
+      player.match.lineup = 1
     for i in [2, 3, 4]:
-      if i not in [x.lineup for x in self]:
-        player = random.choice([x for x in self.full_backs if x.lineup == 0])
-        player.lineup = i
+      if i not in [x.match.lineup for x in self]:
+        player = random.choice([x for x in self.full_backs if x.match.lineup == 0])
+        player.match.lineup = i
     for i in [5, 6, 7]:
-      if i not in [x.lineup for x in self]:
-        player = random.choice([x for x in self.half_backs if x.lineup == 0])
-        player.lineup = i
+      if i not in [x.match.lineup for x in self]:
+        player = random.choice([x for x in self.half_backs if x.match.lineup == 0])
+        player.match.lineup = i
     for i in [8, 9]:
-      if i not in [x.lineup for x in self]:
-        player = random.choice([x for x in self.midfielders if x.lineup == 0])
-        player.lineup = i
+      if i not in [x.match.lineup for x in self]:
+        player = random.choice([x for x in self.midfielders if x.match.lineup == 0])
+        player.match.lineup = i
     for i in [10, 11, 12]:
-      if i not in [x.lineup for x in self]:
-        player = random.choice([x for x in self.half_forwards if x.lineup == 0])
-        player.lineup = i
+      if i not in [x.match.lineup for x in self]:
+        player = random.choice([x for x in self.half_forwards if x.match.lineup == 0])
+        player.match.lineup = i
     for i in [13, 14, 15]:
-      if i not in [x.lineup for x in self]:
-        player = random.choice([x for x in self.full_forwards if x.lineup == 0])
-        player.lineup = i
-    if 16 not in [x.lineup for x in self]:
-      player = random.choice([x for x in self.goalkeepers if x.lineup == 0])
-      player.lineup = 16
+      if i not in [x.match.lineup for x in self]:
+        player = random.choice([x for x in self.full_forwards if x.match.lineup == 0])
+        player.match.lineup = i
+    if 16 not in [x.match.lineup for x in self]:
+      player = random.choice([x for x in self.goalkeepers if x.match.lineup == 0])
+      player.match.lineup = 16
     for i in [17, 18, 19, 20, 21]:
-      if i not in [x.lineup for x in self]:
-        player = random.choice([x for x in self if x.lineup == 0])
-        player.lineup = i
+      if i not in [x.match.lineup for x in self]:
+        player = random.choice([x for x in self if x.match.lineup == 0])
+        player.match.lineup = i
     self.get_player_table()
 
   def get_player_table(self):
     x = PrettyTable()
     x.add_column('last name', [x.last_name for x in self])
     x.add_column('first name', [x.first_name for x in self])
-    x.add_column('position', [x.position for x in self])
-    x.add_column('lineup', [x.lineup for x in self])
-    x.add_column('overall', [x.overall for x in self])
-    x.add_column('rating', [x.average_match_rating for x in self])
-    x.add_column('defending', [x.defending for x in self])
-    x.add_column('passing', [x.passing for x in self])
-    x.add_column('shooting', [x.shooting for x in self])
-    x.add_column('fitness', [x.fitness for x in self])
-    x.add_column('condition', [x.condition for x in self])
-    x.add_column('injury', [x.injury for x in self])
-    x.add_column('minutes', [x.minutes for x in self])
-    x.add_column('score', [x.score for x in self])
+    x.add_column('position', [x.physical.position for x in self])
+    x.add_column('lineup', [x.match.lineup for x in self])
+    x.add_column('overall', [x.physical.overall for x in self])
+    x.add_column('rating', [x.season.average_match_rating for x in self])
+    x.add_column('defending', [x.physical.defending for x in self])
+    x.add_column('passing', [x.physical.passing for x in self])
+    x.add_column('shooting', [x.physical.shooting for x in self])
+    x.add_column('fitness', [x.physical.fitness for x in self])
+    x.add_column('condition', [x.physical.condition for x in self])
+    x.add_column('injury', [x.season.injury for x in self])
+    x.add_column('minutes', [x.match.minutes for x in self])
+    x.add_column('score', [x.match.score for x in self])
     x.sortby = 'lineup'
     x.title = '{0} {1} {2}'.format(self.name, self.manager, self.overall)
     x.float_format = '5.2'
@@ -159,11 +159,11 @@ class Team():
     scorers = [i for i in sorted(self, key=lambda x: -x.scoren) if i.scoren > 0]
     x = PrettyTable()
     x.add_column('%s scorers' % self.name, scorers)
-    x.add_column('score', ['{0}-{1} ({2})'.format(x.goals, x.points, x.scoren) for x in scorers])
+    x.add_column('score', [x.score for x in scorers])
     self.scorer_table = x
 
   def get_overall(self):
-    self.overall = round(np.mean([p.overall for p in self]), 2)
+    self.overall = round(np.mean([p.physical.overall for p in self]), 2)
     self.get_player_table()
 
   def update_score(self):

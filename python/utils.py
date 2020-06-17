@@ -1,3 +1,6 @@
+'''Helper functions used by multiple scripts'''
+
+import numpy as np
 
 # https://stackoverflow.com/questions/53401383/how-to-print-two-strings-large-text-side-by-side-in-python
 def print_side_by_side(a, b, size=60, space=4):
@@ -27,3 +30,8 @@ def is_int(x):
     return False
   return True
 
+def x_0_100_cap(x):
+  return int(max(min(round(x, 0), 100), 0))
+
+def random_0_100_normal(mean, sd):
+  return x_0_100_cap(np.random.normal(mean, sd))
