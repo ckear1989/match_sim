@@ -1,3 +1,4 @@
+'''Store default parameters for game mechanics'''
 
 with open('../data/defaults/poss_teams.txt', 'r') as f:
   poss_teams = [x.strip() for x in f.readlines()]
@@ -86,4 +87,3 @@ suspensions = {
   'yellow': 14,
   'red': 28
 }
-

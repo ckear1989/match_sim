@@ -1,6 +1,7 @@
 data/games/*
 TODO
 profile*.txt
+pylint*.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
