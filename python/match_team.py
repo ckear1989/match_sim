@@ -61,6 +61,8 @@ class MatchTeam(Team):
 
   def lineup_change(self, l_a=None, l_b=None):
     if self.control is True:
+      print('set pre-match lineup')
+      time.sleep(0.3)
       print(self)
       if l_b is None:
         l_b = input('player to assign new lineup number (last, first):')
@@ -68,6 +70,9 @@ class MatchTeam(Team):
         f = l_b.split(',')[1].strip()
         l = l_b.split(',')[0].strip()
       else:
+        cmd = input('(c)ontinue\n')
+        if cmd not in ['c', 'continue']:
+          self.lineup_change()
         return None
       players = [x for x in self if (x.first_name == f) and (x.last_name == l)]
       if len(players) > 0:
@@ -77,14 +82,20 @@ class MatchTeam(Team):
           if is_int(l_a):
             l_a = int(l_a)
           else:
+            cmd = input('(c)ontinue\n')
+            if cmd not in ['c', 'continue']:
+              self.lineup_change()
             return None
         player.lineup = l_a
       self.update_playing_positions()
       self.lineup_check()
       print(self)
+      cmd = input('(c)ontinue\n')
+      if cmd not in ['c', 'continue']:
+        self.lineup_change()
 
   def formation_change(self):
-    self.formation.change(team)
+    self.formation.change(self)
     self.update_playing_positions()
 
   def tactics_change(self):
@@ -100,19 +111,21 @@ class MatchTeam(Team):
 
   def manage(self):
     if self.control is True:
-      x = input('{0}\n'.format('\t'.join(['(l)ineup', '(s)ubstitute', '(f)ormation', '(t)actics']))).strip()
-      if x in ['l', 'lineup']:
-        if len([x for x in self if x.minutes > 0]) > 0:
-          print('can\'t set up lineup during match!\r')
-          time.sleep(1)
-        else:
-          self.lineup_change()
-      if x in ['s', 'substitute']:
-        self.substitute()
-      elif x in ['f', 'formation']:
-        self.formation_change()
-      elif x in ['t', 'tactics']:
-        self.tactics_change()
+      x = ''
+      while x not in ['c', 'continue']:
+        x = input('{0}\n'.format('\t'.join(['(l)ineup', '(s)ubstitute', '(f)ormation', '(t)actics', '(c)ontinue']))).strip()
+        if x in ['l', 'lineup']:
+          if len([x for x in self if x.minutes > 0]) > 0:
+            print('can\'t set up lineup during match!\r')
+            time.sleep(1)
+          else:
+            self.lineup_change()
+        if x in ['s', 'substitute']:
+          self.substitute()
+        elif x in ['f', 'formation']:
+          self.formation_change()
+        elif x in ['t', 'tactics']:
+          self.tactics_change()
 
   def forced_substitution(self, player, preferred_position=None, reason=None):
     subs_used = len([x for x in self.playing if x.lineup not in range(1, 16)])
@@ -196,7 +209,8 @@ class MatchTeam(Team):
   def substitute(self, l_a=None, l_b=None):
     subs_used = len([x for x in self.playing if x.lineup not in range(1, 16)])
     if subs_used < 5:
-      print(self)
+      if self.control is True:
+        print(self)
       if l_b is None:
         l_b = input('substitute player coming on (last, first):')
         if ',' in l_b:
@@ -235,7 +249,8 @@ class MatchTeam(Team):
       self.playing.append(player_on)
       self.formation.ammend(player_off.lineup, player_on.lineup)
       self.update_playing_positions()
-      print(self)
+      if self.control is True:
+        print(self)
       return True
     else:
       print('{0} substitutes already used'.format(subs_used))

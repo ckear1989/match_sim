@@ -32,6 +32,9 @@ class Player():
     self.position = random.choice(['GK', 'FB', 'HB', 'MI', 'HF', 'FF'])
     self.lineup = 0
     self.minutes = 0
+    self.match_rating = 5.0
+    self.average_match_rating = 5.0
+    self.match_ratings = []
     self.cards = []
     self.injury = Injury()
     self.suspension = Suspension()
@@ -60,11 +63,14 @@ class Player():
     self.update_score()
     self.minutes = 0
     self.assists = 0
+    self.match_rating = 0.5
     self.cards = []
 
   def update_score(self):
     self.scoren = (self.goals * 3) + self.points
     self.score = '{0}-{1} ({2})'.format(self.goals, self.points, self.scoren)
+    if len(self.match_ratings) > 0:
+      self.average_match_rating = round(np.mean(self.match_ratings), 2)
 
   def gain_injury(self, current_date):
     self.injury.gain(current_date)
@@ -89,7 +95,24 @@ class Player():
     self.suspension.reset()
 
   def assist(self):
+    self.match_rating += 0.2
     self.assists += 1
+
+  def turnover(self):
+   self.match_rating += 0.5
+
+  def save_goal(self):
+   self.match_rating += 1.5
+
+  def score_point(self):
+   self.points += 1
+   self.match_rating += 0.5
+   self.update_score()
+
+  def score_goal(self):
+   self.goals += 1
+   self.match_rating += 1.0
+   self.update_score()
 
 if __name__=="__main__":
 

@@ -45,21 +45,21 @@ class Competition():
     self.get_fixtures()
     self.update_next_fixture(self.start_date)
     self.get_league_table()
-    self.get_scorers_table()
+    self.get_stats_tables()
 
   def __repr__(self):
     if self.form in ['rr', 'drr']:
       return print_side_by_side(print_side_by_side(print_side_by_side(
         self.league_table,
-        self.scorers_table),
-        self.assist_table),
-        self.overall_table)
+        self.match_rating_table, 51),
+        self.scorers_table, 100),
+        self.assist_table, 136)
     elif self.form == 'cup':
       return print_side_by_side(print_side_by_side(print_side_by_side(
         self.bracket_p,
-        self.scorers_table),
-        self.assist_table),
-        self.overall_table)
+        self.match_rating_table, 30),
+        self.scorers_table), 80,
+        self.assist_table, 100)
 
   def update_next_fixture(self, current_date):
     remaining_fixtures = [x for x in self.fixtures.keys() if x > current_date]
@@ -145,7 +145,6 @@ class Competition():
     self.update_cup_fixtures(current_date, roundn)
     self.update_next_fixture(current_date)
     self.get_league_table()
-    self.get_scorers_table()
 
   def update_cup_fixtures(self, current_date, roundn):
     nt = '-'*self.bracket.max
@@ -175,7 +174,6 @@ class Competition():
     self.update_bracket(self.start_date)
     self.update_next_fixture(self.start_date)
     self.get_league_table()
-    self.get_scorers_table()
 
   def get_fixtures(self):
     if self.form == 'rr':
@@ -214,8 +212,9 @@ class Competition():
     x = x.get_string(end=n)
     return(x)
 
-  def get_scorers_table(self):
+  def get_stats_tables(self):
     self.scorers_table = self.get_stat_table('score', 'scoren')
+    self.match_rating_table = self.get_stat_table('average_match_rating')
     self.overall_table = self.get_stat_table('overall')
     self.assist_table = self.get_stat_table('assists')
 

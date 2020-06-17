@@ -100,17 +100,17 @@ class Season():
 
   def update_league(self):
     self.league1.get_league_table()
-    self.league1.get_scorers_table()
+    self.league1.get_stats_tables()
     self.league2.get_league_table()
-    self.league2.get_scorers_table()
+    self.league2.get_stats_tables()
     self.league3.get_league_table()
-    self.league3.get_scorers_table()
+    self.league3.get_stats_tables()
     self.league4.get_league_table()
-    self.league4.get_scorers_table()
+    self.league4.get_stats_tables()
 
   def update_cup(self):
-    self.cup.get_scorers_table()
     self.cup.update_bracket(self.current_date)
+    self.cup.get_stats_tables()
 
   def update_next_fixture(self):
     self.get_fixtures()
@@ -336,8 +336,9 @@ class Season():
       for player in compo.teams[team]:
         compo.players[i].points += player.points
         compo.players[i].goals += player.goals
-        compo.players[i].update_score()
         compo.players[i].assists += player.assists
+        compo.players[i].match_ratings.append(player.match_rating)
+        compo.players[i].update_score()
         i += 1
       self.teams[team].reset_match_stats()
       compo.teams[team].reset_match_stats()
@@ -413,8 +414,24 @@ class Season():
     self.process_match_result(match, match_t[2])
     self.update_next_fixture()
 
-  def stats(self):
+  def get_player_stats(self):
     pass
+
+  def get_team_stats(self):
+    pass
+
+  def get_competition_stats(self):
+    pass
+
+  def stats(self):
+    options = ['(p)layers', '(t)eams', '(c)ompetitions']
+    cmd = input('choose option:\n%s\n' % ' '.join(options))
+    if cmd in ['p', 'players']:
+      self.get_player_stats()
+    if cmd in ['t', 'teams']:
+      self.get_team_stats()
+    elif cmd in ['c', 'competitions']:
+      self.get_competition_stats()
 
   def process(self, cmd):
     if cmd in ['sa', 'save']:

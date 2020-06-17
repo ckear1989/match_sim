@@ -1,7 +1,7 @@
 
 import json
 
-nl = '\n'
+from utils import is_int
 
 class Settings():
   def __init__(self):
@@ -26,15 +26,20 @@ class Settings():
       'settings',
       'autosave: %r' % self.autosave,
       'match_speed: %d' % self.match_speed,
-      sep=nl
+      sep='\n'
     )
     setting = input()
-    if setting == 'autosave: False':
-      self.update_setting('autosave', False)
-    elif setting == 'autosave: True':
-      self.update_setting('autosave', True)
-    elif setting == 'match_speed: 30x':
-      self.update_setting('match_speed', 30)
+    if ':' in setting:
+      setting0 = setting.split(':')[0]
+      setting1 = setting.split(':')[1].strip()
+      if setting == 'autosave: False':
+        self.update_setting('autosave', False)
+      elif setting == 'autosave: True':
+        self.update_setting('autosave', True)
+      elif setting0 == 'match_speed':
+        if is_int(setting1):
+          if int(setting1) <= 70:
+            self.update_setting('match_speed', int(setting1))
 
 def test_settings():
   s = Settings()

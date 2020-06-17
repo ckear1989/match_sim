@@ -20,3 +20,10 @@ def print_side_by_side(a, b, size=60, space=4):
     pstr += '\n'
   return pstr
 
+def is_int(x):
+  try:
+    int(x)
+  except ValueError:
+    return False
+  return True
+

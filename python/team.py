@@ -141,6 +141,7 @@ class Team():
     x.add_column('position', [x.position for x in self])
     x.add_column('lineup', [x.lineup for x in self])
     x.add_column('overall', [x.overall for x in self])
+    x.add_column('rating', [x.average_match_rating for x in self])
     x.add_column('defending', [x.defending for x in self])
     x.add_column('passing', [x.passing for x in self])
     x.add_column('shooting', [x.shooting for x in self])
