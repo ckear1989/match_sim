@@ -1,9 +1,10 @@
-
+'''Store and update in game settings'''
 import json
 
 from utils import is_int
 
 class Settings():
+  '''Create object to store game settings populated with defaults'''
   def __init__(self):
     self.defaults_file = '../data/settings/defaults.json'
     self.defaults_file_test = '../data/settings/defaults_test.json'
@@ -13,15 +14,14 @@ class Settings():
     self.match_speed = self.defaults['match_speed']
 
   def update_setting(self, setting, value):
+    '''Update class attribute with user input'''
     if setting == 'autosave':
       self.autosave = value
-      # self.defaults['autosave'] = value
     if setting == 'match_speed':
       self.match_speed = value
-    # with open(self.defaults_file, 'w') as f:
-    #   json.dump(self.defaults, f)
 
   def get_settings(self):
+    '''Ask user for input and check validity'''
     print(
       'settings',
       'autosave: %r' % self.autosave,
@@ -42,9 +42,9 @@ class Settings():
             self.update_setting('match_speed', int(setting1))
 
 def test_settings():
-  s = Settings()
-  s.update_setting('autosave', False)
+  '''Test case for local use'''
+  test_s = Settings()
+  test_s.update_setting('autosave', False)
 
-if __name__=="__main__":
+if __name__ == "__main__":
   test_settings()
-
