@@ -195,7 +195,7 @@ class Match():
 
   def event(self):
     event = Event(self)
-    event.run()
+    event.run(self)
 
   def get_score(self):
     return 'Score is now {0} {1}-{2} ({3}) {4} {5}-{6} ({7})'.format(
