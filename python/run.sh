@@ -24,7 +24,7 @@
 # python3.6 training.py
 # python3.6 team.py
 # python3.6 match_team.py
-# sudo python3.6 main.py
+sudo python3.6 main.py
 
-pylint --disable=bad-continuation --indent-string='  ' match_team.py > pylint.txt
+# pylint --disable=bad-continuation --indent-string='  ' main.py > pylint.txt
 

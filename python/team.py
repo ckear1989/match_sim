@@ -212,8 +212,9 @@ class Team():
 
   def train(self, date):
     '''Call method to alter player stats'''
-    focus = self.training.schedule[date]
-    train(self, focus)
+    if date in self.training.schedule.keys():
+      focus = self.training.schedule[date]
+      train(self, focus)
 
 if __name__ == "__main__":
   team = Team('a', 'a')
