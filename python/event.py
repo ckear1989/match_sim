@@ -34,7 +34,7 @@ class Event():
     self.pl.append(self.stopclock_time + ' ')
     attack_propensity = min(1, (1.6 * self.attackers.attacking /
       (self.attackers.attacking+self.attackers.defending)))
-    self.pl.append('Team {0} has posession with {1} on the ball.'.format(
+    self.pl.append('{0} has posession with {1} on the ball.'.format(
       self.attackers.name, self.posession_player))
     p0 = random.random()
     if p0 < attack_propensity:
