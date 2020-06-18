@@ -26,5 +26,5 @@
 # python3.6 match_team.py
 # sudo python3.6 main.py
 
-pylint --disable=bad-continuation --indent-string='  ' team.py > pylint.txt
+pylint --disable=bad-continuation --indent-string='  ' match_team.py > pylint.txt
 
