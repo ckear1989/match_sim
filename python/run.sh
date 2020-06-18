@@ -18,7 +18,7 @@
 # python3.6 settings.py
 # python3.6 player.py
 # python3.6 competition.py
-sudo python3.6 season.py
+# sudo python3.6 season.py
 # sudo python3.6 event.py
 # sudo python3.6 match.py
 # python3.6 training.py
@@ -26,5 +26,5 @@ sudo python3.6 season.py
 # python3.6 match_team.py
 # sudo python3.6 main.py
 
-# pylint --disable=bad-continuation --indent-string='  ' competition.py > pylint.txt
+pylint --disable=bad-continuation --indent-string='  ' season.py > pylint.txt
 
