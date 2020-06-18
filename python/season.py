@@ -381,7 +381,7 @@ class Season():
     '''Age team.  Call method to age players'''
     for team in self.teams:
       if self.current_date in self.teams[team].training.fixtures:
-        self.teams[team].train(self.teams[team].training.fixtures[self.current_date])
+        self.teams[team].train(self.current_date)
       self.process_players_daily(team)
       self.teams[team].get_overall()
 

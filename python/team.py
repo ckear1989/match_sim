@@ -5,7 +5,7 @@ from prettytable import PrettyTable
 
 import default
 from player import Player
-from training import Training
+from training import Training, train
 
 # https://thispointer.com/python-how-to-make-a-class-iterable-create-iterator-class-for-it/
 class TeamIterator:
@@ -192,8 +192,9 @@ class Team():
   def append_training_schedule(self):
     self.training.get_schedule()
 
-  def train(self, focus):
-    self.training.train(self, focus)
+  def train(self, date):
+    focus = self.training.schedule[date]
+    train(self, focus)
 
 if __name__=="__main__":
   team = Team('a', 'a')
