@@ -40,15 +40,16 @@ class Event():
     if self.silent is not True:
      for x in self.pl:
        print(x, end='')
-       time.sleep(0.1)
      print()
+    self.attackers.update_playing_positions()
+    self.defenders.update_playing_positions()
 
   def attack(self):
     self.pl.append('He looks forward to attack.'.format(self.attackers.name, self.posession_player))
     p0 = random.random()
-    if p0 < (0.33 * self.posession_player.passing/100):
+    if p0 < (0.33 * self.posession_player.physical.passing/100):
       self.posession_player_take_on()
-    elif p0 < (0.66 * self.posession_player.passing/100):
+    elif p0 < (0.66 * self.posession_player.physical.passing/100):
       self.shooting_player_posession()
     elif p0 < 0.99:
       self.pl.append('But he loses posession with the kick.')
@@ -85,7 +86,7 @@ class Event():
     if assisting_player is None:
       assisting_player = self.posession_player
     p0 = random.random()
-    if p0 < (self.shooting_player.shooting/100):
+    if p0 < (self.shooting_player.physical.shooting/100):
       shooting_player.score_goal()
       assisting_player.assist()
       self.pl.append('And he scores.')
@@ -101,7 +102,7 @@ class Event():
     if assisting_player is None:
       assisting_player = self.posession_player
     p0 = random.random()
-    if p0 < (shooting_player.shooting/100):
+    if p0 < (shooting_player.physical.shooting/100):
       self.pl.append('And he scores.')
       shooting_player.score_point()
       assisting_player.assist()
@@ -111,7 +112,7 @@ class Event():
   def shooting_player_posession(self):
     self.pl.append('He passes the ball to {0}.'.format(self.shooting_player))
     p0 = random.random()
-    if p0 < ((self.defending_player.defending-30)/100):
+    if p0 < ((self.defending_player.physical.defending-30)/100):
       self.pl.append('But {0} wins the ball back for {1}.'.format(self.defending_player, self.defending_player.team))
       self.defending_player.turnover()
     elif p0 < 0.8:
@@ -138,9 +139,9 @@ class Event():
     p0 = random.random()
     if p0 < 0.2:
       self.pl.append('{0} receives a yellow card.'.format(self.defending_player))
-      self.defending_player.cards.append('y')
-      if self.defending_player.cards.count('y') == 2:
-        self.defending_player.cards.append('r')
+      self.defending_player.gain_card('y')
+      if self.defending_player.season.cards.count('y') == 2:
+        self.defending_player.gain_card('r')
         self.pl.append('And it\'s his second yellow.  He is sent off by the referee.')
         self.defending_player.gain_suspension('yellow', self.date)
         self.defenders.playing.remove(self.defending_player)
@@ -150,10 +151,10 @@ class Event():
         self.attackers.forced_substitution(attacker)
     elif p0 < 0.25:
       self.pl.append('{0} receives a red card.'.format(self.defending_player))
-      self.defending_player.cards.append('r')
+      self.defending_player.gain_card('r')
       self.defending_player.gain_suspension('red', self.date)
       self.defenders.playing.remove(self.defending_player)
-      if self.defending_player.position == 'GK':
+      if self.defending_player.physical.position == 'GK':
         player_off = random.choice(self.defenders.playing)
         self.defenders.forced_substitution(player_off, 'GK',
           '{0} has been sent off. {1} is being substituted to bring on a GK'.format(self.defending_player, player_off))

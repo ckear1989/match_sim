@@ -149,17 +149,17 @@ class Team():
     x.add_column('condition', [x.physical.condition for x in self])
     x.add_column('injury', [x.season.injury for x in self])
     x.add_column('minutes', [x.match.minutes for x in self])
-    x.add_column('score', [x.match.score for x in self])
+    x.add_column('score', [x.match.score.score for x in self])
     x.sortby = 'lineup'
     x.title = '{0} {1} {2}'.format(self.name, self.manager, self.overall)
     x.float_format = '5.2'
     self.player_table = x
 
   def get_scorer_table(self):
-    scorers = [i for i in sorted(self, key=lambda x: -x.scoren) if i.scoren > 0]
+    scorers = [i for i in sorted(self, key=lambda x: -x.match.score.scoren) if i.match.score.scoren > 0]
     x = PrettyTable()
     x.add_column('%s scorers' % self.name, scorers)
-    x.add_column('score', [x.score for x in scorers])
+    x.add_column('score', [x.match.score.score for x in scorers])
     self.scorer_table = x
 
   def get_overall(self):
@@ -167,8 +167,8 @@ class Team():
     self.get_player_table()
 
   def update_score(self):
-    self.goals = sum([x.goals for x in self])
-    self.points = sum([x.points for x in self])
+    self.goals = sum([x.match.score.goals for x in self])
+    self.points = sum([x.match.score.points for x in self])
     self.score = (self.goals * 3) + self.points
 
   def reset_match_stats(self):

@@ -54,25 +54,25 @@ class Training():
   def train(self, ateam, focus):
     for x in ateam:
       if focus in ['de', 'defending']:
-        x.defending = x_0_100_cap(x.defending + random_0_100_normal(5, 1))
-        x.passing = x_0_100_cap(x.passing - random_0_100_normal(2, 1))
-        x.shooting = x_0_100_cap(x.shooting - random_0_100_normal(2, 1))
-        x.fitness = x_0_100_cap(x.fitness - random_0_100_normal(2, 1))
+        x.physical.defending = x_0_100_cap(x.physical.defending + random_0_100_normal(5, 1))
+        x.physical.passing = x_0_100_cap(x.physical.passing - random_0_100_normal(2, 1))
+        x.physical.shooting = x_0_100_cap(x.physical.shooting - random_0_100_normal(2, 1))
+        x.physical.fitness = x_0_100_cap(x.physical.fitness - random_0_100_normal(2, 1))
       if focus in ['pa', 'passing']:
-        x.passing = x_0_100_cap(x.passing + random_0_100_normal(5, 1))
-        x.defending = x_0_100_cap(x.defending - random_0_100_normal(2, 1))
-        x.shooting = x_0_100_cap(x.shooting - random_0_100_normal(2, 1))
-        x.fitness = x_0_100_cap(x.fitness - random_0_100_normal(2, 1))
+        x.physical.passing = x_0_100_cap(x.physical.passing + random_0_100_normal(5, 1))
+        x.physical.defending = x_0_100_cap(x.physical.defending - random_0_100_normal(2, 1))
+        x.physical.shooting = x_0_100_cap(x.physical.shooting - random_0_100_normal(2, 1))
+        x.physical.fitness = x_0_100_cap(x.physical.fitness - random_0_100_normal(2, 1))
       elif focus in ['sh', 'shooting']:
-        x.shooting = x_0_100_cap(x.shooting + random_0_100_normal(5, 1))
-        x.defending = x_0_100_cap(x.defending - random_0_100_normal(2, 1))
-        x.passing = x_0_100_cap(x.passing - random_0_100_normal(2, 1))
-        x.fitness = x_0_100_cap(x.fitness - random_0_100_normal(2, 1))
+        x.physical.shooting = x_0_100_cap(x.physical.shooting + random_0_100_normal(5, 1))
+        x.physical.defending = x_0_100_cap(x.physical.defending - random_0_100_normal(2, 1))
+        x.physical.passing = x_0_100_cap(x.physical.passing - random_0_100_normal(2, 1))
+        x.physical.fitness = x_0_100_cap(x.physical.fitness - random_0_100_normal(2, 1))
       elif focus in ['fi', 'fitness']:
-        x.fitness = x_0_100_cap(x.fitness + random_0_100_normal(5, 1))
-        x.defending = x_0_100_cap(x.defending - random_0_100_normal(2, 1))
-        x.passing = x_0_100_cap(x.passing - random_0_100_normal(2, 1))
-        x.shooting = x_0_100_cap(x.shooting - random_0_100_normal(2, 1))
+        x.physical.fitness = x_0_100_cap(x.physical.fitness + random_0_100_normal(5, 1))
+        x.physical.defending = x_0_100_cap(x.physical.defending - random_0_100_normal(2, 1))
+        x.physical.passing = x_0_100_cap(x.physical.passing - random_0_100_normal(2, 1))
+        x.physical.shooting = x_0_100_cap(x.physical.shooting - random_0_100_normal(2, 1))
       x.get_overall()
     ateam.get_overall()
 

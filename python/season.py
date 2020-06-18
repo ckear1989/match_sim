@@ -57,9 +57,9 @@ class Season():
       if 'league' in self.next_team_fixture[2]:
         ps += '{0}\n'.format(self.team_league)
       elif 'cup' in self.next_team_fixture[2]:
-        ps += '{0}\n'.format(sef.cup)
+        ps += '{0}\n'.format(self.competitions['cup'])
     else:
-      ps += '{0}\n'.format(sef.cup)
+      ps += '{0}\n'.format(self.competitions['cup'])
     return ps
 
   def get_upcoming_events(self):
@@ -167,7 +167,7 @@ class Season():
     for comp in self.competitions.keys():
       for team in self.competitions[comp].teams:
         self.competitions[comp].teams[team].reset_match_stats()
-        self.competitions[comp].teams[team].reset_wld_stats()
+        self.competitions[comp].teams[team].reset_wld()
     for team in self.teams.keys():
       self.teams[team].reset_match_stats()
       self.teams[team].reset_wld()
@@ -312,14 +312,7 @@ class Season():
     i = 0
     for team in compo.teams.keys():
       for player in compo.teams[team]:
-        compo.players[i].points += player.points
-        compo.players[i].goals += player.goals
-        compo.players[i].assists += player.assists
-        if compo.players[i].match_ratings == [0.0]:
-          compo.players[i].match_ratings = [player.match_rating]
-        else:
-          compo.players[i].match_ratings.append(player.match_rating)
-        compo.players[i].update_score()
+        compo.players[i].update_postmatch_stats(player)
         i += 1
       self.teams[team].reset_match_stats()
       compo.teams[team].reset_match_stats()
@@ -381,6 +374,8 @@ class Season():
   def process_match_tuple(self, match_t):
     silent = False
     time_step = 1/self.settings.match_speed
+    if self.settings.match_speed == 70:
+      time_step =0
     if self.team not in match_t:
       silent = True
       time_step = 0

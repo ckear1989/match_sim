@@ -21,14 +21,14 @@ class Score():
     return self.score
 
   def score_point(self):
-   '''Increment stat and update score'''
-   self.points += 1
-   self.update_score()
+    '''Increment stat and update score'''
+    self.points += 1
+    self.update_score()
 
   def score_goal(self):
-   '''Increment stat and update score'''
-   self.goals += 1
-   self.update_score()
+    '''Increment stat and update score'''
+    self.goals += 1
+    self.update_score()
 
   def update_score(self):
     '''Recalculate total score and reformat string representation'''
@@ -44,23 +44,39 @@ class MatchStats():
     self.minutes = 0
     self.rating = 0.0
 
+  def reset_match_stats(self):
+    '''Reset stats accrued during match'''
+    self.score = Score()
+    self.assists = 0
+    self.minutes = 0
+    self.rating = 0.0
+
+  def age_match_minute(self):
+    '''Increment minutes played'''
+    self.minutes += 1
+
   def assist(self):
     '''Increment assist and improve rating'''
     self.rating += 0.5
     self.assists += 1
 
   def turnover(self):
-   '''Improve rating after turning over opponent'''
-   self.rating += 0.5
+    '''Improve rating after turning over opponent'''
+    self.rating += 0.5
 
   def save_goal(self):
-   '''Improve rating during match'''
-   self.rating += 1.5
+    '''Improve rating during match'''
+    self.rating += 1.5
 
   def score_point(self):
     '''Increment score and improve rating during match'''
     self.score.score_point()
     self.rating += 1.0
+
+  def score_goal(self):
+    '''Increment score and improve rating during match'''
+    self.score.score_goal()
+    self.rating += 2.0
 
 class PhysicalStats():
   '''Randomly generate ratings for physical attributes'''
@@ -84,7 +100,7 @@ class PhysicalStats():
 
   def condition_deteriorate(self):
     '''Decrement condition to represent tiring during match'''
-    self.condition -= 0.5
+    self.condition = max((self.condition-0.08), 0.2)
 
   def condition_improve(self):
     '''Increment condition to represent resting period'''
@@ -98,6 +114,10 @@ class SeasonStats():
     self.injury = Injury()
     self.suspension = Suspension()
     self.update_match_rating()
+
+  def gain_card(self, card):
+    '''Add card to currently held cards'''
+    self.cards.append(card)
 
   def update_match_rating(self):
     '''Recalculate average match rating'''
@@ -151,13 +171,48 @@ class Player():
     '''Assert player order for table sorting'''
     return self.__repr__() < other.__repr__()
 
+  def update_postmatch_stats(self, mplayer):
+    '''Copy match playing stats from one player to self'''
+    self.match.score.points += mplayer.match.score.points
+    self.match.score.goals += mplayer.match.score.goals
+    self.match.assists += mplayer.match.assists
+    if self.season.match_ratings == [0.0]:
+      self.season.match_ratings = [mplayer.match.rating]
+    else:
+      self.season.match_ratings.append(mplayer.match.rating)
+    self.update_score()
+
+  def save_goal(self):
+    '''Improve rating during match'''
+    self.match.save_goal()
+
+  def gain_card(self, card):
+    '''Add card to currently held cards'''
+    self.season.gain_card(card)
+
+  def assist(self):
+    '''Tell sub class to do it\'s job'''
+    self.match.assist()
+
+  def turnover(self):
+    '''Tell sub class to do it\'s job'''
+    self.match.turnover()
+
+  def update_score(self):
+    '''Tell sub class to do it\'s job'''
+    self.match.score.update_score()
+
   def score_point(self):
     '''Tell sub class to do it\'s job'''
     self.match.score_point()
 
+  def score_goal(self):
+    '''Tell sub class to do it\'s job'''
+    self.match.score_goal()
+
   def reset_match_stats(self):
     '''Set all match stats to start of match positions'''
-    self.match = MatchStats()
+    self.match.reset_match_stats()
 
   def gain_injury(self, date):
     '''Tell sub class to do it\'s job'''
@@ -185,6 +240,16 @@ class Player():
     self.check_suspension(date)
     self.condition_improve()
     self.get_overall()
+
+  def age_match_minute(self):
+    '''Update player stats after playing a minute'''
+    self.physical.condition_deteriorate()
+    self.match.age_match_minute()
+    self.get_overall()
+
+  def gain_suspension(self, status, date):
+    '''Update suspension object'''
+    self.season.gain_suspension(status, date)
 
 if __name__ == "__main__":
 

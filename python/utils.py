@@ -1,5 +1,6 @@
 '''Helper functions used by multiple scripts'''
 
+import datetime
 import numpy as np
 
 # https://stackoverflow.com/questions/53401383/how-to-print-two-strings-large-text-side-by-side-in-python
@@ -35,3 +36,13 @@ def x_0_100_cap(x):
 
 def random_0_100_normal(mean, sd):
   return x_0_100_cap(np.random.normal(mean, sd))
+
+def get_sundays(start_date):
+  sundays = []
+  year = start_date.year
+  for i in range(366):
+    adate = start_date + datetime.timedelta(i)
+    if adate.year == year:
+      if adate.weekday() == 6:
+        sundays.append(adate)
+  return sundays
