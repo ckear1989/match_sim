@@ -180,6 +180,7 @@ class Player():
       self.season.match_ratings = [mplayer.match.rating]
     else:
       self.season.match_ratings.append(mplayer.match.rating)
+    self.season.update_match_rating()
     self.update_score()
 
   def save_goal(self):
