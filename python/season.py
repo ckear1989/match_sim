@@ -9,8 +9,10 @@ import pyfiglet
 from prettytable import PrettyTable
 import dill as pickle
 from progressbar import Counter, Timer, ProgressBar
+import concurrent.futures
 
 import default
+from utils import timed_future_progress_bar
 from team import Team
 from match_team import MatchTeam
 from match import Match
@@ -213,7 +215,7 @@ class Season():
     self.update_league()
     self.update_cup()
 
-  def get_teams(self):
+  def progress_get_teams(self):
     '''Create teams from random data.  Instantiate competitions'''
     self.teams = {}
     for team in default.poss_teams:
@@ -231,13 +233,19 @@ class Season():
     teams4 = poss_teams[teams_per_div+8:]
     self.init_competitions(teams1, teams2, teams3, teams4)
 
+  def get_teams(self):
+    print('creating teams...')
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+      future = pool.submit(self.progress_get_teams)
+      timed_future_progress_bar(future, 4)
+
   def reset_players(self):
     '''Reset stats of all players in all competitions'''
     for comp in self.competitions:
       for player in self.competitions[comp].players:
         player.reset_match_stats()
 
-  def init_competitions(self, teams1, teams2, teams3, teams4):
+  def progress_init_competitions(self, teams1, teams2, teams3, teams4):
     '''Create 4 leagues and cup.'''
     self.competitions['league1'] = Competition('league1', 'rr',
       datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams1})
@@ -253,6 +261,12 @@ class Season():
     last_league_fixture_date = max([x.last_fixture_date for x in self.competitions.values()])
     self.competitions['cup'] = Competition('cup', 'cup',
       last_league_fixture_date + datetime.timedelta(1), self.teams)
+
+  def init_competitions(self, teams1, teams2, teams3, teams4):
+    print('creating competitions...')
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+      future = pool.submit(self.progress_init_competitions, teams1, teams2, teams3, teams4)
+      timed_future_progress_bar(future, 2)
 
   def promotion_relegation(self):
     '''Determine teams to move up or down.  Change lists of team names'''
@@ -295,11 +309,13 @@ class Season():
 
   def save(self):
     '''Save pickle version of season that can be loaded later'''
-    widgets = ['Saving game...', Timer()]
-    pbar = ProgressBar(widgets=widgets)
-    for i in pbar([0]):
+    def blocking_job():
       with open(self.save_file, 'wb') as f:
         pickle.dump(self, f)
+    print('saving game...')
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+      future = pool.submit(blocking_job)
+      timed_future_progress_bar(future, 4)
 
   def cont(self):
     '''Continue season.  Wait on user input'''

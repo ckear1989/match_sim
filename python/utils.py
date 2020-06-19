@@ -1,10 +1,14 @@
 '''Helper functions used by multiple scripts'''
 
 import datetime
+import time
 import numpy as np
+from tqdm import tqdm
 
-# https://stackoverflow.com/questions/53401383/how-to-print-two-strings-large-text-side-by-side-in-python
 def print_side_by_side(a, b, size=60, space=4):
+  '''https://stackoverflow.com/questions/53401383/how-to-print-
+     two-strings-large-text-side-by-side-in-python
+  '''
   pstr = ''
   astr0 = str(a).split('\n')
   bstr0 = str(b).split('\n')
@@ -46,3 +50,27 @@ def get_sundays(start_date):
       if adate.weekday() == 6:
         sundays.append(adate)
   return sundays
+
+def timed_future_progress_bar(future, expected_time, increments=10):
+  """
+  https://stackoverflow.com/questions/59013308/python-progress-
+    bar-for-non-loop-function
+  Display progress bar for expected_time seconds.
+  Complete early if future completes.
+  Wait for future if it doesn't complete in expected_time.
+  """
+  interval = expected_time / increments
+  with tqdm(total=increments) as pbar:
+    for i in range(increments - 1):
+      if future.done():
+        # finish the progress bar
+        # not sure if there's a cleaner way to do this?
+        pbar.update(increments - i)
+        return
+      else:
+        time.sleep(interval)
+        pbar.update()
+    # if the future still hasn't completed, wait for it.
+    future.result()
+    pbar.update()
+

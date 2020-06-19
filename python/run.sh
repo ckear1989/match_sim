@@ -13,6 +13,7 @@
 # pip3 install pyfiglet
 # pip3 install pylint
 # pip3 install barnum
+# pip3 install tqdm
 
 # python3.6 default.py
 # python3.6 settings.py
