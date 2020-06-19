@@ -13,6 +13,9 @@ setuptools.setup(
   long_description_content_type="text/markdown",
   url="https://github.com/ckear/match_sim",
   packages=setuptools.find_packages(),
+  package_data={
+    'match_sim': ['data/defaults/*.txt', 'data/formations/*.txt'],
+  },
   classifiers=[
       "Programming Language :: Python :: 3",
       "License :: OSI Approved :: MIT License",

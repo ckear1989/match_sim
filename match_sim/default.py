@@ -1,6 +1,9 @@
 '''Store default parameters for game mechanics'''
+
 import barnum
 import random
+import pathlib
+path = pathlib.Path(__file__).parent.absolute()
 
 random.seed(12345)
 poss_teams = [barnum.create_city_state_zip()[1] for i in range(16)]
@@ -22,7 +25,7 @@ dow = {
   'su': 6
 }
 
-with open('../data/defaults/training_focus.txt', 'r') as f:
+with open('{0}/data/defaults/training_focus.txt'.format(path), 'r') as f:
   focus = [x.strip() for x in f.readlines()]
 focus += [f[:2] for f in focus]
 
@@ -34,7 +37,7 @@ formations = [
   '2-2-1-4-5'
 ]
 
-formations_ascii = {x:open('../data/formations/{0}.txt'.format(x)).read() for x in formations}
+formations_ascii = {x:open('{0}/data/formations/{1}.txt'.format(path, x)).read() for x in formations}
 
 tactics = [
   'neutral',
