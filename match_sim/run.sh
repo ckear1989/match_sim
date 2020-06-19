@@ -15,6 +15,7 @@
 # pip3 install barnum
 # pip3 install tqdm
 
+sudo python3 __init__.py
 # python3.6 default.py
 # python3.6 settings.py
 # python3.6 player.py
@@ -27,7 +28,6 @@
 # python3.6 match_team.py
 # sudo python3.6 main.py
 
-sudo python3 __init__.py
 
 # pylint --disable=bad-continuation --indent-string='  ' main.py > pylint.txt
 
