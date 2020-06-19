@@ -69,7 +69,7 @@ class Event():
     self.pl.append('He takes the ball into the tackle against {0}.'.format(self.defending_player))
     p0 = random.random()
     if p0 < 0.4:
-      self.pl.append('{0} get\'s past his man and looks to shoot.'.format(self.posession_player))
+      self.pl.append('{0} gets past his man and looks to shoot.'.format(self.posession_player))
       p1 = random.random()
       if p1 < 0.8:
         self.pl.append('The kick goes high.')
