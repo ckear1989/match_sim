@@ -5,27 +5,33 @@ import time
 import numpy as np
 from tqdm import tqdm
 
-def print_side_by_side(a, b, size=60, space=4):
+def print_side_by_side(a, b, space=4):
   '''https://stackoverflow.com/questions/53401383/how-to-print-
      two-strings-large-text-side-by-side-in-python
   '''
   pstr = ''
   astr0 = str(a).split('\n')
   bstr0 = str(b).split('\n')
-  for i in range(max(len(astr0), len(bstr0))):
-    if len(astr0) > i:
-      astr = astr0[i]
-    else:
-      astr = ''
-    if len(bstr0) > i:
-      bstr = bstr0[i]
-    else:
-      bstr = ''
-    while astr or bstr:
-      pstr += astr[:size].ljust(size) + " " * space + bstr[:size]
-      astr = astr[size:]
-      bstr = bstr[size:]
-    pstr += '\n'
+  amax = max([len(x) for x in astr0])
+  bmax = max([len(x) for x in bstr0])
+  size = max(amax, bmax)
+  if (amax + bmax) < 180:
+    for i in range(max(len(astr0), len(bstr0))):
+      if len(astr0) > i:
+        astr = astr0[i]
+      else:
+        astr = ''
+      if len(bstr0) > i:
+        bstr = bstr0[i]
+      else:
+        bstr = ''
+      while astr or bstr:
+        pstr += astr[:size].ljust(size) + " " * space + bstr[:size]
+        astr = astr[size:]
+        bstr = bstr[size:]
+      pstr += '\n'
+  else:
+    pstr += '{0}\n{1}'.format(str(a) , str(b))
   return pstr
 
 def is_int(x):

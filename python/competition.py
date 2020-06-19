@@ -50,14 +50,14 @@ class Competition():
     if self.form in ['rr', 'drr']:
       return print_side_by_side(print_side_by_side(print_side_by_side(
         self.league_table,
-        self.match_rating_table, 57),
-        self.scorers_table, 106),
-        self.assist_table, 142)
+        self.match_rating_table),
+        self.scorers_table),
+        self.assist_table)
     return print_side_by_side(print_side_by_side(print_side_by_side(
       self.bracket_p,
-      self.match_rating_table, 50),
-      self.scorers_table, 99),
-      self.assist_table, 135)
+      self.match_rating_table),
+      self.scorers_table),
+      self.assist_table)
 
   def update_next_fixture(self, date):
     '''Store info on next and last fixtures'''
