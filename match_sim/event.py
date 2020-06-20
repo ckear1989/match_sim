@@ -2,6 +2,8 @@
 
 import random
 
+import numpy as np
+
 class Event():
   '''Data generated for attacking event.  Stochastically evaluate event'''
   def __init__(self, amatch):
@@ -41,12 +43,27 @@ class Event():
       self.attack(amatch)
     else:
       self.pl.append('He cycles back to retain posession.')
-    if self.silent is not True:
-      for x in self.pl:
-        print(x, end='')
-      print()
     self.attackers.update_playing_positions()
     self.defenders.update_playing_positions()
+
+  def throw_in(self):
+    if random.random() < 0.5:
+      posession_player = random.choice(self.attackers.midfielders)
+      team = self.attackers.name
+    else:
+      posession_player = random.choice(self.defenders.midfielders)
+      team = self.defenders.name
+    self.pl.append('{0} The referee throws the ball in.{1} wins posession for {2}'.format(
+      self.stopclock_time, posession_player, team))
+
+  def added_time(self):
+    '''Determine how many minutes and seconds to be played'''
+    at = random.choice(range(1, 7))
+    self.pl.append('{0} {1} minutes added time indicated by the linesman.'.format(self.stopclock_time, at))
+    at = float(at)
+    at += np.random.normal(0.5, 0.1)
+    at = at * 60
+    return at
 
   def attack(self, amatch):
     '''Attackers have posession.  Pass or take on or foul given'''
@@ -150,7 +167,7 @@ class Event():
       self.pl.append('{0} steps up to take the free kick.'.format(self.shooting_player))
       self.shooting_player_point_attempt(shooting_player, assister)
     else:
-      self.pl.append('It\'s inside the box.  It will be a penalty.')
+      self.pl.append('It\'s inside the box.It will be a penalty.')
       self.pl.append('The penalty is to be taken by {0}.'.format(self.shooting_player))
       self.shooting_player_goal_attempt(shooting_player, assister)
 

@@ -15,14 +15,14 @@
 # pip3 install barnum
 # pip3 install tqdm
 
-sudo python3 __init__.py
+# sudo python3 __init__.py
 # python3.6 default.py
 # python3.6 settings.py
 # python3.6 player.py
 # python3.6 competition.py
 # sudo python3.6 season.py
 # sudo python3.6 event.py
-# sudo python3.6 match.py
+sudo python3.6 match.py
 # python3.6 training.py
 # python3.6 team.py
 # python3.6 match_team.py

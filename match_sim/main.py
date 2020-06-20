@@ -2,6 +2,8 @@
 
 import os
 import pickle
+import pathlib
+path = pathlib.Path(__file__).parent.absolute()
 
 from season import Season
 import default
@@ -24,14 +26,14 @@ def new_game():
 
 def load_game():
   '''Show existing games.  Ask user to choose their game'''
-  games = os.listdir('../data/games/')
+  games = os.listdir('{0}/data/games/'.format(path))
   games = [g.replace('.dat', '') for g in games]
   if games == []:
     print('\tno games found\n')
   else:
     pl_game = input('choose game:\n{0}\n'.format(' '.join(games)))
     if pl_game in games:
-      with open('../data/games/%s.dat' % pl_game, 'rb') as f:
+      with open('{0}/data/games/{1}.dat'.format(path, pl_game), 'rb') as f:
         season = pickle.load(f)
       season.save()
       season.cont()

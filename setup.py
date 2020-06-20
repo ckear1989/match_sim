@@ -14,7 +14,7 @@ setuptools.setup(
   url="https://github.com/ckear/match_sim",
   packages=setuptools.find_packages(),
   package_data={
-    'match_sim': ['data/defaults/*.txt', 'data/formations/*.txt'],
+    'match_sim': ['data/defaults/*.txt', 'data/formations/*.txt', 'data/settings/*.json'],
   },
   classifiers=[
       "Programming Language :: Python :: 3",

@@ -51,16 +51,18 @@ class Match():
     )
     return ps
 
+  def print_event_list(self, pl):
+    '''Print each line in list.  Pause appropriately.'''
+    if self.silent is not True:
+      for ps in pl:
+        print(ps, end='')
+      print()
+
   def throw_in(self):
-    '''Coin toss for initial posession'''
-    if random.random() < 0.5:
-      posession_player = random.choice(self.team_a)
-      team = self.team_a.name
-    else:
-      posession_player = random.choice(self.team_b)
-      team = self.team_b.name
-    print('{0} The referee throws the ball in.{1} wins posession for {2}'.format(
-      self.stopclock_time, posession_player, team))
+    '''Call event throw in method.  Print if necessary'''
+    event = Event(self)
+    event.throw_in()
+    self.print_event_list(event.pl)
 
   def update_team_condition(self):
     '''Age team by one minute'''
@@ -70,12 +72,11 @@ class Match():
     self.team_b.get_overall()
 
   def added_time(self):
-    '''Determine how many minutes and seconds to be played'''
+    '''Call event method'''
+    event = Event(self)
+    at = event.added_time()
+    self.print_event_list(event.pl)
     at = random.choice(range(1, 7))
-    print('{0} {1} minutes added time indicated by the linesman.'.format(self.stopclock_time, at))
-    at = float(at)
-    at += np.random.normal(0.5, 0.1)
-    at = at * 60
     return at
 
   def play_half(self, end_time, time_step, tane=time_until_next_event()):
@@ -219,6 +220,7 @@ class Match():
     '''Instatiate event.  Run it'''
     event = Event(self)
     event.run(self)
+    self.print_event_list(event.pl)
     self.abandon()
 
   def get_score(self):
@@ -233,6 +235,6 @@ if __name__ == "__main__":
   team_a = MatchTeam(Team('a', 'a'))
   team_b = MatchTeam(Team('b', 'b'))
   match = Match(team_a, team_b, datetime.date(2020, 1, 1), False, False)
-  match.play()
-  match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)
-  match.play()
+  match.play(0.1)
+  # match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)
+  # match.play()

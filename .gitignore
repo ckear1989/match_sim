@@ -1,4 +1,4 @@
-data/games/*
+match_sim/data/games/*
 TODO
 profile*.txt
 pylint*.txt
