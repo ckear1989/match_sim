@@ -40,7 +40,7 @@ class Match():
     self.stopclock_time = stopclock(self.time)
     self.first_half_length = 35 * 60
     self.second_half_length = 35 * 60
-    self.get_output()
+    # self.get_output()
     random.seed()
 
   def __repr__(self):
@@ -133,22 +133,26 @@ class Match():
     '''Create beginning of match ascii banner.  Print it'''
     banner = pyfiglet.figlet_format('{0} vs {1} {2}\n'.format(
       self.team_a.name, self.team_b.name, self.date))
-    print(banner)
+    if self.silent is False:
+      print(banner)
 
   def banner_end(self):
     '''Create end of match ascii banner.  Print it'''
     banner = pyfiglet.figlet_format('{0} {1}\n'.format(
       self.get_score().replace('Score is now ', ''), self.date))
-    print(banner)
+    if self.silent is False:
+      print(banner)
 
   def shootout(self):
     '''Coin toss to determine winner'''
     p0 = random.random()
     if p0 < 0.5:
-      print('{0} wins the shootout.'.format(self.team_a.name))
+      if self.silent is False:
+        print('{0} wins the shootout.'.format(self.team_a.name))
       self.team_a.score += 1
     else:
-      print('{0} wins the shootout.'.format(self.team_b.name))
+      if self.silent is False:
+        print('{0} wins the shootout.'.format(self.team_b.name))
       self.team_b.score += 1
 
   def get_output(self):
@@ -194,7 +198,7 @@ class Match():
     self.full_time()
     self.extra_time(time_step)
     self.banner_end()
-    self.reset_output()
+    # self.reset_output()
 
   def get_scorers(self):
     '''Call team methods to collate scorer data.  Print tables.'''

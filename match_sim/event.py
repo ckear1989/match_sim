@@ -6,7 +6,8 @@ import numpy as np
 
 class Event():
   '''Data generated for attacking event.  Stochastically evaluate event'''
-  def __init__(self, amatch):
+  def __init__(self, amatch, seed=None):
+    random.seed(seed)
     self.stopclock_time = amatch.stopclock_time
     a_tot = amatch.team_a.overall
     b_tot = amatch.team_b.overall
@@ -42,9 +43,12 @@ class Event():
     if p0 < attack_propensity:
       self.attack(amatch)
     else:
-      self.pl.append('He cycles back to retain posession.')
+      self.recycle_posession()
     self.attackers.update_playing_positions()
     self.defenders.update_playing_positions()
+
+  def recycle_posession(self):
+    self.pl.append('He cycles back to retain posession.')
 
   def throw_in(self):
     if random.random() < 0.5:
