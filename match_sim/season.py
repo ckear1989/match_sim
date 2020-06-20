@@ -10,8 +10,6 @@ from prettytable import PrettyTable
 import dill as pickle
 from progressbar import Counter, Timer, ProgressBar
 import concurrent.futures
-import pathlib
-path = pathlib.Path(__file__).parent.absolute()
 
 import default
 from utils import timed_future_progress_bar
@@ -64,8 +62,8 @@ class Season():
     random.seed(team_name)
     self.team = team_name
     self.manager = manager_name
-    self.save_file = '{0}/data/games/{1}_{2}_{3}.dat'.format(
-      path, self.team, self.manager, datetime.datetime.today().strftime('%Y%m%d'))
+    self.save_file = '{0}{1}_{2}_{3}.dat'.format(
+      default.save_dir, self.team, self.manager, datetime.datetime.today().strftime('%Y%m%d'))
     self.start_date = datetime.date(2020, 1, 1)
     self.current_date = self.start_date
     self.year = self.start_date.year
