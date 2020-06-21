@@ -5,6 +5,7 @@ import random
 import datetime
 import calendar
 import copy
+import names
 import pyfiglet
 from prettytable import PrettyTable
 import dill as pickle
@@ -224,7 +225,7 @@ class Season():
       if team == self.team:
         self.teams[team] = MatchTeam(Team(team, self.manager, control=True))
       else:
-        self.teams[team] = MatchTeam(Team(team, 'jim'))
+        self.teams[team] = MatchTeam(Team(team, names.get_full_name()))
         self.teams[team].training = Training(self.current_date, [0, 2, 4], ['fi', 'pa', 'sh'])
     n_teams = len(self.teams.keys())
     poss_teams = random.sample(self.teams.keys(), n_teams)
