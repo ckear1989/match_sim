@@ -199,6 +199,14 @@ class Team():
       x.update_score()
     self.update_score()
 
+  def reset_season_stats(self):
+    '''Clear all scores etc. for beginning of next match'''
+    for x in self:
+      x.reset_season_stats()
+      x.update_score()
+    self.update_score()
+    self.reset_wld()
+
   def reset_wld(self):
     '''End of season reset stats for next season'''
     self.played = 0

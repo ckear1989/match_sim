@@ -204,54 +204,64 @@ class Competition():
     myplayers = [myteams[x].players for x in self.teams]
     myplayers = [p for team in myplayers for p in team]
     if self.form in ['rr', 'drr']:
-      players = sorted([x for x in myplayers if x.season.league_score.scoren > 0],
-        key=lambda x: -x.season.league_score.scoren)
+      players = sorted([x for x in myplayers if x.league.score.scoren > 0],
+        key=lambda x: -x.league.score.scoren)
       x = PrettyTable()
       x.add_column('player', players)
       x.add_column('team', [x.team for x in players])
-      x.add_column('score', [x.season.league_score.score for x in players])
+      x.add_column('score', [x.league.score.score for x in players])
       x.title = '{0} top {1}'.format(self.name, 'score')
       x = x.get_string(end=n)
       self.scorers_table = x
 
-      players = sorted(myplayers, key=lambda x: -x.season.league_assists)
+      players = sorted(myplayers, key=lambda x: -x.league.assists)
       x = PrettyTable()
       x.add_column('player', players)
       x.add_column('team', [x.team for x in players])
-      x.add_column('assists', [x.season.league_assists for x in players])
+      x.add_column('assists', [x.league.assists for x in players])
       x.title = '{0} top {1}'.format(self.name, 'assists')
       x = x.get_string(end=n)
       self.assist_table = x
+
+      players = sorted(myplayers, key=lambda x: -x.league.average_match_rating)
+      x = PrettyTable()
+      x.add_column('player', players)
+      x.add_column('team', [x.team for x in players])
+      x.add_column('average_match_rating', [x.league.average_match_rating for
+        x in players])
+      x.title = '{0} top {1}'.format(self.name, 'average_match_rating')
+      x = x.get_string(end=n)
+      self.match_rating_table = x
 
     elif self.form in ['cup']:
-      players = sorted([x for x in myplayers if x.season.cup_score.scoren > 0],
-        key=lambda x: -x.season.cup_score.scoren)
+      players = sorted([x for x in myplayers if x.cup.score.scoren > 0],
+        key=lambda x: -x.cup.score.scoren)
       x = PrettyTable()
       x.add_column('player', players)
       x.add_column('team', [x.team for x in players])
-      x.add_column('score', [x.season.cup_score.score for x in players])
+      x.add_column('score', [x.cup.score.score for x in players])
       x.title = '{0} top {1}'.format(self.name, 'score')
       x = x.get_string(end=n)
       self.scorers_table = x
 
-      players = sorted(myplayers, key=lambda x: -x.season.cup_assists)
+      players = sorted(myplayers, key=lambda x: -x.cup.assists)
       x = PrettyTable()
       x.add_column('player', players)
       x.add_column('team', [x.team for x in players])
-      x.add_column('assists', [x.season.cup_assists for x in players])
+      x.add_column('assists', [x.cup.assists for x in players])
       x.title = '{0} top {1}'.format(self.name, 'assists')
       x = x.get_string(end=n)
       self.assist_table = x
 
-    players = sorted(myplayers, key=lambda x: -x.season.average_match_rating)
-    x = PrettyTable()
-    x.add_column('player', players)
-    x.add_column('team', [x.team for x in players])
-    x.add_column('average_match_rating', [x.season.average_match_rating for
-      x in players])
-    x.title = '{0} top {1}'.format(self.name, 'average_match_rating')
-    x = x.get_string(end=n)
-    self.match_rating_table = x
+      players = sorted(myplayers, key=lambda x: -x.cup.average_match_rating)
+      x = PrettyTable()
+      x.add_column('player', players)
+      x.add_column('team', [x.team for x in players])
+      x.add_column('average_match_rating', [x.cup.average_match_rating for
+        x in players])
+      x.title = '{0} top {1}'.format(self.name, 'average_match_rating')
+      x = x.get_string(end=n)
+      self.match_rating_table = x
 
     players = sorted(myplayers, key=lambda x: -x.physical.overall)
     x = PrettyTable()

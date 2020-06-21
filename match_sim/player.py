@@ -127,10 +127,8 @@ class SeasonStats():
     self.injury = Injury()
     self.suspension = Suspension()
     self.update_match_rating()
-    self.league_score = Score()
-    self.cup_score = Score()
-    self.league_assists = 0
-    self.cup_assists = 0
+    self.score = Score()
+    self.assists = 0
 
   def gain_card(self, card):
     '''Add card to currently held cards'''
@@ -151,6 +149,13 @@ class SeasonStats():
     if self.injury.return_date is not None:
       if self.injury.return_date <= date:
         self.reset_injury()
+
+  def reset(self):
+    self.match_rating = 0
+    self.cards = []
+    self.update_match_rating()
+    self.score = Score()
+    self.assists = 0
 
   def reset_injury(self):
     '''Clear injury'''
@@ -179,6 +184,8 @@ class Player():
     self.match = MatchStats()
     self.physical = PhysicalStats()
     self.season = SeasonStats()
+    self.league = SeasonStats()
+    self.cup = SeasonStats()
 
   def __repr__(self):
     '''Return user friendly representation of player'''
@@ -191,16 +198,15 @@ class Player():
   def update_postmatch_stats(self, comp):
     '''Copy match playing stats from one player to self'''
     if comp.form in ['rr', 'drr']:
-      self.season.league_score.points += self.match.score.points
-      self.season.league_score.goals += self.match.score.goals
-      self.season.league_assists += self.match.assists
+      stats = self.league
     elif comp.form in ['cup']:
-      self.season.cup_score.points += self.match.score.points
-      self.season.cup_score.goals += self.match.score.goals
-      self.season.cup_assists += self.match.assists
+      stats = self.cup
+    stats.score.points += self.match.score.points
+    stats.score.goals += self.match.score.goals
+    stats.assists += self.match.assists
     if self.match.minutes > 0:
-      self.season.match_ratings.append(self.match.rating)
-    self.season.update_match_rating()
+      stats.match_ratings.append(self.match.rating)
+    stats.update_match_rating()
     self.update_score()
 
   def save_goal(self):
@@ -222,8 +228,8 @@ class Player():
   def update_score(self):
     '''Tell sub class to do it\'s job'''
     self.match.score.update_score()
-    self.season.league_score.update_score()
-    self.season.cup_score.update_score()
+    self.league.score.update_score()
+    self.cup.score.update_score()
 
   def score_point(self):
     '''Tell sub class to do it\'s job'''
@@ -236,6 +242,12 @@ class Player():
   def reset_match_stats(self):
     '''Set all match stats to start of match positions'''
     self.match.reset_match_stats()
+
+  def reset_season_stats(self):
+    '''Set all match stats to start of match positions'''
+    self.season.reset()
+    self.league.reset()
+    self.cup.reset()
 
   def gain_injury(self, date):
     '''Tell sub class to do it\'s job'''

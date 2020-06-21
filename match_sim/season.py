@@ -211,8 +211,7 @@ class Season():
     self.year += 1
     self.promotion_relegation()
     for team in self.teams:
-      self.teams[team].reset_match_stats()
-      self.teams[team].reset_wld()
+      self.teams[team].reset_season_stats()
     self.get_fixtures()
     self.update_next_fixture()
     self.update_league()
