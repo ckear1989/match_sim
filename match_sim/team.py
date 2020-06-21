@@ -163,7 +163,8 @@ class Team():
     x.title = '{0} {1} {2}'.format(self.name, self.manager, self.overall)
     x.float_format = '5.2'
     player_table_fields = ['last name', 'first name', 'position', 'lineup', 'condition', 'injury', 'suspension']
-    self.player_table = x.get_string(fields=player_table_fields)
+    self.player_table = x
+    x.fields = player_table_fields
 
   def get_scorer_table(self):
     '''Subset to scorers.  Format table'''

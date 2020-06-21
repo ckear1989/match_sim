@@ -238,7 +238,12 @@ if __name__ == "__main__":
 
   team_a = MatchTeam(Team('a', 'a'))
   team_b = MatchTeam(Team('b', 'b'))
-  match = Match(team_a, team_b, datetime.date(2020, 1, 1), False, False)
-  match.play(0.1)
+  match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)
+  # match.play(0.1)
   # match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)
   # match.play()
+  import cProfile
+  import pstats
+  cProfile.run('match.play()', 'profile1.txt')
+  p = pstats.Stats('profile1.txt').sort_stats('tottime').reverse_order()
+  p.print_stats()
