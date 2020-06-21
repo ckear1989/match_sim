@@ -16,7 +16,7 @@ import default
 from utils import timed_future_progress_bar
 from team import Team
 from match_team import MatchTeam
-from match import Match
+from match import Match, Result
 from training import Training
 from competition import Competition
 from settings import Settings
@@ -355,10 +355,11 @@ class Season():
       self.teams[team].reset_match_stats()
     self.update_league()
     self.update_cup()
+    result = Result(match)
     if self.current_date in self.results.keys():
-      self.results[self.current_date].append(match)
+      self.results[self.current_date].append(result)
     else:
-      self.results[self.current_date] = [match]
+      self.results[self.current_date] = [result]
 
   def training(self):
     '''Create or append team training schedule'''

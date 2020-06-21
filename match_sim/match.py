@@ -28,6 +28,21 @@ def time_until_next_event(mean=60, sd=10):
   '''Stochastic number of seconds until next event'''
   return max(round(np.random.normal(mean, sd), 0), 1)
 
+class Result():
+  '''Strip down match object'''
+  def __init__(self, amatch):
+    self.team_a_name = amatch.team_a.name
+    self.team_b_name = amatch.team_b.name
+    self.team_a_score = amatch.team_a.score
+    self.team_b_score = amatch.team_b.score
+
+  def __repr__(self):
+    '''User friendly scoreboard of match to represent object'''
+    ps = '{0} {1} {2} {3}'.format(
+      self.team_a_name, self.team_a_score, self.team_b_name, self.team_b_score
+    )
+    return ps
+
 class Match():
   '''Match playing engine'''
   def __init__(self, team_home, team_away, date, silent, extra_time_required):
@@ -40,7 +55,6 @@ class Match():
     self.stopclock_time = stopclock(self.time)
     self.first_half_length = 35 * 60
     self.second_half_length = 35 * 60
-    # self.get_output()
 
   def __repr__(self):
     '''User friendly scoreboard of match to represent object'''
@@ -153,18 +167,6 @@ class Match():
         print('{0} wins the shootout.'.format(self.team_b.name))
       self.team_b.score += 1
 
-  def get_output(self):
-    '''Set output to null if match is to be silent'''
-    if self.silent is True:
-      self.stdout = sys.stdout
-      f = open(os.devnull, 'w')
-      sys.stdout = f
-
-  def reset_output(self):
-    '''Restore printed output back to default'''
-    if self.silent is True:
-      sys.stdout = self.stdout
-
   def extra_time(self, time_step):
     '''Determine if extra time is needed.Play 2x10 minute periods of events'''
     if self.extra_time_required is True:
@@ -196,7 +198,6 @@ class Match():
     self.full_time()
     self.extra_time(time_step)
     self.banner_end()
-    # self.reset_output()
 
   def get_scorers(self):
     '''Call team methods to collate scorer data.  Print tables.'''
