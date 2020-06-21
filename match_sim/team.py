@@ -4,7 +4,7 @@ import random
 import numpy as np
 from prettytable import PrettyTable
 
-from player import Player
+from player import Player, Score
 from training import Training, train
 
 class TeamIterator:
@@ -38,10 +38,8 @@ class Team():
       self.players = players
     self.control = control
     self.get_overall()
-    self.score = 0
+    self.score = Score()
     self.played = 0
-    self.goals = 0
-    self.points = 0
     self.league_win = 0
     self.league_loss = 0
     self.league_draw = 0
@@ -158,12 +156,14 @@ class Team():
     x.add_column('fitness', [x.physical.fitness for x in self])
     x.add_column('condition', [x.physical.condition for x in self])
     x.add_column('injury', [x.season.injury for x in self])
+    x.add_column('suspension', [x.season.suspension for x in self])
     x.add_column('minutes', [x.match.minutes for x in self])
     x.add_column('score', [x.match.score.score for x in self])
     x.sortby = 'lineup'
     x.title = '{0} {1} {2}'.format(self.name, self.manager, self.overall)
     x.float_format = '5.2'
-    self.player_table = x
+    player_table_fields = ['last name', 'first name', 'position', 'lineup', 'condition', 'injury', 'suspension']
+    self.player_table = x.get_string(fields=player_table_fields)
 
   def get_scorer_table(self):
     '''Subset to scorers.  Format table'''
@@ -181,9 +181,15 @@ class Team():
 
   def update_score(self):
     '''Sum player points and goals.'''
-    self.goals = sum([x.match.score.goals for x in self])
-    self.points = sum([x.match.score.points for x in self])
-    self.score = (self.goals * 3) + self.points
+    self.score.goals = sum([x.match.score.goals for x in self])
+    self.score.points = sum([x.match.score.points for x in self])
+    self.score.update_score()
+
+  def update_postmatch_stats(self, comp):
+    '''Clear all scores etc. for beginning of next match'''
+    for x in self:
+      x.update_postmatch_stats(comp)
+    self.get_player_table()
 
   def reset_match_stats(self):
     '''Clear all scores etc. for beginning of next match'''

@@ -33,17 +33,16 @@ class Competition():
     self.form = form
     self.start_date = start_date
     self.year = self.start_date.year
-    self.teams = copy.deepcopy(teams)
-    self.bracket = bracket.Bracket(list(self.teams.keys()))
+    self.teams = [x for x in teams.keys()]
+    self.bracket = bracket.Bracket(self.teams)
     with Capturing() as self.bracket_p:
       self.bracket.show()
     self.bracket_p = '{0} bracket\n'.format(self.name) + '\n'.join(self.bracket_p)
     self.fixtures = {}
-    self.get_players()
     self.get_fixtures()
     self.update_next_fixture(self.start_date)
-    self.get_league_table()
-    self.get_stats_tables()
+    self.get_league_table(teams)
+    self.get_stats_tables(teams)
 
   def __repr__(self):
     '''Create user friendly string representation of league or cup'''
@@ -75,11 +74,11 @@ class Competition():
 
   def get_drr_fixtures(self):
     '''Round robin fixtures.  Each team plays each other twice'''
-    n_teams = len(self.teams.keys())
+    n_teams = len(self.teams)
     n_rounds = (n_teams - 1) * 2
     games_per_round = int(n_teams / 2)
     sundays = get_sundays(self.start_date)[:n_rounds]
-    all_teams = list(self.teams.keys())
+    all_teams = self.teams[:]
     matches = [list(x) for x in list(permutations(all_teams, 2))]
     for sunday in sundays:
       this_round = []
@@ -96,11 +95,11 @@ class Competition():
 
   def get_rr_fixtures(self):
     '''ROund robin fixtures.  Each team plays each other once'''
-    n_teams = len(self.teams.keys())
+    n_teams = len(self.teams)
     n_rounds = n_teams - 1
     games_per_round = int(n_teams / 2)
     sundays = get_sundays(self.start_date)[:n_rounds]
-    all_teams = list(self.teams.keys())
+    all_teams = self.teams[:]
     matches = [list(x) for x in list(combinations(all_teams, 2))]
     for sunday in sundays:
       this_round = []
@@ -146,7 +145,6 @@ class Competition():
       roundn = self.get_current_round()
     self.update_cup_fixtures()
     self.update_next_fixture(date)
-    self.get_league_table()
 
   def update_cup_fixtures(self):
     '''Create fixtures from beginnin of bracket to latest tie'''
@@ -174,7 +172,6 @@ class Competition():
     self.fixtures[sunday] = [x + [self.name] for x in matchups if null_opponent not in x]
     self.update_bracket(self.start_date)
     self.update_next_fixture(self.start_date)
-    self.get_league_table()
 
   def get_fixtures(self):
     '''Decide and call which method will be used to generate fixtures'''
@@ -185,39 +182,68 @@ class Competition():
     elif self.form == 'cup':
       self.get_cup_fixtures()
 
-  def get_league_table(self):
+  def get_league_table(self, steams):
     '''Create prettytable for league stats'''
+    myteams = {x: steams[x] for x in self.teams}
     x = PrettyTable()
-    x.add_column('team', [x.name for x in self.teams.values()])
-    x.add_column('played', [x.played for x in self.teams.values()])
-    x.add_column('win', [x.league_win for x in self.teams.values()])
-    x.add_column('loss', [x.league_loss for x in self.teams.values()])
-    x.add_column('draw', [x.league_draw for x in self.teams.values()])
-    x.add_column('pd', [x.league_points_diff for x in self.teams.values()])
-    x.add_column('points', [x.league_points for x in self.teams.values()])
+    x.add_column('team', [x.name for x in myteams.values()])
+    x.add_column('played', [x.played for x in myteams.values()])
+    x.add_column('win', [x.league_win for x in myteams.values()])
+    x.add_column('loss', [x.league_loss for x in myteams.values()])
+    x.add_column('draw', [x.league_draw for x in myteams.values()])
+    x.add_column('pd', [x.league_points_diff for x in myteams.values()])
+    x.add_column('points', [x.league_points for x in myteams.values()])
     x.sortby = 'points'
     x.reversesort = True
     x.title = '%s table' % self.name
     self.league_table = x
 
-  def get_players(self):
-    '''Create copies of all players in competition for stat updates'''
-    self.players = [copy.deepcopy(player) for team in self.teams for
-      player in self.teams[team].players]
-
-  def get_stats_tables(self, n=10):
+  def get_stats_tables(self, steams, n=10):
     '''Create prettytable objects to print for user friendly stats'''
-    players = sorted([x for x in self.players if x.match.score.scoren > 0],
-      key=lambda x: -x.match.score.scoren)
-    x = PrettyTable()
-    x.add_column('player', players)
-    x.add_column('team', [x.team for x in players])
-    x.add_column('score', [x.match.score.score for x in players])
-    x.title = '{0} top {1}'.format(self.name, 'score')
-    x = x.get_string(end=n)
-    self.scorers_table = x
+    myteams = {x: steams[x] for x in self.teams}
+    myplayers = [myteams[x].players for x in self.teams]
+    myplayers = [p for team in myplayers for p in team]
+    if self.form in ['rr', 'drr']:
+      players = sorted([x for x in myplayers if x.season.league_score.scoren > 0],
+        key=lambda x: -x.season.league_score.scoren)
+      x = PrettyTable()
+      x.add_column('player', players)
+      x.add_column('team', [x.team for x in players])
+      x.add_column('score', [x.season.league_score.score for x in players])
+      x.title = '{0} top {1}'.format(self.name, 'score')
+      x = x.get_string(end=n)
+      self.scorers_table = x
 
-    players = sorted(self.players, key=lambda x: -x.season.average_match_rating)
+      players = sorted(myplayers, key=lambda x: -x.season.league_assists)
+      x = PrettyTable()
+      x.add_column('player', players)
+      x.add_column('team', [x.team for x in players])
+      x.add_column('assists', [x.season.league_assists for x in players])
+      x.title = '{0} top {1}'.format(self.name, 'assists')
+      x = x.get_string(end=n)
+      self.assist_table = x
+
+    elif self.form in ['cup']:
+      players = sorted([x for x in myplayers if x.season.cup_score.scoren > 0],
+        key=lambda x: -x.season.cup_score.scoren)
+      x = PrettyTable()
+      x.add_column('player', players)
+      x.add_column('team', [x.team for x in players])
+      x.add_column('score', [x.season.cup_score.score for x in players])
+      x.title = '{0} top {1}'.format(self.name, 'score')
+      x = x.get_string(end=n)
+      self.scorers_table = x
+
+      players = sorted(myplayers, key=lambda x: -x.season.cup_assists)
+      x = PrettyTable()
+      x.add_column('player', players)
+      x.add_column('team', [x.team for x in players])
+      x.add_column('assists', [x.season.cup_assists for x in players])
+      x.title = '{0} top {1}'.format(self.name, 'assists')
+      x = x.get_string(end=n)
+      self.assist_table = x
+
+    players = sorted(myplayers, key=lambda x: -x.season.average_match_rating)
     x = PrettyTable()
     x.add_column('player', players)
     x.add_column('team', [x.team for x in players])
@@ -227,7 +253,7 @@ class Competition():
     x = x.get_string(end=n)
     self.match_rating_table = x
 
-    players = sorted(self.players, key=lambda x: -x.physical.overall)
+    players = sorted(myplayers, key=lambda x: -x.physical.overall)
     x = PrettyTable()
     x.add_column('player', players)
     x.add_column('team', [x.team for x in players])
@@ -235,15 +261,6 @@ class Competition():
     x.title = '{0} top {1}'.format(self.name, 'overall')
     x = x.get_string(end=n)
     self.overall_table = x
-
-    players = sorted(self.players, key=lambda x: -x.match.assists)
-    x = PrettyTable()
-    x.add_column('player', players)
-    x.add_column('team', [x.team for x in players])
-    x.add_column('assists', [x.match.assists for x in players])
-    x.title = '{0} top {1}'.format(self.name, 'assists')
-    x = x.get_string(end=n)
-    self.assist_table = x
 
 if __name__ == "__main__":
 

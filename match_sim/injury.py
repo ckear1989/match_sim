@@ -27,7 +27,6 @@ class Injury():
     else:
       self.status = 'Severely'
       self.return_date = current_date + datetime.timedelta(np.random.gamma(20, 8))
-    print((self.return_date - current_date).days)
 
   def reset(self):
     self.__init__()

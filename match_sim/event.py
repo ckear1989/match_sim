@@ -59,19 +59,17 @@ class Event():
       self.foul(self.posession_player)
 
   def defensive_setup(self):
-    self.pl.append('He\'\ using the time to let his team mates filter back.')
+    self.pl.append('He\'s using the time to let his team mates filter back.')
     self.pl.append('This will frustrate {0}.'.format(self.defenders.name))
     self.defenders.condition_deteriorate(0.6)
 
   def throw_in(self):
     if random.random() < 0.5:
-      posession_player = random.choice(self.attackers.midfielders)
-      team = self.attackers.name
+      posession_player = self.attackers.choose_player(0.01, 0.04, 0.9)
     else:
-      posession_player = random.choice(self.defenders.midfielders)
-      team = self.defenders.name
+      posession_player = self.defenders.choose_player(0.01, 0.04, 0.9)
     self.pl.append('{0} The referee throws the ball in.{1} wins posession for {2}'.format(
-      self.stopclock_time, posession_player, team))
+      self.stopclock_time, posession_player, posession_player.team))
 
   def added_time(self):
     '''Determine how many minutes and seconds to be played'''

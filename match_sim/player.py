@@ -20,6 +20,18 @@ class Score():
     '''User friendly representation of score'''
     return self.score
 
+  def __lt__(self, other):
+    '''Score less than other score'''
+    return self.scoren < other.scoren
+
+  def __gt__(self, other):
+    '''Score more than other score'''
+    return self.scoren > other.scoren
+
+  def __eq__(self, other):
+    '''Score equal to other score'''
+    return self.scoren == other.scoren
+
   def score_point(self):
     '''Increment stat and update score'''
     self.points += 1
@@ -54,6 +66,7 @@ class MatchStats():
   def age_match_minute(self):
     '''Increment minutes played'''
     self.minutes += 1
+    self.rating = min(self.rating + 0.1, 10.0)
 
   def assist(self):
     '''Increment assist and improve rating'''
@@ -114,6 +127,10 @@ class SeasonStats():
     self.injury = Injury()
     self.suspension = Suspension()
     self.update_match_rating()
+    self.league_score = Score()
+    self.cup_score = Score()
+    self.league_assists = 0
+    self.cup_assists = 0
 
   def gain_card(self, card):
     '''Add card to currently held cards'''
@@ -171,15 +188,18 @@ class Player():
     '''Assert player order for table sorting'''
     return self.__repr__() < other.__repr__()
 
-  def update_postmatch_stats(self, mplayer):
+  def update_postmatch_stats(self, comp):
     '''Copy match playing stats from one player to self'''
-    self.match.score.points += mplayer.match.score.points
-    self.match.score.goals += mplayer.match.score.goals
-    self.match.assists += mplayer.match.assists
-    if self.season.match_ratings == [0.0]:
-      self.season.match_ratings = [mplayer.match.rating]
-    else:
-      self.season.match_ratings.append(mplayer.match.rating)
+    if comp.form in ['rr', 'drr']:
+      self.season.league_score.points += self.match.score.points
+      self.season.league_score.goals += self.match.score.goals
+      self.season.league_assists += self.match.assists
+    elif comp.form in ['cup']:
+      self.season.cup_score.points += self.match.score.points
+      self.season.cup_score.goals += self.match.score.goals
+      self.season.cup_assists += self.match.assists
+    if self.match.minutes > 0:
+      self.season.match_ratings.append(self.match.rating)
     self.season.update_match_rating()
     self.update_score()
 
@@ -202,6 +222,8 @@ class Player():
   def update_score(self):
     '''Tell sub class to do it\'s job'''
     self.match.score.update_score()
+    self.season.league_score.update_score()
+    self.season.cup_score.update_score()
 
   def score_point(self):
     '''Tell sub class to do it\'s job'''
