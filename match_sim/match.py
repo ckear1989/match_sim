@@ -41,7 +41,6 @@ class Match():
     self.first_half_length = 35 * 60
     self.second_half_length = 35 * 60
     # self.get_output()
-    random.seed()
 
   def __repr__(self):
     '''User friendly scoreboard of match to represent object'''

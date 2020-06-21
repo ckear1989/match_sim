@@ -14,9 +14,10 @@ class Tactics():
   def __str__(self):
     return self.__repr__()
 
-  def change(self):
+  def change(self, x=None):
     print(self)
-    x = input('choose tactics:\n{0}\n'.format(' '.join(tactics))).strip()
+    if x is None:
+      x = input('choose tactics:\n{0}\n'.format(' '.join(tactics))).strip()
     if x in tactics:
       self.tactics = x
       self.get_s()

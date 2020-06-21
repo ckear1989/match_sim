@@ -56,14 +56,14 @@ tactics = [
 
 tactics_s = {
   'neutral': {
-    'attacking': 50,
-    'posession': 50,
-    'defending': 50
+    'attacking': 60,
+    'posession': 20,
+    'defending': 20
   },
   'posession': {
-    'attacking': 10,
-    'posession': 60,
-    'defending': 30
+    'attacking': 40,
+    'posession': 40,
+    'defending': 20
   },
   'blanket': {
     'attacking': 10,
@@ -71,14 +71,14 @@ tactics_s = {
     'defending': 80
   },
   'attacking': {
-    'attacking': 60,
-    'posession': 20,
-    'defending': 20
+    'attacking': 75,
+    'posession': 15,
+    'defending': 10
   },
   'gung-ho': {
-    'attacking': 80,
-    'posession': 10,
-    'defending': 10
+    'attacking': 90,
+    'posession': 8,
+    'defending': 2
   }
 }
 

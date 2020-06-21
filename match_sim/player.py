@@ -98,9 +98,9 @@ class PhysicalStats():
       self.fitness
     ])))
 
-  def condition_deteriorate(self):
+  def condition_deteriorate(self, n):
     '''Decrement condition to represent tiring during match'''
-    self.condition = max((self.condition-0.08), 0.2)
+    self.condition = max((self.condition-0.08), n)
 
   def condition_improve(self):
     '''Increment condition to represent resting period'''
@@ -242,9 +242,14 @@ class Player():
     self.condition_improve()
     self.get_overall()
 
+  def condition_deteriorate(self, n):
+    '''Update player stats after playing a minute'''
+    self.physical.condition_deteriorate(n)
+    self.get_overall()
+
   def age_match_minute(self):
     '''Update player stats after playing a minute'''
-    self.physical.condition_deteriorate()
+    self.physical.condition_deteriorate(0.2)
     self.match.age_match_minute()
     self.get_overall()
 

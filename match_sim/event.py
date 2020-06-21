@@ -6,8 +6,7 @@ import numpy as np
 
 class Event():
   '''Data generated for attacking event.  Stochastically evaluate event'''
-  def __init__(self, amatch, seed=None):
-    random.seed(seed)
+  def __init__(self, amatch):
     self.stopclock_time = amatch.stopclock_time
     a_tot = amatch.team_a.overall
     b_tot = amatch.team_b.overall
@@ -35,20 +34,34 @@ class Event():
   def run(self, amatch):
     '''Print string collected from method.  Printed if match is not silent'''
     self.pl.append(self.stopclock_time + ' ')
-    attack_propensity = min(1, (1.6 * self.attackers.attacking /
-      (self.attackers.attacking+self.attackers.defending)))
     self.pl.append('{0} has posession with {1} on the ball.'.format(
       self.attackers.name, self.posession_player))
+    attack_propensity = min(1, (self.attackers.attacking /
+      (self.attackers.attacking+self.attackers.posession+self.attackers.defending)))
+    posession_propensity = min(1, (self.attackers.posession /
+      (self.attackers.attacking+self.attackers.posession+self.attackers.defending)))
     p0 = random.random()
     if p0 < attack_propensity:
       self.attack(amatch)
-    else:
+    elif p0 < (attack_propensity+posession_propensity):
       self.recycle_posession()
+    else:
+      self.defensive_setup()
     self.attackers.update_playing_positions()
     self.defenders.update_playing_positions()
 
   def recycle_posession(self):
     self.pl.append('He cycles back to retain posession.')
+    self.pl.append('This will tire out {0}.'.format(self.defenders.name))
+    self.defenders.condition_deteriorate(0.4)
+    p0 = random.random()
+    if p0 < 0.2:
+      self.foul(self.posession_player)
+
+  def defensive_setup(self):
+    self.pl.append('He\'\ using the time to let his team mates filter back.')
+    self.pl.append('This will frustrate {0}.'.format(self.defenders.name))
+    self.defenders.condition_deteriorate(0.6)
 
   def throw_in(self):
     if random.random() < 0.5:
@@ -71,16 +84,25 @@ class Event():
 
   def attack(self, amatch):
     '''Attackers have posession.  Pass or take on or foul given'''
+    def branch0(): pass
+    def branch1(): pass
+    def branch2(): pass
+    def branch3(): pass
     self.pl.append('He looks forward to attack.')
     p0 = random.random()
-    if p0 < (0.33 * self.posession_player.physical.passing/100):
+    if p0 < (0.4 * self.posession_player.physical.passing/100):
+      branch0()
       self.posession_player_take_on()
-    elif p0 < (0.66 * self.posession_player.physical.passing/100):
+    elif p0 < (0.9 * self.posession_player.physical.passing/100):
+      branch1()
       self.shooting_player_posession()
-    elif p0 < 0.98:
+    elif p0 < 0.9:
+      branch2()
       self.pl.append('But he loses posession with the kick.')
     else:
+      branch3()
       self.foul(self.posession_player)
+    self.attackers.condition_deteriorate(0.1)
     self.shooting_player.update_score()
     self.attackers.update_score()
     self.pl.append(amatch.get_score())

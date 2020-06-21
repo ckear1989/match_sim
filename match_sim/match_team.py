@@ -116,9 +116,9 @@ class MatchTeam(Team):
     self.formation.change(self)
     self.update_playing_positions()
 
-  def tactics_change(self):
+  def tactics_change(self, x=None):
     '''Call tactics method. Update team stats'''
-    self.tactics.change()
+    self.tactics.change(x)
     self.stats_update()
     self.update_playing_positions()
 
@@ -289,6 +289,11 @@ class MatchTeam(Team):
       return True
     print('{0} substitutes already used'.format(subs_used))
     return
+
+  def condition_deteriorate(self, n):
+    for x in self.players:
+      x.condition_deteriorate(n)
+    self.get_overall()
 
   def choose_player(self, p0, p1, p2):
     '''Randomly choose player from position bucket.'''
