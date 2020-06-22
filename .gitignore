@@ -2,6 +2,7 @@ match_sim/data/games/*
 TODO
 profile*.txt
 pylint*.txt
+*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
