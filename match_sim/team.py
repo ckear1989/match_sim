@@ -3,6 +3,7 @@
 import random
 import numpy as np
 from prettytable import PrettyTable
+import names
 
 from player import Player, Score
 from training import Training, train
@@ -31,6 +32,7 @@ class Team():
   def __init__(self, name, manager, players=None, control=False):
     self.name = name
     self.manager = manager
+    self.coach = names.get_full_name()
     if players is None:
       random.seed(name)
       self.players = [Player(name) for i in range(30)]

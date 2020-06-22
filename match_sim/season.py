@@ -13,7 +13,7 @@ from progressbar import Counter, Timer, ProgressBar
 import concurrent.futures
 
 import default
-from utils import timed_future_progress_bar
+from utils import timed_future_progress_bar, print_side_by_side
 from team import Team
 from match_team import MatchTeam
 from match import Match, Result
@@ -64,20 +64,11 @@ class Season():
     self.update_cup()
     self.get_upcoming_events()
     self.settings = Settings()
-    self.inbox = Inbox()
+    self.inbox = Inbox(self.teams[self.team])
 
   def __repr__(self):
     '''User friendly representation of season in current state'''
-    print_string = '{0}\n'.format(self.upcoming_events)
-    print_string += '{0}\n'.format(self.teams[self.team])
-    # if self.next_team_fixture is not None:
-    #   if 'league' in self.next_team_fixture[2]:
-    #     print_string += '{0}\n'.format(self.team_league)
-    #   elif 'cup' in self.next_team_fixture[2]:
-    #     print_string += '{0}\n'.format(self.competitions['cup'])
-    # else:
-    #   print_string += '{0}\n'.format(self.competitions['cup'])
-    return print_string
+    return print_side_by_side(self.upcoming_events, self.teams[self.team])
 
   def get_upcoming_events(self):
     '''Create pretty table of events from previous day to week in advance'''
@@ -317,10 +308,10 @@ class Season():
   def cont(self):
     '''Continue season.  Wait on user input'''
     self.banner()
-    options = ['(c)ontinue', '(i)nbox[{}]'.format(self.inbox.count), '(m)anage',
-      '(t)raining', '(st)ats', '(sa)ve', '(se)ttings', '(e)xit']
     cmd = ''
     while cmd not in ['exit', 'e']:
+      options = ['(c)ontinue', '(i)nbox[{}]'.format(self.inbox.count), '(m)anage',
+        '(t)raining', '(st)ats', '(sa)ve', '(se)ttings', '(e)xit']
       print(self)
       if self.next_fixture_date is None:
         self.end()
