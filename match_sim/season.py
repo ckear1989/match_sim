@@ -19,6 +19,7 @@ from match_team import MatchTeam
 from match import Match, Result
 from training import Training
 from competition import Competition
+from reporting.inbox import Inbox
 from settings import Settings
 
 def process_league_match_result(match):
@@ -63,6 +64,7 @@ class Season():
     self.update_cup()
     self.get_upcoming_events()
     self.settings = Settings()
+    self.inbox = Inbox()
 
   def __repr__(self):
     '''User friendly representation of season in current state'''
@@ -315,7 +317,8 @@ class Season():
   def cont(self):
     '''Continue season.  Wait on user input'''
     self.banner()
-    options = ['(c)ontinue', '(m)anage', '(t)raining', '(st)ats', '(sa)ve', '(se)ttings', '(e)xit']
+    options = ['(c)ontinue', '(i)nbox[{}]'.format(self.inbox.count), '(m)anage',
+      '(t)raining', '(st)ats', '(sa)ve', '(se)ttings', '(e)xit']
     cmd = ''
     while cmd not in ['exit', 'e']:
       print(self)
@@ -490,9 +493,9 @@ class Season():
     '''Call function based on user input cmd'''
     if cmd in ['sa', 'save']:
       self.save()
-    if cmd in ['se', 'settings']:
+    elif cmd in ['se', 'settings']:
       self.settings.get_settings()
-    if cmd in ['st', 'stats']:
+    elif cmd in ['st', 'stats']:
       self.stats()
     elif cmd in ['m', 'manage']:
       self.manage_team()
@@ -503,6 +506,8 @@ class Season():
       self.process_teams_daily()
       self.process_fixtures_daily()
       self.update_next_fixture()
+    elif cmd in ['i', 'inbox']:
+      self.inbox.open()
 
 if __name__ == "__main__":
 
