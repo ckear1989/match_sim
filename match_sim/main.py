@@ -2,13 +2,14 @@
 
 import os
 import pickle
+import pyfiglet
 
 from season import Season
 import default
 
 def home_screen():
   '''Welcome user.  Offer option to begin or resume game'''
-  print('hello')
+  print(pyfiglet.figlet_format('Match\nSimulator\n2020\n'))
   options = ['(n)ew', '(l)oad', '(e)xit']
   while True:
     choose_option(input('choose option:\n{0}\n'.format(' '.join(options))))
@@ -46,7 +47,7 @@ def choose_option(txt):
   elif txt in ['l', 'load']:
     load_game()
   elif txt in ['e', 'exit']:
-    print('bye')
+    print(pyfiglet.figlet_format('Goodbye\n'))
     exit()
 
 if __name__ == "__main__":
