@@ -20,6 +20,7 @@ def new_game():
   team_name = input('choose team:\n{0}\n'.format(' '.join(default.poss_teams)))
   if team_name not in default.poss_teams:
     print('{0} not found in possible teams'.format(team_name))
+    new_game()
   manager_name = input('manager name:\n')
   season = Season(team_name, manager_name)
   season.save()
