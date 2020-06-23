@@ -4,8 +4,8 @@ import os
 import pickle
 import pyfiglet
 
-from cl.season import Season
-import match_sim.default
+from cl.game import Game
+import match_sim.default as default
 
 def home_screen():
   '''Welcome user.  Offer option to begin or resume game'''
@@ -23,9 +23,9 @@ def new_game():
     new_game()
     return
   manager_name = input('manager name:\n')
-  season = Season(team_name, manager_name)
-  season.save()
-  season.cont()
+  game = Game(team_name, manager_name)
+  game.save()
+  game.cont()
 
 def load_game():
   '''Show existing games.  Ask user to choose their game'''
@@ -38,9 +38,9 @@ def load_game():
     pl_game = input('choose game:\n{0}\n'.format(' '.join(games)))
     if pl_game in games:
       with open('{0}/{1}.dat'.format(default.save_dir, pl_game), 'rb') as f:
-        season = pickle.load(f)
-      season.save()
-      season.cont()
+        game = pickle.load(f)
+      game.save()
+      game.cont()
 
 def choose_option(txt):
   '''Compare user text to available options. Call appropriate method'''

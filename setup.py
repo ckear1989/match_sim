@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
   name="match_sim-ckear",
-  version="0.0.1",
+  version="0.0.2",
   author="Conor Kearney",
   author_email="ckear@example.com",
   description="A small example package",
