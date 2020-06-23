@@ -241,6 +241,9 @@ class Team():
         if x.season.injury.status is not None:
           if x.season.injury.gain_date == date:
             inbox.add_injury_message(x)
+        if x.season.suspension.status is not None:
+          if x.season.suspension.gain_date == date:
+            inbox.add_suspension_message(x)
 
 if __name__ == "__main__":
   team = Team('a', 'a')

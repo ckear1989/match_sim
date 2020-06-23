@@ -7,6 +7,7 @@ class Suspension():
   def __init__(self):
     self.status = None
     self.return_date = None
+    self.gain_date = None
 
   def __repr__(self):
     if self.status is None:
@@ -17,6 +18,7 @@ class Suspension():
 
   def gain(self, status, current_date):
     self.status = status
+    self.gain_date = current_date
     self.return_date = current_date + datetime.timedelta(suspensions[status])
 
   def reset(self):

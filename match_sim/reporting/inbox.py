@@ -37,6 +37,16 @@ class Inbox():
     self.messages['unread'].append(msg)
     self.update_count()
 
+  def add_suspension_message(self, player):
+    susp = player.season.suspension
+    msg = 'Suspension report\n'
+    msg += '{0} gained a suspension on {1}.'.format(player, susp.gain_date)
+    msg += 'During a match he got a {0} suspension.'.format(susp.status)
+    msg += 'He is set to return on {0}.\n'.format(susp.return_date)
+    msg += 'From {0}.'.format(self.team_coach)
+    self.messages['unread'].append(msg)
+    self.update_count()
+
   def update_count(self):
     self.count = len(self.messages['unread'])
 
