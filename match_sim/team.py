@@ -200,7 +200,6 @@ class Team():
       x.reset_match_stats()
       x.update_score()
     self.update_score()
-    self.formation.get_pos_lineups()
 
   def reset_season_stats(self):
     '''Clear all scores etc. for beginning of next match'''

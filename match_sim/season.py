@@ -11,7 +11,6 @@ import concurrent.futures
 
 import default
 from utils import timed_future_progress_bar, print_side_by_side
-from team import Team
 from match_team import MatchTeam
 from training import Training
 from competition import Competition
@@ -191,9 +190,9 @@ class Season():
     self.teams = {}
     for team in default.poss_teams:
       if team == self.team:
-        self.teams[team] = MatchTeam(Team(team, self.manager, control=True))
+        self.teams[team] = MatchTeam(team, self.manager, control=True)
       else:
-        self.teams[team] = MatchTeam(Team(team, names.get_full_name()))
+        self.teams[team] = MatchTeam(team, names.get_full_name())
         self.teams[team].training = Training(self.current_date, [0, 2, 4], ['fi', 'pa', 'sh'])
     n_teams = len(self.teams.keys())
     poss_teams = random.sample(self.teams.keys(), n_teams)

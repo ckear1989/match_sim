@@ -1,6 +1,5 @@
 '''Methods for manipulating team for management and matches'''
 
-import copy
 import random
 import time
 from utils import is_int
@@ -11,8 +10,8 @@ from tactics import Tactics
 
 class MatchTeam(Team):
   '''Contain all data on team and players'''
-  def __init__(self, ateam):
-    self.__dict__ = copy.deepcopy(ateam.__dict__)
+  def __init__(self, name, manager, players=None, control=False):
+    super().__init__(name, manager, players, control)
     self.formation = Formation()
     self.tactics = Tactics()
     self.auto_lineup()
@@ -246,7 +245,11 @@ class MatchTeam(Team):
     except IndexError:
       return self.choose_player(p0, p1, p2)
 
+  def reset_match_stats(self):
+    '''Clear all scores etc. for beginning of next match'''
+    super().reset_match_stats()
+    self.formation.get_pos_lineups()
+
 if __name__ == "__main__":
-  team = Team('a', 'a', control=True)
-  mteam = MatchTeam(team)
+  mteam = MatchTeam('a', 'a', control=True)
   mteam.manage()

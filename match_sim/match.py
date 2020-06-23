@@ -9,7 +9,6 @@ import numpy as np
 import keyboard
 import pyfiglet
 
-from team import Team
 from match_team import MatchTeam
 from event import Event
 
@@ -237,8 +236,8 @@ class Match():
 
 if __name__ == "__main__":
 
-  team_a = MatchTeam(Team('a', 'a'))
-  team_b = MatchTeam(Team('b', 'b'))
+  team_a = MatchTeam('a', 'a')
+  team_b = MatchTeam('b', 'b')
   match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)
   # match.play(0.1)
   # match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)
