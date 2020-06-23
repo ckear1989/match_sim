@@ -4,22 +4,36 @@ class Inbox():
   def __init__(self, team):
     self.count = 0
     self.messages = {'read':[], 'unread': []}
-    self.add_welcome_message(team)
+    self.team_name = team.name
+    self.team_manager = team.manager
+    self.team_coach = team.coach
+    self.add_welcome_message()
 
-  def add_welcome_message(self, team):
-    msg = 'Dear {0},\n'.format(team.manager)
-    msg += 'Welcome to {0}.'.format(team.name)
+  def add_welcome_message(self):
+    msg = 'Dear {0},\n'.format(self.team_manager)
+    msg += 'Welcome to {0}.'.format(self.team_name)
     msg += 'The 2020 season will be tough.'
-    msg += 'You will be expected to come first or second in'
-    msg += 'the league group.  We would be delighted if you'
+    msg += 'You will be expected to come first or second in '
+    msg += 'the league group.  We would be delighted if you '
     msg += 'take the team to the second or third round of the cup.\n\n'
-    msg += 'We hope you will work well with coach {0} and get the'.format(team.coach)
-    msg += 'players into top condition.  With your first match coming soon,'
-    msg += 'we need you to put a training regime in place and sort out the team tactics'
-    msg += 'and formation.\n\nFrom the board,\n{0}'.format(team.name)
+    msg += 'We hope you will work well with coach {0} and get the '.format(self.team_coach)
+    msg += 'players into top condition.With your first match coming soon, '
+    msg += 'we need you to put a training regime in place and sort out the team tactics '
+    msg += 'and formation.\n\nFrom the board,\n{0}'.format(self.team_name)
     self.add_message(msg)
 
   def add_message(self, msg):
+    self.messages['unread'].append(msg)
+    self.update_count()
+
+  def add_injury_message(self, player):
+    injury = player.season.injury
+    msg = 'Injury report\n'
+    msg += '{0} gained injury on {1}.'.format(player, injury.gain_date)
+    msg += 'During a match he {0} injured his {1}.'.format(
+      injury.status.lower(), injury.part)
+    msg += 'He is set to return on {0}.\n'.format(injury.return_date)
+    msg += 'From {0}.'.format(self.team_coach)
     self.messages['unread'].append(msg)
     self.update_count()
 

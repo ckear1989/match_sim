@@ -217,7 +217,7 @@ class MatchTeam(Team):
       self.playing.remove(player_off)
       self.subs.remove(player_on)
       self.playing.append(player_on)
-      self.formation.ammend(player_off.match.lineup, player_on.match.lineup)
+      self.formation.ammend_pos_lineups(player_off.match.lineup, player_on.match.lineup)
       self.update_playing_positions()
       if self.control is True:
         print(self)
