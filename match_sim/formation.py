@@ -49,7 +49,7 @@ class Formation():
     j = self.pos[4] + i
     self.full_forward_lineups = list(range(i, j))
 
-  def ammend(self, off, on):
+  def ammend_pos_lineups(self, off, on):
     if off in self.goalkeeper_lineups:
       self.goalkeeper_lineups.append(on)
     if off in self.full_back_lineups:

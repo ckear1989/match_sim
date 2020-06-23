@@ -200,6 +200,7 @@ class Team():
       x.reset_match_stats()
       x.update_score()
     self.update_score()
+    self.formation.get_pos_lineups()
 
   def reset_season_stats(self):
     '''Clear all scores etc. for beginning of next match'''
@@ -232,6 +233,14 @@ class Team():
     if date in self.training.schedule.keys():
       focus = self.training.schedule[date]
       train(self, focus)
+
+  def get_player_report(self, inbox, date):
+    '''Clear all scores etc. for beginning of next match'''
+    if self.control is True:
+      for x in self:
+        if x.season.injury.status is not None:
+          if x.season.injury.gain_date == date:
+            inbox.add_injury_message(x)
 
 if __name__ == "__main__":
   team = Team('a', 'a')
