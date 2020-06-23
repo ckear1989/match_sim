@@ -4,8 +4,8 @@ import copy
 import datetime
 from progressbar import Counter, Timer, ProgressBar
 
-from match import Match, Result
-from season import Season
+from cl.match import Match, Result
+from cl.season import Season
 
 def process_league_match_result(match):
   '''Update team stats from match result.'''

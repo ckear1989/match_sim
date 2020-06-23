@@ -2,8 +2,8 @@
 
 import random
 import time
-from utils import is_int
 
+from utils import is_int
 from team import Team
 from formation import Formation
 from tactics import Tactics
@@ -15,7 +15,6 @@ class MatchTeam(Team):
     self.formation = Formation()
     self.tactics = Tactics()
     self.auto_lineup()
-    self.update_playing_positions()
     self.stats_update()
 
   def update_playing_positions(self):
@@ -85,7 +84,6 @@ class MatchTeam(Team):
     '''Call tactics method. Update team stats'''
     self.tactics.change(x)
     self.stats_update()
-    self.update_playing_positions()
 
   def stats_update(self):
     '''Copy chosen tactic attributes'''

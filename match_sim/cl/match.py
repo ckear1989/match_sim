@@ -9,8 +9,8 @@ import numpy as np
 import keyboard
 import pyfiglet
 
-from match_team import MatchTeam
-from event import Event
+from match_sim.match_team import MatchTeam
+from match_sim.event import Event
 
 def printc(x):
   '''Print and clear'''

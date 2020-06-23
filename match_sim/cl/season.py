@@ -9,13 +9,13 @@ from prettytable import PrettyTable
 import dill as pickle
 import concurrent.futures
 
-import default
-from utils import timed_future_progress_bar, print_side_by_side
-from match_team import MatchTeam
-from training import Training
-from competition import Competition
-from reporting.inbox import Inbox
-from settings import Settings
+import match_sim.default as default
+from match_sim.utils import timed_future_progress_bar, print_side_by_side
+from match_sim.match_team import MatchTeam
+from match_sim.training import Training
+from match_sim.competition import Competition
+from match_sim.reporting.inbox import Inbox
+from match_sim.settings import Settings
 
 class Season():
   '''Season engine to store all game data'''
