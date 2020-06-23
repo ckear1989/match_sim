@@ -14,6 +14,15 @@
 # pip3 install pylint
 # pip3 install barnum
 # pip3 install tqdm
+# pip3 install wxpython
+# cat /etc/os-release
+# lsb_release -a
+# hostnamectl
+# pip3 install -U \
+#     -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-18.04 \
+#     wxPython
+# sudo apt-get install git curl libsdl2-mixer-2.0-0 libsdl2-image-2.0-0 libsdl2-2.0-0
+# pip3 install eyed3
 
 # sudo python3 __init__.py
 # python3.6 default.py
@@ -26,9 +35,9 @@
 # python3.6 match_team.py
 # sudo python3.6 cl/match.py
 # sudo python3.6 cl/season.py
-sudo python3.6 -m match_sim.cl.game
+# sudo python3.6 -m match_sim.cl.game
 # sudo python3.6 cl/main.py
-
+python3.6 -m match_sim.gui.main
 
 # pylint --disable=bad-continuation --indent-string='  ' main.py > pylint.txt
 
