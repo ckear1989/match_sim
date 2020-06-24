@@ -6,6 +6,7 @@ import pathlib
 path = pathlib.Path(__file__).parent.absolute()
 
 import barnum
+import pyfiglet
 
 random.seed(12345)
 poss_teams = [barnum.create_city_state_zip()[1] for i in range(16)]
@@ -14,6 +15,8 @@ save_dir = '{0}/data/games/'.format(path)
 def check_save_dir():
   if os.path.isdir(save_dir) is False:
      os.mkdir(save_dir)
+
+welcome_message = pyfiglet.figlet_format('Match\nSimulator\n2020\n')
 
 dow = {
   'monday': 0,
