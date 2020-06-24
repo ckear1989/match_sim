@@ -37,7 +37,7 @@
 # sudo python3.6 cl/season.py
 # sudo python3.6 -m match_sim.cl.game
 # sudo python3.6 cl/main.py
-python3.6 -m match_sim.gui.main
+sudo python3.6 -m match_sim.gui.main
 
 # pylint --disable=bad-continuation --indent-string='  ' main.py > pylint.txt
 

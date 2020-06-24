@@ -1,50 +1,29 @@
 
 import glob
+import pickle
+import time
 
 import wx
 
 import match_sim.default as default
-from match_sim.cl.game import Game
+from match_sim.gui.game import GamePanel, Game
 
 class MSPanel(wx.Panel):
   def __init__(self, parent):
     super().__init__(parent)
     main_sizer = wx.BoxSizer(wx.VERTICAL)
-    self.row_obj_dict = {}
-
-    new_button = wx.Button(self, label='New')
-    new_button.Bind(wx.EVT_BUTTON, self.on_new)
-    main_sizer.Add(new_button, 0, wx.ALL | wx.CENTER, 5)
-    load_button = wx.Button(self, label='Load')
-    load_button.Bind(wx.EVT_BUTTON, self.on_load)
-    main_sizer.Add(load_button, 0, wx.ALL | wx.CENTER, 5)
-    exit_button = wx.Button(self, label='Exit')
-    exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
-    main_sizer.Add(exit_button, 0, wx.ALL | wx.CENTER, 5)
+    self.SetSize((800, 600))
+    self.new_button = wx.Button(self, label='New')
+    main_sizer.Add(self.new_button, 0, wx.ALL | wx.CENTER, 5)
+    self.load_button = wx.Button(self, label='Load')
+    main_sizer.Add(self.load_button, 0, wx.ALL | wx.CENTER, 5)
+    self.exit_button = wx.Button(self, label='Exit')
+    main_sizer.Add(self.exit_button, 0, wx.ALL | wx.CENTER, 5)
     self.SetSizer(main_sizer)
-
-  def on_new(self, event):
-    dlg = NewDialog()
-    dlg.ShowModal()
-    dlg.Destroy()
-
-  def on_load(self, event):
-    title = "Choose a directory:"
-    dlg = wx.DirDialog(self, title, style=wx.DD_DEFAULT_STYLE)
-    if dlg.ShowModal() == wx.ID_OK:
-      self.update_game_listing(dlg.GetPath())
-    dlg.Destroy()
-
-  def update_game_listing(self, folder_path):
-    self.current_folder_path = folder_path
-    games = glob.glob(folder_path + '/*.dat')
-    print(games)
-
-  def on_exit(self, event):
-    self.Destroy()
 
 class NewDialog(wx.Dialog):
   def __init__(self):
+    self.game = None
     title = 'New Game'
     super().__init__(parent=None, title=title)
     self.main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -73,18 +52,61 @@ class NewDialog(wx.Dialog):
     team = self.team.GetString(self.team.GetSelection())
     if name:
       if team:
-        game = Game(team, name)
-        game.save()
-        game.cont()
+        self.game = Game(team, name)
     self.Close()
 
 class MSFrame(wx.Frame):
   def __init__(self):
     super().__init__(parent=None, title='Match Simulator 2020')
-    self.panel = MSPanel(self)
-    self.Show()
+    self.game = None
+    self.game_listing = None
+    self.main_panel = MSPanel(self)
+    self.game_panel = GamePanel(self)
+    self.sizer = wx.BoxSizer(wx.VERTICAL)
+    self.sizer.Add(self.main_panel, 1, wx.EXPAND)
+    self.main_panel.new_button.Bind(wx.EVT_BUTTON, self.on_new)
+    self.main_panel.load_button.Bind(wx.EVT_BUTTON, self.on_load)
+    self.main_panel.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
+    self.sizer.Add(self.game_panel, 1, wx.EXPAND)
+    self.game_panel.exit_button.Bind(wx.EVT_BUTTON, self.show_main_panel)
+    self.game_panel.Hide()
+    self.SetSizer(self.sizer)
+    self.SetSize((800, 600))
+    self.Centre()
+
+  def on_new(self, event):
+    dlg = NewDialog()
+    dlg.ShowModal()
+    if dlg.game is not None:
+      self.game = dlg.game
+      self.show_game_panel()
+    dlg.Destroy()
+
+  def on_load(self, event):
+    title = "Choose a game file:"
+    dlg = wx.FileDialog(self, title, style=wx.DD_DEFAULT_STYLE)
+    if dlg.ShowModal() == wx.ID_OK:
+      self.game_listing = dlg.GetPath()
+      with open(self.game_listing, 'rb') as f:
+        self.game = pickle.load(f)
+      self.show_game_panel()
+    dlg.Destroy()
+
+  def show_game_panel(self):
+    self.game_panel.Show()
+    self.main_panel.Hide()
+    self.Layout()
+
+  def show_main_panel(self, event):
+    self.main_panel.Show()
+    self.game_panel.Hide()
+    self.Layout()
+
+  def on_exit(self, event):
+    self.Destroy()
 
 if __name__ == '__main__':
   app = wx.App(False)
   frame = MSFrame()
+  frame.Show()
   app.MainLoop()
