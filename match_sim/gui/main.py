@@ -1,4 +1,6 @@
 
+import glob
+
 import wx
 
 import match_sim.default as default
@@ -14,6 +16,7 @@ class MSPanel(wx.Panel):
     new_button.Bind(wx.EVT_BUTTON, self.on_new)
     main_sizer.Add(new_button, 0, wx.ALL | wx.CENTER, 5)
     load_button = wx.Button(self, label='Load')
+    load_button.Bind(wx.EVT_BUTTON, self.on_load)
     main_sizer.Add(load_button, 0, wx.ALL | wx.CENTER, 5)
     exit_button = wx.Button(self, label='Exit')
     exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
@@ -24,6 +27,18 @@ class MSPanel(wx.Panel):
     dlg = NewDialog()
     dlg.ShowModal()
     dlg.Destroy()
+
+  def on_load(self, event):
+    title = "Choose a directory:"
+    dlg = wx.DirDialog(self, title, style=wx.DD_DEFAULT_STYLE)
+    if dlg.ShowModal() == wx.ID_OK:
+      self.update_game_listing(dlg.GetPath())
+    dlg.Destroy()
+
+  def update_game_listing(self, folder_path):
+    self.current_folder_path = folder_path
+    games = glob.glob(folder_path + '/*.dat')
+    print(games)
 
   def on_exit(self, event):
     self.Destroy()
