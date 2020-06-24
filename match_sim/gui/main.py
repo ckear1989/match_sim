@@ -48,47 +48,47 @@ class NewDialog(wx.Dialog):
     self.main_sizer.Add(row_sizer, 0, wx.EXPAND)
 
   def on_start(self, event):
-    name = self.name.GetValue()
-    team = self.team.GetString(self.team.GetSelection())
-    if name:
-      if team:
-        self.game = Game(team, name)
     self.Close()
 
 class MSFrame(wx.Frame):
   def __init__(self):
     super().__init__(parent=None, title='Match Simulator 2020')
-    self.game = None
-    self.game_listing = None
     self.main_panel = MSPanel(self)
-    self.game_panel = GamePanel(self)
     self.sizer = wx.BoxSizer(wx.VERTICAL)
     self.sizer.Add(self.main_panel, 1, wx.EXPAND)
     self.main_panel.new_button.Bind(wx.EVT_BUTTON, self.on_new)
     self.main_panel.load_button.Bind(wx.EVT_BUTTON, self.on_load)
     self.main_panel.exit_button.Bind(wx.EVT_BUTTON, self.on_exit)
-    self.sizer.Add(self.game_panel, 1, wx.EXPAND)
-    self.game_panel.exit_button.Bind(wx.EVT_BUTTON, self.show_main_panel)
-    self.game_panel.Hide()
     self.SetSizer(self.sizer)
     self.SetSize((800, 600))
     self.Centre()
 
+  def create_game_panel(self, game):
+    self.game_panel = GamePanel(self, game)
+    self.sizer.Add(self.game_panel, 1, wx.EXPAND)
+    self.game_panel.exit_button.Bind(wx.EVT_BUTTON, self.show_main_panel)
+    self.game_panel.Hide()
+
   def on_new(self, event):
     dlg = NewDialog()
     dlg.ShowModal()
-    if dlg.game is not None:
-      self.game = dlg.game
-      self.show_game_panel()
+    name = dlg.name.GetValue()
+    team = dlg.team.GetString(dlg.team.GetSelection())
+    if name:
+      if team:
+        game = Game(team, name)
+        self.create_game_panel(game)
+        self.show_game_panel()
     dlg.Destroy()
 
   def on_load(self, event):
     title = "Choose a game file:"
     dlg = wx.FileDialog(self, title, style=wx.DD_DEFAULT_STYLE)
     if dlg.ShowModal() == wx.ID_OK:
-      self.game_listing = dlg.GetPath()
-      with open(self.game_listing, 'rb') as f:
-        self.game = pickle.load(f)
+      game_listing = dlg.GetPath()
+      with open(game_listing, 'rb') as f:
+        game = pickle.load(f)
+      self.create_game_panel(game)
       self.show_game_panel()
     dlg.Destroy()
 
