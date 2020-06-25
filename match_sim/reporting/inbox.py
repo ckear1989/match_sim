@@ -1,9 +1,14 @@
 
+class Folder(list):
+  '''Folder for inbox object'''
+  def __str__(self):
+    return '\n'.join(['[{0}] {1}...'.format(self.index(x), x[:20].replace('\n', ' ')) for x in self])
+
 class Inbox():
   '''Simulated email inbox for reports and communications'''
   def __init__(self, team):
     self.count = 0
-    self.messages = {'read':[], 'unread': []}
+    self.messages = {'read': Folder(), 'unread': Folder()}
     self.team_name = team.name
     self.team_manager = team.manager
     self.team_coach = team.coach
@@ -60,7 +65,7 @@ class Inbox():
         self.get_read()
 
   def clear(self):
-    self.messages['read'] = []
+    self.messages['read'] = Folder()
 
   def get_read(self, i=0):
     cmd = ''

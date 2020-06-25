@@ -4,6 +4,7 @@ import datetime
 import wx
 
 from match_sim.cl.game import Game as ClGame
+from match_sim.gui.inbox import Inbox
 
 class GamePanel(wx.Panel):
   def __init__(self, parent, game):
@@ -60,6 +61,7 @@ class GamePanel(wx.Panel):
 class Game(ClGame):
   def __init__(self, team, name):
     super().__init__(team, name)
+    self.inbox = Inbox(self.teams[self.team])
 
   def pcontinue(self):
     self.current_date += datetime.timedelta(1)
