@@ -13,7 +13,7 @@ class InboxPanel(wx.Panel):
     hbox1 = wx.BoxSizer()
     self.txt_output = wx.TextCtrl(self,
       style=wx.TE_MULTILINE|wx.BORDER_SUNKEN|wx.TE_READONLY|wx.TE_RICH2, size=(400,200))
-    self.currently_showing = self.game.inbox.messages['unread']
+    self.currently_showing = self.game.inbox.msg
     self.txt_output.AppendText(str(self.currently_showing))
     hbox1.Add(self.txt_output, proportion=1, flag=wx.EXPAND)
     main_sizer.Add(hbox1, proportion=2, flag=wx.ALL|wx.EXPAND, border=20)

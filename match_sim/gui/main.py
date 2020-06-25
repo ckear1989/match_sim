@@ -8,6 +8,9 @@ import wx
 import match_sim.default as default
 from match_sim.gui.game import GamePanel, Game
 from match_sim.gui.inbox import InboxPanel
+from match_sim.gui.manage import ManagePanel
+from match_sim.gui.stats import StatsPanel
+from match_sim.gui.settings import SettingsPanel
 
 class MSPanel(wx.Panel):
   def __init__(self, parent):
@@ -79,7 +82,7 @@ class MSFrame(wx.Frame):
   def create_game_panel(self, game):
     self.game_panel = GamePanel(self, game)
     self.sizer.Add(self.game_panel, 1, wx.EXPAND)
-    self.game_panel.exit_button.Bind(wx.EVT_BUTTON, self.show_main_panel)
+    self.game_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_game_panel)
     self.game_panel.Hide()
 
   def create_inbox_panel(self, game):
@@ -87,6 +90,24 @@ class MSFrame(wx.Frame):
     self.sizer.Add(self.inbox_panel, 1, wx.EXPAND)
     self.inbox_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_inbox_panel)
     self.inbox_panel.Hide()
+
+  def create_manage_panel(self):
+    self.manage_panel = ManagePanel(self)
+    self.sizer.Add(self.manage_panel, 1, wx.EXPAND)
+    self.manage_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_manage_panel)
+    self.manage_panel.Hide()
+
+  def create_stats_panel(self):
+    self.stats_panel = StatsPanel(self)
+    self.sizer.Add(self.stats_panel, 1, wx.EXPAND)
+    self.stats_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_stats_panel)
+    self.stats_panel.Hide()
+
+  def create_settings_panel(self):
+    self.settings_panel = SettingsPanel(self)
+    self.sizer.Add(self.settings_panel, 1, wx.EXPAND)
+    self.settings_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_settings_panel)
+    self.settings_panel.Hide()
 
   def on_new(self, event):
     dlg = NewDialog()
@@ -115,12 +136,24 @@ class MSFrame(wx.Frame):
     self.create_inbox_panel(self.game_panel.game)
     self.show_inbox_panel()
 
+  def on_manage(self, event):
+    self.create_manage_panel()
+    self.show_manage_panel()
+
+  def on_stats(self, event):
+    self.create_stats_panel()
+    self.show_stats_panel()
+
+  def on_settings(self, event):
+    self.create_settings_panel()
+    self.show_settings_panel()
+
   def show_game_panel(self):
     self.game_panel.Show()
     self.main_panel.Hide()
     self.Layout()
 
-  def show_main_panel(self, event):
+  def exit_game_panel(self, event):
     self.main_panel.Show()
     self.game_panel.Hide()
     self.Layout()
@@ -133,6 +166,36 @@ class MSFrame(wx.Frame):
   def exit_inbox_panel(self, event):
     self.game_panel.Show()
     self.inbox_panel.Hide()
+    self.Layout()
+
+  def show_manage_panel(self):
+    self.manage_panel.Show()
+    self.game_panel.Hide()
+    self.Layout()
+
+  def exit_manage_panel(self, event):
+    self.game_panel.Show()
+    self.manage_panel.Hide()
+    self.Layout()
+
+  def show_stats_panel(self):
+    self.stats_panel.Show()
+    self.game_panel.Hide()
+    self.Layout()
+
+  def exit_stats_panel(self, event):
+    self.game_panel.Show()
+    self.stats_panel.Hide()
+    self.Layout()
+
+  def show_settings_panel(self):
+    self.settings_panel.Show()
+    self.game_panel.Hide()
+    self.Layout()
+
+  def exit_settings_panel(self, event):
+    self.game_panel.Show()
+    self.settings_panel.Hide()
     self.Layout()
 
   def on_exit(self, event):

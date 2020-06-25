@@ -5,6 +5,7 @@ import wx
 
 from match_sim.cl.game import Game as ClGame
 from match_sim.gui.inbox import Inbox
+from match_sim.gui.settings import Settings
 
 class GamePanel(wx.Panel):
   def __init__(self, parent, game):
@@ -28,19 +29,16 @@ class GamePanel(wx.Panel):
     inbox_button.Bind(wx.EVT_BUTTON, self.GetParent().on_inbox)
     hbox2.Add(inbox_button, 1, wx.LEFT | wx.BOTTOM, 5)
     manage_button = wx.Button(self, label='Manage')
-    manage_button.Bind(wx.EVT_BUTTON, self.insert_text)
+    manage_button.Bind(wx.EVT_BUTTON, self.GetParent().on_manage)
     hbox2.Add(manage_button, 1, wx.LEFT | wx.BOTTOM, 5)
-    training_button = wx.Button(self, label='Training')
-    training_button.Bind(wx.EVT_BUTTON, self.insert_text)
-    hbox2.Add(training_button, 1, wx.LEFT | wx.BOTTOM, 5)
     stats_button = wx.Button(self, label='Stats')
-    stats_button.Bind(wx.EVT_BUTTON, self.insert_text)
+    stats_button.Bind(wx.EVT_BUTTON, self.GetParent().on_stats)
     hbox2.Add(stats_button, 1, wx.LEFT | wx.BOTTOM, 5)
     save_button = wx.Button(self, label='Save')
     save_button.Bind(wx.EVT_BUTTON, self.save_game)
     hbox2.Add(save_button, 1, wx.LEFT | wx.BOTTOM, 5)
     settings_button = wx.Button(self, label='Settings')
-    settings_button.Bind(wx.EVT_BUTTON, self.insert_text)
+    settings_button.Bind(wx.EVT_BUTTON, self.get_settings)
     hbox2.Add(settings_button, 1, wx.LEFT | wx.BOTTOM, 5)
     self.exit_button = wx.Button(self, label='Exit')
     hbox2.Add(self.exit_button, 1, wx.LEFT | wx.BOTTOM, 5)
@@ -49,6 +47,10 @@ class GamePanel(wx.Panel):
 
   def save_game(self, event):
     self.game.save()
+
+  def get_settings(self, event):
+    self.GetParent().on_settings(event)
+    self.game.settings.get_settings()
 
   def on_continue(self, event):
     self.game.pcontinue()
@@ -62,6 +64,7 @@ class Game(ClGame):
   def __init__(self, team, name):
     super().__init__(team, name)
     self.inbox = Inbox(self.teams[self.team])
+    self.settings = Settings()
 
   def pcontinue(self):
     self.current_date += datetime.timedelta(1)
