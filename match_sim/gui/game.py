@@ -1,4 +1,6 @@
 
+import datetime
+
 import wx
 
 from match_sim.cl.game import Game as ClGame
@@ -13,17 +15,16 @@ class GamePanel(wx.Panel):
     hbox1 = wx.BoxSizer()
     self.txt_output = wx.TextCtrl(self,
       style=wx.TE_MULTILINE|wx.BORDER_SUNKEN|wx.TE_READONLY|wx.TE_RICH2, size=(400,200))
+    self.txt_output.AppendText(str(self.game))
     hbox1.Add(self.txt_output, proportion=1, flag=wx.EXPAND)
     main_sizer.Add(hbox1, proportion=2, flag=wx.ALL|wx.EXPAND, border=20)
 
-    # main_sizer.Add((-1, 100))
-
     hbox2 = wx.BoxSizer(wx.HORIZONTAL)
     continue_button = wx.Button(self, label='Continue')
-    continue_button.Bind(wx.EVT_BUTTON, self.insert_text)
+    continue_button.Bind(wx.EVT_BUTTON, self.on_continue)
     hbox2.Add(continue_button, 1, wx.LEFT | wx.BOTTOM, 5)
     inbox_button = wx.Button(self, label='Inbox[{0}]'.format(self.game.inbox.count))
-    inbox_button.Bind(wx.EVT_BUTTON, self.insert_text)
+    inbox_button.Bind(wx.EVT_BUTTON, self.GetParent().on_inbox)
     hbox2.Add(inbox_button, 1, wx.LEFT | wx.BOTTOM, 5)
     manage_button = wx.Button(self, label='Manage')
     manage_button.Bind(wx.EVT_BUTTON, self.insert_text)
@@ -48,9 +49,20 @@ class GamePanel(wx.Panel):
   def save_game(self, event):
     self.game.save()
 
+  def on_continue(self, event):
+    self.game.pcontinue()
+    self.insert_text(event)
+
   def insert_text(self, event):
-    self.txt_output.AppendText('debug')
+    self.txt_output.Clear()
+    self.txt_output.AppendText(str(self.game))
 
 class Game(ClGame):
   def __init__(self, team, name):
     super().__init__(team, name)
+
+  def pcontinue(self):
+    self.current_date += datetime.timedelta(1)
+    self.process_teams_daily()
+    self.process_fixtures_daily()
+    self.update_next_fixture()

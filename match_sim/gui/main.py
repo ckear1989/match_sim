@@ -7,6 +7,7 @@ import wx
 
 import match_sim.default as default
 from match_sim.gui.game import GamePanel, Game
+from match_sim.gui.inbox import InboxPanel
 
 class MSPanel(wx.Panel):
   def __init__(self, parent):
@@ -81,6 +82,12 @@ class MSFrame(wx.Frame):
     self.game_panel.exit_button.Bind(wx.EVT_BUTTON, self.show_main_panel)
     self.game_panel.Hide()
 
+  def create_inbox_panel(self, game):
+    self.inbox_panel = InboxPanel(self, game)
+    self.sizer.Add(self.inbox_panel, 1, wx.EXPAND)
+    self.inbox_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_inbox_panel)
+    self.inbox_panel.Hide()
+
   def on_new(self, event):
     dlg = NewDialog()
     dlg.ShowModal()
@@ -104,6 +111,10 @@ class MSFrame(wx.Frame):
       self.show_game_panel()
     dlg.Destroy()
 
+  def on_inbox(self, event):
+    self.create_inbox_panel(self.game_panel.game)
+    self.show_inbox_panel()
+
   def show_game_panel(self):
     self.game_panel.Show()
     self.main_panel.Hide()
@@ -112,6 +123,16 @@ class MSFrame(wx.Frame):
   def show_main_panel(self, event):
     self.main_panel.Show()
     self.game_panel.Hide()
+    self.Layout()
+
+  def show_inbox_panel(self):
+    self.inbox_panel.Show()
+    self.game_panel.Hide()
+    self.Layout()
+
+  def exit_inbox_panel(self, event):
+    self.game_panel.Show()
+    self.inbox_panel.Hide()
     self.Layout()
 
   def on_exit(self, event):
