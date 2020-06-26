@@ -7,10 +7,21 @@ import wx
 class TemplateButton(wx.Button):
   def __init__(self, parent, label):
     super().__init__(parent)
-    self.font = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT)
-    self.font.SetPointSize(15)
+    # self.font = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT)
+    # self.font.SetPointSize(15)
+    # self.SetFont(self.font)
+    png = wx.Image('{0}/../data/image/buttons/new0.png'.format(path), wx.BITMAP_TYPE_ANY)
+    w = png.GetWidth() / 5
+    h = png.GetHeight() / 5
+    png = png.Scale(w, h)
+    png = png.ConvertToBitmap()
+    png.SetMask(wx.Mask())
+    # print(png.GetMask())
+    self.SetSize((w+10, h+10))
+    self.SetBitmap(png)
+    # print(self.GetSize())
+    # print(png.GetSize())
     self.SetLabel(label)
-    self.SetFont(self.font)
 
 class TemplatePanel(wx.Panel):
   def __init__(self, parent):

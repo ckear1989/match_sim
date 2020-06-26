@@ -190,6 +190,21 @@ class MSFrame(wx.Frame):
     self.settings_panel.Hide()
     self.Layout()
 
+  def exit_on_panel(self, event):
+    self.off_panel.Show()
+    self.on_panel.Hide()
+    self.Layout()
+
+  def hide_panel(self, apanel):
+    self.off_panel = apanel
+    self.off_panel.Hide()
+
+  def show_panel(self, apanel):
+    self.on_panel = apanel(self)
+    self.sizer.Add(self.on_panel, 1, wx.EXPAND)
+    self.on_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_on_panel)
+    self.on_panel.Show()
+
   def on_exit(self, event):
     self.Destroy()
 
