@@ -198,9 +198,9 @@ class Season():
     poss_teams = random.sample(self.teams.keys(), n_teams)
     teams_per_div = int(n_teams / 4)
     teams1 = poss_teams[:teams_per_div]
-    teams2 = poss_teams[teams_per_div:teams_per_div+4]
-    teams3 = poss_teams[teams_per_div+4:teams_per_div+8]
-    teams4 = poss_teams[teams_per_div+8:]
+    teams2 = poss_teams[teams_per_div:(teams_per_div*2)]
+    teams3 = poss_teams[(teams_per_div*2):(teams_per_div*3)]
+    teams4 = poss_teams[(teams_per_div*3):]
     self.init_competitions(teams1, teams2, teams3, teams4)
 
   def get_teams(self):
@@ -208,7 +208,7 @@ class Season():
       future = pool.submit(self.progress_get_teams)
       timed_future_progress_bar(future, 4)
 
-  def progress_init_competitions(self, teams1, teams2, teams3, teams4):
+  def init_competitions(self, teams1, teams2, teams3, teams4):
     '''Create 4 leagues and cup.'''
     self.competitions['league1'] = Competition('league1', 'rr',
       datetime.date(self.year, 1, 1), {x: self.teams[x] for x in teams1})
@@ -224,12 +224,6 @@ class Season():
     last_league_fixture_date = max([x.last_fixture_date for x in self.competitions.values()])
     self.competitions['cup'] = Competition('cup', 'cup',
       last_league_fixture_date + datetime.timedelta(1), self.teams)
-
-  def init_competitions(self, teams1, teams2, teams3, teams4):
-    print('creating competitions...')
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-      future = pool.submit(self.progress_init_competitions, teams1, teams2, teams3, teams4)
-      timed_future_progress_bar(future, 2)
 
   def promotion_relegation(self):
     '''Determine teams to move up or down.  Change lists of team names'''
