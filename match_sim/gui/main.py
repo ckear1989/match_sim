@@ -115,6 +115,7 @@ class MSFrame(wx.Frame):
   def on_load(self, event):
     title = "Choose a game file:"
     dlg = wx.FileDialog(self, title, style=wx.DD_DEFAULT_STYLE)
+    dlg.SetDirectory('{0}/../data/games/'.format(path))
     if dlg.ShowModal() == wx.ID_OK:
       game_listing = dlg.GetPath()
       with open(game_listing, 'rb') as f:
