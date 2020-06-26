@@ -1,7 +1,7 @@
 
 import wx
 
-from match_sim.gui.template import TemplatePanel
+from match_sim.gui.template import TemplatePanel, TemplateButton
 from match_sim.reporting.inbox import Inbox as ClInbox
 
 class InboxPanel(TemplatePanel):
@@ -10,15 +10,15 @@ class InboxPanel(TemplatePanel):
     self.game = game
     self.currently_showing = self.game.inbox.msg
     self.txt_output.AppendText(str(self.currently_showing))
-    read_button = wx.Button(self, label='Read')
+    read_button = TemplateButton(self, 'Read')
     read_button.Bind(wx.EVT_BUTTON, self.on_read)
-    self.hbox2.Add(read_button, 1, wx.LEFT | wx.BOTTOM, 5)
-    unread_button = wx.Button(self, label='Unread')
+    self.hbox3.Add(read_button, proportion=0)
+    unread_button = TemplateButton(self, 'Unread')
     unread_button.Bind(wx.EVT_BUTTON, self.on_unread)
-    self.hbox2.Add(unread_button, 1, wx.LEFT | wx.BOTTOM, 5)
-    next_button = wx.Button(self, label='Next')
+    self.hbox3.Add(unread_button, proportion=0)
+    next_button = TemplateButton(self, 'Next')
     next_button.Bind(wx.EVT_BUTTON, self.on_next)
-    self.hbox2.Add(next_button, 1, wx.LEFT | wx.BOTTOM, 5)
+    self.hbox3.Add(next_button, proportion=0)
     self.SetSizer(self.main_sizer)
 
   def on_read(self, event):

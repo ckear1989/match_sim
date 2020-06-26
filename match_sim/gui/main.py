@@ -8,7 +8,7 @@ path = pathlib.Path(__file__).parent.absolute()
 import wx
 
 import match_sim.default as default
-from match_sim.gui.template import TemplatePanel
+from match_sim.gui.template import TemplatePanel, TemplateButton
 from match_sim.gui.game import GamePanel, Game
 from match_sim.gui.inbox import InboxPanel
 from match_sim.gui.manage import ManagePanel
@@ -18,30 +18,10 @@ from match_sim.gui.settings import SettingsPanel
 class MSPanel(TemplatePanel):
   def __init__(self, parent):
     super().__init__(parent)
-    # main_sizer = wx.BoxSizer(wx.VERTICAL)
-    font = wx.SystemSettings.GetFont(wx.SYS_SYSTEM_FONT)
-    font.SetPointSize(15)
-    # welcome_message = wx.StaticText(self, label=default.welcome_message)
-    # welcome_message.SetFont(font)
-    # hbox1 = wx.BoxSizer()
-    # hbox1.Add(welcome_message, proportion=1, flag=wx.ALL|wx.EXPAND, border=10)
-    # main_sizer.Add(hbox1, proportion=1)
-    # hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-    self.new_button = wx.Button(self, label='New', size=(100, 30))
-    self.new_button.SetFont(font)
-    self.hbox2.Add(self.new_button, proportion=0, flag=wx.ALL|wx.CENTER, border=5)
-    self.load_button = wx.Button(self, label='Load', size=(100, 30))
-    self.load_button.SetFont(font)
-    self.hbox2.Add(self.load_button, proportion=0, flag=wx.ALL|wx.CENTER, border=5)
-    # self.exit_button = wx.Button(self, label='Exit', size=(100, 30))
-    self.exit_button.SetFont(font)
-    self.exit_button.SetSize((100, 30))
-    # self.hbox2.Add(self.exit_button, proportion=0, flag=wx.ALL|wx.CENTER, border=5)
-    # main_sizer.Add(hbox2, proportion=0)
-    # self.hbox1.Detach(self.txt_output)
-    # self.main_sizer.Detach(self.hbox1)
-    # self.Detach(self.txt_output)
-    # del self.txt_output
+    self.new_button = TemplateButton(self, 'New')
+    self.hbox3.Add(self.new_button, proportion=0)
+    self.load_button = TemplateButton(self, 'Load')
+    self.hbox3.Add(self.load_button, proportion=0)
     self.txt_output.Destroy()
     logo = wx.Image('{0}/../data/image/3dd982de-5e3b-4bcd-b9b8-88ce9bd03cce_200x200.png'.format(path), wx.BITMAP_TYPE_ANY).ConvertToBitmap()
     logo = wx.StaticBitmap(self, -1, logo, (10, 5), (logo.GetWidth(), logo.GetHeight()))
