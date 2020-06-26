@@ -1,4 +1,7 @@
 
+import pathlib
+path = pathlib.Path(__file__).parent.absolute()
+
 import wx
 
 class TemplatePanel(wx.Panel):
@@ -21,4 +24,21 @@ class TemplatePanel(wx.Panel):
 
     self.main_sizer.Add(self.hbox2, proportion=0, flag=wx.RIGHT|wx.BOTTOM, border=10)
     self.SetSizer(self.main_sizer)
+    self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+
+  def OnEraseBackground(self, evt):
+    """
+    https://www.blog.pythonlibrary.org/2010/03/18/wxpython-putting-a-background-image-on-a-panel/
+    Add a picture to the background
+    """
+    # yanked from ColourDB.py
+    dc = evt.GetDC()
+            
+    if not dc:
+      dc = wx.ClientDC(self)
+      rect = self.GetUpdateRegion().GetBox()
+      dc.SetClippingRect(rect)
+    dc.Clear()
+    bmp = wx.Bitmap('{0}/../data/image/puma-40-20-artificial-grass-2.jpg'.format(path))
+    dc.DrawBitmap(bmp, 0, 0)
 

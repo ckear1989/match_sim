@@ -9,7 +9,7 @@ import barnum
 import pyfiglet
 
 random.seed(12345)
-poss_teams = [barnum.create_city_state_zip()[1] for i in range(16)]
+poss_teams = [barnum.create_city_state_zip()[1] for i in range(16)][:8]
 
 save_dir = '{0}/data/games/'.format(path)
 def check_save_dir():
