@@ -10,10 +10,6 @@ import wx
 import match_sim.default as default
 from match_sim.gui.template import TemplatePanel, TemplateButton
 from match_sim.gui.game import GamePanel, Game
-from match_sim.gui.inbox import InboxPanel
-from match_sim.gui.manage import ManagePanel
-from match_sim.gui.stats import StatsPanel
-from match_sim.gui.settings import SettingsPanel
 
 class MSPanel(TemplatePanel):
   def __init__(self, parent):
@@ -70,36 +66,6 @@ class MSFrame(wx.Frame):
     self.SetSize((800, 600))
     self.Centre()
 
-  def create_game_panel(self, game):
-    self.game_panel = GamePanel(self, game)
-    self.sizer.Add(self.game_panel, 1, wx.EXPAND)
-    self.game_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_game_panel)
-    self.game_panel.Hide()
-
-  def create_inbox_panel(self, game):
-    self.inbox_panel = InboxPanel(self, game)
-    self.sizer.Add(self.inbox_panel, 1, wx.EXPAND)
-    self.inbox_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_inbox_panel)
-    self.inbox_panel.Hide()
-
-  def create_manage_panel(self):
-    self.manage_panel = ManagePanel(self)
-    self.sizer.Add(self.manage_panel, 1, wx.EXPAND)
-    self.manage_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_manage_panel)
-    self.manage_panel.Hide()
-
-  def create_stats_panel(self):
-    self.stats_panel = StatsPanel(self)
-    self.sizer.Add(self.stats_panel, 1, wx.EXPAND)
-    self.stats_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_stats_panel)
-    self.stats_panel.Hide()
-
-  def create_settings_panel(self):
-    self.settings_panel = SettingsPanel(self)
-    self.sizer.Add(self.settings_panel, 1, wx.EXPAND)
-    self.settings_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_settings_panel)
-    self.settings_panel.Hide()
-
   def on_new(self, event):
     dlg = NewDialog()
     dlg.ShowModal()
@@ -107,9 +73,13 @@ class MSFrame(wx.Frame):
     team = dlg.team.GetString(dlg.team.GetSelection())
     if name:
       if team:
-        game = Game(team, name)
-        self.create_game_panel(game)
-        self.show_game_panel()
+        self.game = Game(team, name)
+        self.game_panel = GamePanel(self)
+        self.sizer.Add(self.game_panel, 1, wx.EXPAND)
+        self.game_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_game)
+        self.game_panel.Show()
+        self.main_panel.Hide()
+        self.Layout()
     dlg.Destroy()
 
   def on_load(self, event):
@@ -119,91 +89,123 @@ class MSFrame(wx.Frame):
     if dlg.ShowModal() == wx.ID_OK:
       game_listing = dlg.GetPath()
       with open(game_listing, 'rb') as f:
-        game = pickle.load(f)
-      self.create_game_panel(game)
-      self.show_game_panel()
+        self.game = pickle.load(f)
+      self.game_panel = GamePanel(self)
+      self.sizer.Add(self.game_panel, 1, wx.EXPAND)
+      self.game_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_game)
+      self.game_panel.Show()
+      self.main_panel.Hide()
+      self.Layout()
     dlg.Destroy()
 
-  def on_inbox(self, event):
-    self.create_inbox_panel(self.game_panel.game)
-    self.show_inbox_panel()
-
-  def on_manage(self, event):
-    self.create_manage_panel()
-    self.show_manage_panel()
-
-  def on_stats(self, event):
-    self.create_stats_panel()
-    self.show_stats_panel()
-
-  def on_settings(self, event):
-    self.create_settings_panel()
-    self.show_settings_panel()
-
-  def show_game_panel(self):
-    self.game_panel.Show()
-    self.main_panel.Hide()
-    self.Layout()
-
-  def exit_game_panel(self, event):
-    self.main_panel.Show()
-    self.game_panel.Hide()
-    self.Layout()
-
-  def show_inbox_panel(self):
+  def on_inbox(self, apanel):
+    self.inbox_panel = apanel(self)
+    self.sizer.Add(self.inbox_panel, 1, wx.EXPAND)
+    self.inbox_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_inbox)
     self.inbox_panel.Show()
     self.game_panel.Hide()
     self.Layout()
 
-  def exit_inbox_panel(self, event):
-    self.game_panel.Show()
-    self.inbox_panel.Hide()
-    self.Layout()
-
-  def show_manage_panel(self):
+  def on_manage(self, apanel):
+    self.manage_panel = apanel(self)
+    self.sizer.Add(self.manage_panel, 1, wx.EXPAND)
+    self.manage_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_manage)
     self.manage_panel.Show()
     self.game_panel.Hide()
     self.Layout()
 
-  def exit_manage_panel(self, event):
-    self.game_panel.Show()
+  def on_lineup(self, apanel):
+    self.lineup_panel = apanel(self)
+    self.sizer.Add(self.lineup_panel, 1, wx.EXPAND)
+    self.lineup_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_lineup)
+    self.lineup_panel.Show()
     self.manage_panel.Hide()
     self.Layout()
 
-  def show_stats_panel(self):
+  def on_formation(self, apanel):
+    self.formation_panel = apanel(self)
+    self.sizer.Add(self.formation_panel, 1, wx.EXPAND)
+    self.formation_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_formation)
+    self.formation_panel.Show()
+    self.manage_panel.Hide()
+    self.Layout()
+
+  def on_tactics(self, apanel):
+    self.tactics_panel = apanel(self)
+    self.sizer.Add(self.tactics_panel, 1, wx.EXPAND)
+    self.tactics_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_tactics)
+    self.tactics_panel.Show()
+    self.manage_panel.Hide()
+    self.Layout()
+
+  def on_training(self, apanel):
+    self.training_panel = apanel(self)
+    self.sizer.Add(self.training_panel, 1, wx.EXPAND)
+    self.training_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_training)
+    self.training_panel.Show()
+    self.manage_panel.Hide()
+    self.Layout()
+
+  def on_stats(self, apanel):
+    self.stats_panel = apanel(self)
+    self.sizer.Add(self.stats_panel, 1, wx.EXPAND)
+    self.stats_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_stats)
     self.stats_panel.Show()
     self.game_panel.Hide()
     self.Layout()
 
-  def exit_stats_panel(self, event):
-    self.game_panel.Show()
-    self.stats_panel.Hide()
-    self.Layout()
-
-  def show_settings_panel(self):
+  def on_settings(self, apanel):
+    self.settings_panel = apanel(self)
+    self.sizer.Add(self.settings_panel, 1, wx.EXPAND)
+    self.settings_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_settings)
     self.settings_panel.Show()
     self.game_panel.Hide()
     self.Layout()
 
-  def exit_settings_panel(self, event):
+  def exit_game(self, event):
+    self.main_panel.Show()
+    self.game_panel.Hide()
+    self.Layout()
+
+  def exit_inbox(self, event):
+    self.game_panel.Show()
+    self.inbox_panel.Hide()
+    self.Layout()
+
+  def exit_manage(self, event):
+    self.game_panel.Show()
+    self.manage_panel.Hide()
+    self.Layout()
+
+  def exit_lineup(self, event):
+    self.manage_panel.Show()
+    self.lineup_panel.Hide()
+    self.Layout()
+
+  def exit_formation(self, event):
+    self.manage_panel.Show()
+    self.formation_panel.Hide()
+    self.Layout()
+
+  def exit_tactics(self, event):
+    self.manage_panel.Show()
+    self.tactics_panel.Hide()
+    self.Layout()
+
+  def exit_training(self, event):
+    self.manage_panel.Show()
+    self.training_panel.Hide()
+    self.Layout()
+
+  def exit_stats(self, event):
+    self.game_panel.Show()
+    self.stats_panel.Hide()
+    self.Layout()
+
+  def exit_settings(self, event):
     self.game_panel.Show()
     self.settings_panel.Hide()
     self.Layout()
-
-  def exit_on_panel(self, event):
-    self.off_panel.Show()
-    self.on_panel.Hide()
-    self.Layout()
-
-  def hide_panel(self, apanel):
-    self.off_panel = apanel
-    self.off_panel.Hide()
-
-  def show_panel(self, apanel):
-    self.on_panel = apanel(self)
-    self.sizer.Add(self.on_panel, 1, wx.EXPAND)
-    self.on_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_on_panel)
-    self.on_panel.Show()
 
   def on_exit(self, event):
     self.Destroy()

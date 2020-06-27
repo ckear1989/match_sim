@@ -5,9 +5,9 @@ from match_sim.gui.template import TemplatePanel, TemplateButton
 from match_sim.reporting.inbox import Inbox as ClInbox
 
 class InboxPanel(TemplatePanel):
-  def __init__(self, parent, game):
+  def __init__(self, parent):
     super().__init__(parent)
-    self.game = game
+    self.game = self.GetParent().game
     self.currently_showing = self.game.inbox.msg
     self.txt_output.AppendText(str(self.currently_showing))
     read_button = TemplateButton(self, 'Read')

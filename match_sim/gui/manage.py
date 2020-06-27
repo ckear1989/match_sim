@@ -21,24 +21,16 @@ class ManagePanel(TemplatePanel):
     self.SetSizer(self.main_sizer)
 
   def on_lineup(self, event):
-    self.GetParent().hide_panel(self)
-    self.GetParent().show_panel(LineupPanel)
-    self.GetParent().Layout()
+    self.GetParent().on_lineup(LineupPanel)
 
   def on_formation(self, event):
-    self.GetParent().hide_panel(self)
-    self.GetParent().show_panel(FormationPanel)
-    self.GetParent().Layout()
+    self.GetParent().on_formation(FormationPanel)
 
   def on_tactics(self, event):
-    self.GetParent().hide_panel(self)
-    self.GetParent().show_panel(TacticsPanel)
-    self.GetParent().Layout()
+    self.GetParent().on_tactics(TacticsPanel)
 
   def on_training(self, event):
-    self.GetParent().hide_panel(self)
-    self.GetParent().show_panel(TrainingPanel)
-    self.GetParent().Layout()
+    self.GetParent().on_training(TrainingPanel)
 
 class LineupPanel(TemplatePanel):
   def __init__(self, parent):
