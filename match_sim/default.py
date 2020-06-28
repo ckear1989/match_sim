@@ -17,6 +17,8 @@ def check_save_dir():
      os.mkdir(save_dir)
 
 welcome_message = pyfiglet.figlet_format('Match\nSimulator\n2020\n')
+image_dir = '{0}/data/image/'.format(path)
+gui_background = '{0}{1}'.format(image_dir, 'puma-40-20-artificial-grass-2.jpg')
 
 dow = {
   'monday': 0,

@@ -24,21 +24,11 @@
 # sudo apt-get install git curl libsdl2-mixer-2.0-0 libsdl2-image-2.0-0 libsdl2-2.0-0
 # pip3 install eyed3
 
-# sudo python3 __init__.py
-# python3.6 default.py
-# python3.6 settings.py
-# python3.6 player.py
-# python3.6 competition.py
-# sudo python3.6 event.py
-# python3.6 training.py
-# python3.6 team.py
-# python3.6 match_team.py
-# sudo python3.6 cl/match.py
-# sudo python3.6 cl/season.py
+
+# sudo python3.6 -m match_sim.gui.main
 # sudo python3.6 -m match_sim.cl.game
-# sudo python3.6 cl/main.py
-sudo python3.6 -m match_sim.gui.main
 # sudo python3.6 -m match_sim.gui.manage
+python3.6 -m match_sim.gui.graphics
 
 # pylint --disable=bad-continuation --indent-string='  ' main.py > pylint.txt
 

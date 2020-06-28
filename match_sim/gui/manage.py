@@ -6,8 +6,9 @@ import os
 import pathlib
 path = pathlib.Path(__file__).parent.absolute()
 
-# import pygame
 import wx
+
+from match_sim.gui.graphics import PaintPanel
 
 class ManagePanel(TemplatePanel):
   def __init__(self, parent):
@@ -38,7 +39,7 @@ class ManagePanel(TemplatePanel):
   def on_training(self, event):
     self.GetParent().on_training(TrainingPanel)
 
-class LineupPanel(TemplatePanel):
+class LineupPanel(TemplatePanel, PaintPanel):
   def __init__(self, parent):
     super().__init__(parent)
     self.txt_output.Destroy()
@@ -46,15 +47,11 @@ class LineupPanel(TemplatePanel):
     self.starting = wx.ListBox(self)
     self.subs = wx.ListBox(self)
     self.reserves = wx.ListBox(self)
+    self.InitUI()
     self.hbox1.Add(self.starting)
     self.hbox1.Add(self.subs)
     self.hbox1.Add(self.reserves)
-    self.txt_output = wx.TextCtrl(self,
-      style=wx.TE_MULTILINE|wx.BORDER_SUNKEN|wx.TE_READONLY|wx.TE_RICH2, size=(400,200))
-    self.currently_showing = ''
-    self.txt_output.AppendText(str(self.currently_showing))
     self.refresh()
-    self.hbox1.Add(self.txt_output, proportion=1, flag=wx.EXPAND)
     start_to_sub_button = TemplateButton(self, 'Move to subs')
     start_to_sub_button.Bind(wx.EVT_BUTTON, self.start_to_sub)
     sub_to_start_button = TemplateButton(self, 'Move to starting')
@@ -67,7 +64,7 @@ class LineupPanel(TemplatePanel):
     self.hbox3.Add(sub_to_start_button, proportion=0)
     self.hbox3.Add(sub_to_res_button, proportion=0)
     self.hbox3.Add(res_to_sub_button, proportion=0)
- 
+
   def refresh(self):
     self.get_starting()
     self.get_subs()
@@ -80,8 +77,8 @@ class LineupPanel(TemplatePanel):
       self.reserves.SetSelection(0)
     self.team.formation.get_ascii()
     self.team.formation.update_ascii(self.team)
-    self.txt_output.Clear()
-    self.txt_output.AppendText(str(self.team.formation))
+    # self.txt_output.Clear()
+    # self.txt_output.AppendText(str(self.team.formation))
 
   def start_to_sub(self, event):
     if self.starting.GetCount() > 0:
@@ -167,7 +164,7 @@ class wxSDLWindow(wx.Frame):
         if sys.platform == 'win32':
           os.environ['SDL_VIDEODRIVER'] = 'windib'
 
-        pygame.init()
+        # pygame.init()
 
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self._initialized = 1
@@ -175,7 +172,7 @@ class wxSDLWindow(wx.Frame):
       self._resized = 0
 
     x,y = self.GetSize()
-    self._surface = pygame.display.set_mode((x,y))
+    # self._surface = pygame.display.set_mode((x,y))
 
     if self.__needsDrawing:
       self.draw()

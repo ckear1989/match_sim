@@ -4,6 +4,16 @@ path = pathlib.Path(__file__).parent.absolute()
 
 import wx
 
+import match_sim.default as default
+
+class TemplateFrame(wx.Frame):
+  def __init__(self):
+    super().__init__(parent=None, title='Match Simulator 2020')
+    self.sizer = wx.BoxSizer(wx.VERTICAL)
+    self.SetSizer(self.sizer)
+    self.SetSize((800, 600))
+    self.Centre()
+
 class TemplateButton(wx.Button):
   def __init__(self, parent, label):
     super().__init__(parent)
@@ -64,6 +74,6 @@ class TemplatePanel(wx.Panel):
       rect = self.GetUpdateRegion().GetBox()
       dc.SetClippingRect(rect)
     dc.Clear()
-    bmp = wx.Bitmap('{0}/../data/image/puma-40-20-artificial-grass-2.jpg'.format(path))
+    bmp = wx.Bitmap(default.gui_background)
     dc.DrawBitmap(bmp, 0, 0)
 
