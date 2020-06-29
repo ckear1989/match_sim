@@ -75,9 +75,9 @@ class MatchTeam(Team):
         self.lineup_change()
       return True
 
-  def formation_change(self):
+  def formation_change(self, x=None):
     '''Call formation method'''
-    self.formation.change(self)
+    self.formation.change(self, x)
     self.update_playing_positions()
 
   def tactics_change(self, x=None):

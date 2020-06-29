@@ -195,6 +195,9 @@ class Player():
     '''Assert player order for table sorting'''
     return self.__repr__() < other.__repr__()
 
+  def update_lineup(self, i):
+    self.match.lineup = i
+
   def update_postmatch_stats(self, comp):
     '''Copy match playing stats from one player to self'''
     if comp.form in ['rr', 'drr']:

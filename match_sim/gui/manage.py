@@ -8,7 +8,8 @@ path = pathlib.Path(__file__).parent.absolute()
 
 import wx
 
-from match_sim.gui.graphics import PaintPanel
+from match_sim.gui.graphics import PaintPanel, Colour
+import match_sim.default as default
 
 class ManagePanel(TemplatePanel):
   def __init__(self, parent):
@@ -16,12 +17,6 @@ class ManagePanel(TemplatePanel):
     lineup_button = TemplateButton(self, 'Lineup')
     lineup_button.Bind(wx.EVT_BUTTON, self.on_lineup)
     self.hbox3.Add(lineup_button)
-    formation_button = TemplateButton(self, 'Formation')
-    formation_button.Bind(wx.EVT_BUTTON, self.on_tactics)
-    self.hbox3.Add(formation_button)
-    tactics_button = TemplateButton(self, 'Tactics')
-    tactics_button.Bind(wx.EVT_BUTTON, self.on_tactics)
-    self.hbox3.Add(tactics_button)
     training_button = TemplateButton(self, 'Training')
     training_button.Bind(wx.EVT_BUTTON, self.on_training)
     self.hbox3.Add(training_button)
@@ -30,105 +25,108 @@ class ManagePanel(TemplatePanel):
   def on_lineup(self, event):
     self.GetParent().on_lineup(LineupPanel)
 
-  def on_formation(self, event):
-    self.GetParent().on_formation(FormationPanel)
-
-  def on_tactics(self, event):
-    self.GetParent().on_tactics(TacticsPanel)
-
   def on_training(self, event):
     self.GetParent().on_training(TrainingPanel)
 
-class LineupPanel(TemplatePanel, PaintPanel):
-  def __init__(self, parent):
-    super().__init__(parent)
-    self.txt_output.Destroy()
+class LineupPanel(PaintPanel):
+  def __init__(self, parent, x0=600, y0=None):
+    super().__init__(parent, x0, y0)
+    colour = Colour()
+    font = wx.Font(18, wx.DECORATIVE, wx.BOLD, wx.NORMAL)
+    label_size = wx.Size(200, 50)
     self.team = self.GetParent().game.teams[self.GetParent().game.team]
-    self.starting = wx.ListBox(self)
-    self.subs = wx.ListBox(self)
-    self.reserves = wx.ListBox(self)
+    self.lineups = {}
+    self.vbox1 = wx.BoxSizer(wx.VERTICAL)
+    label = wx.StaticText(self, label='Choose Starting Lineup:', size=label_size)
+    label.SetFont(font)
+    label.SetForegroundColour(colour.BL)
+    label.SetBackgroundColour(colour.LIME)
+    self.vbox1.Add(label, proportion=1)
+    self.hbox1.Add(self.vbox1)
+    self.vbox2 = wx.BoxSizer(wx.VERTICAL)
+    label = wx.StaticText(self, label='Choose Substitutes:', size=label_size)
+    label.SetFont(font)
+    label.SetForegroundColour(colour.BL)
+    label.SetBackgroundColour(colour.LIME)
+    self.vbox2.Add(label, proportion=1)
+    self.hbox1.Add(self.vbox2)
+    for i in range(1, 16):
+      self.lineups[i] = wx.ComboBox(self, choices=[str(x) for x in self.team] + [''])
+      self.lineups[i].SetStringSelection([str(x) for x in self.team if x.match.lineup == i][0])
+      self.lineups[i].Bind(wx.EVT_COMBOBOX, self.update_lineups)
+      self.vbox1.Add(self.lineups[i], flag=wx.ALL, border=2)
+    for i in range(16, 22):
+      self.lineups[i] = wx.ComboBox(self, choices=[str(x) for x in self.team] + [''])
+      self.lineups[i].SetStringSelection([str(x) for x in self.team if x.match.lineup == i][0])
+      self.lineups[i].Bind(wx.EVT_COMBOBOX, self.update_lineups)
+      self.vbox2.Add(self.lineups[i], flag=wx.ALL, border=2)
+    self.formation = wx.ComboBox(self, choices=default.formations)
+    self.formation.SetStringSelection(self.team.formation.nlist)
+    self.formation.Bind(wx.EVT_COMBOBOX, self.update_formation)
+    label = wx.StaticText(self, label='Choose Formation:', size=label_size)
+    label.SetFont(font)
+    label.SetForegroundColour(colour.BL)
+    label.SetBackgroundColour(colour.LIME)
+    self.vbox1.Add(label, proportion=1)
+    self.vbox1.Add(self.formation)
+    self.tactics = wx.ComboBox(self, choices=default.tactics)
+    self.tactics.SetStringSelection(self.team.tactics.tactics)
+    self.tactics.Bind(wx.EVT_COMBOBOX, self.update_tactics)
+    label = wx.StaticText(self, label='Choose Tactics:', size=label_size)
+    label.SetFont(font)
+    label.SetForegroundColour(colour.BL)
+    label.SetBackgroundColour(colour.LIME)
+    self.vbox2.Add(label, proportion=1)
+    self.vbox2.Add(self.tactics)
     self.InitUI()
-    self.hbox1.Add(self.starting)
-    self.hbox1.Add(self.subs)
-    self.hbox1.Add(self.reserves)
+    self.dc = wx.ClientDC(self)
     self.refresh()
-    start_to_sub_button = TemplateButton(self, 'Move to subs')
-    start_to_sub_button.Bind(wx.EVT_BUTTON, self.start_to_sub)
-    sub_to_start_button = TemplateButton(self, 'Move to starting')
-    sub_to_start_button.Bind(wx.EVT_BUTTON, self.sub_to_start)
-    sub_to_res_button = TemplateButton(self, 'Move to reserves')
-    sub_to_res_button.Bind(wx.EVT_BUTTON, self.sub_to_res)
-    res_to_sub_button = TemplateButton(self, 'Move to subs')
-    res_to_sub_button.Bind(wx.EVT_BUTTON, self.res_to_sub)
-    self.hbox3.Add(start_to_sub_button, proportion=0)
-    self.hbox3.Add(sub_to_start_button, proportion=0)
-    self.hbox3.Add(sub_to_res_button, proportion=0)
-    self.hbox3.Add(res_to_sub_button, proportion=0)
+
+  def update_lineups(self, event):
+    for i in range(1, 22):
+      pname = self.lineups[i].GetValue()
+      players = [p for p in self.team if str(p) == pname]
+      if len(players) > 0:
+        player = players[0]
+        player.update_lineup(i)
+        self.lineups[i].SetSelection(self.lineups[i].GetSelection())
+        self.lineups[i].SetStringSelection(str(player))
+        players = [p for p in self.team if p.match.lineup == i]
+        for player in players:
+          if str(player) != pname:
+            player.update_lineup(0)
+    self.refresh()
+
+  def update_formation(self, event):
+    self.team.formation_change(self.formation.GetValue())
+    self.refresh()
+
+  def update_tactics(self, event):
+    self.team.tactics_change(self.tactics.GetValue())
+    self.refresh()
 
   def refresh(self):
-    self.get_starting()
-    self.get_subs()
-    self.get_reserves()
-    if self.starting.GetCount() > 0:
-      self.starting.SetSelection(0)
-    if self.subs.GetCount() > 0:
-      self.subs.SetSelection(0)
-    if self.reserves.GetCount() > 0:
-      self.reserves.SetSelection(0)
-    self.team.formation.get_ascii()
-    self.team.formation.update_ascii(self.team)
-    # self.txt_output.Clear()
-    # self.txt_output.AppendText(str(self.team.formation))
+    for i in range(1, 22):
+      players = [p for p in self.team if p.match.lineup == i]
+      if len(players) == 0:
+        self.lineups[i].SetSelection(wx.NOT_FOUND)
+        self.lineups[i].SetStringSelection('')
+    self.team.update_playing_positions()
+    self.draw_lineup()
 
-  def start_to_sub(self, event):
-    if self.starting.GetCount() > 0:
-      p0 = self.starting.GetString(self.starting.GetSelection())
-      self.lineups = [x.match.lineup for x in self.team]
-      available_slots = [x for x in range(16, 22) if x not in self.lineups]
-      if len(available_slots) > 0:
-        slot = available_slots[0]
-        player = next(x for x in self.team if str(x)==p0)
-        player.match.lineup = slot
-        self.refresh()
-
-  def sub_to_start(self, event):
-    if self.subs.GetCount() > 0:
-      p0 = self.subs.GetString(self.subs.GetSelection())
-      self.lineups = [x.match.lineup for x in self.team]
-      available_slots = [x for x in range(1, 16) if x not in self.lineups]
-      if len(available_slots) > 0:
-        slot = available_slots[0]
-        player = next(x for x in self.team if str(x)==p0)
-        player.match.lineup = slot
-        self.refresh()
-
-  def sub_to_res(self, event):
-    if self.subs.GetCount() > 0:
-      p0 = self.subs.GetString(self.subs.GetSelection())
-      slot = 0
-      player = next(x for x in self.team if str(x)==p0)
-      player.match.lineup = slot
-      self.refresh()
-
-  def res_to_sub(self, event):
-    if self.reserves.GetCount() > 0:
-      p0 = self.reserves.GetString(self.reserves.GetSelection())
-      self.lineups = [x.match.lineup for x in self.team]
-      available_slots = [x for x in range(16, 22) if x not in self.lineups]
-      if len(available_slots) > 0:
-        slot = available_slots[0]
-        player = next(x for x in self.team if str(x)==p0)
-        player.match.lineup = slot
-        self.refresh()
-
-  def get_starting(self):
-    self.starting.Set([str(x) for x in self.team if x.match.lineup in range(1, 16)])
-
-  def get_subs(self):
-    self.subs.Set([str(x) for x in self.team if x.match.lineup in range(16, 22)])
-
-  def get_reserves(self):
-    self.reserves.Set([str(x) for x in self.team if x.match.lineup not in range(1, 22)])
+  def draw_lineup(self):
+    # self.dc.Clear()
+    self.dc = wx.ClientDC(self)
+    # print(self.dc)
+    # self.dc.Clear()
+    self.draw_pitch(self.dc, self.team.name)
+    for i in range(1, 22):
+      players = [p for p in self.team if p.match.lineup == i]
+      if len(players) > 0:
+        player = players[0]
+        x, y = self.team.formation.get_coords(i)
+        # print(player, x, y)
+        self.draw_player(player, self.dc, x=x, y=y) 
 
 class FormationPanel(TemplatePanel):
   def __init__(self, parent):
@@ -212,5 +210,13 @@ def pygametest():
   app.MainLoop()
 
 if __name__ == "__main__":
-  pygametest()
 
+  app = wx.App(False)
+  frame = DefaultFrame()
+  panel = ManagePanel(frame)
+  frame.sizer.Add(panel, 1, wx.EXPAND)
+  frame.SetSizer(self.sizer)
+  frame.SetSize((800, 600))
+  frame.Centre()
+  frame.Show()
+  app.MainLoop()

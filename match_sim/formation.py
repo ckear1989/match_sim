@@ -17,16 +17,15 @@ class Formation():
   def __str__(self):
     return self.__repr__()
 
-  def change(self, team):
-    print(self)
-    x = input('choose formation:\n{0}\n'.format(', '.join(sorted(formations)))).strip()
+  def change(self, team, x=None):
+    if x is None:
+      x = input('choose formation:\n{0}\n'.format(', '.join(sorted(formations)))).strip()
     if x in formations:
       self.nlist = x
       self.get_pos()
       self.get_pos_lineups()
       self.get_ascii()
       self.update_ascii(team)
-    print(self)
 
   def get_pos(self):
     self.pos = [int(i) for i in self.nlist.split('-')]
@@ -88,3 +87,35 @@ class Formation():
       plstr = str(p).center(15).replace('[', ' ').replace(']', ' ')
       self.ascii = self.ascii.replace(postr, plstr)
 
+  def get_coords(self, i):
+    if i in self.goalkeeper_lineups:
+      x, y =  (170, 540)
+    elif i in self.full_back_lineups:
+      y = 480
+      width = (340 / (len(self.full_back_lineups) + 1))
+      j = self.full_back_lineups.index(i) + 1
+      x = (340 - (j*width))
+    elif i in self.half_back_lineups:
+      y = 380
+      width = (340 / (len(self.half_back_lineups) + 1))
+      j = self.half_back_lineups.index(i) + 1
+      x = (340 - (j*width))
+    elif i in self.midfielder_lineups:
+      y = 280
+      width = (340 / (len(self.midfielder_lineups) + 1))
+      j = self.midfielder_lineups.index(i) + 1
+      x = (340 - (j*width))
+    elif i in self.half_forward_lineups:
+      y = 180
+      width = (340 / (len(self.half_forward_lineups) + 1))
+      j = self.half_forward_lineups.index(i) + 1
+      x = (340 - (j*width))
+    elif i in self.full_forward_lineups:
+      y = 80
+      width = (340 / (len(self.full_forward_lineups) + 1))
+      j = self.full_forward_lineups.index(i) + 1
+      x = (340 - (j*width))
+    else:
+      x = 380
+      y = 290 - ((21 - i) * 50)
+    return x, y
