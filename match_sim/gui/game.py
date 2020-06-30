@@ -16,14 +16,17 @@ class GamePanel(TemplatePanel):
     super().__init__(parent)
     self.game = self.GetParent().game
     self.txt_output.Destroy()
-    self.events = self.ptable_to_grid(self.game.upcoming_events)
-    self.hbox1.Add(self.events)
+    self.vbox1 = wx.BoxSizer(wx.VERTICAL)
+    self.vbox2 = wx.BoxSizer(wx.VERTICAL)
+    self.hbox1.Add(self.vbox1, flag=wx.ALL, border=5)
+    self.hbox1.Add(self.vbox2, flag=wx.ALL, border=5)
+    self.create_tables()
     continue_button = TemplateButton(self, 'Continue')
     continue_button.Bind(wx.EVT_BUTTON, self.on_continue)
     self.hbox3.Add(continue_button, proportion=0)
     inbox_button = TemplateButton(self, 'Inbox[{0}]'.format(self.game.inbox.count))
     inbox_button.Bind(wx.EVT_BUTTON, self.on_inbox)
-    self.hbox3.Add(inbox_button, proportion=0, )
+    self.hbox3.Add(inbox_button, proportion=0)
     manage_button = TemplateButton(self, 'Manage')
     manage_button.Bind(wx.EVT_BUTTON, self.on_manage)
     self.hbox3.Add(manage_button, proportion=0)
@@ -78,12 +81,27 @@ class GamePanel(TemplatePanel):
 
   def on_continue(self, event):
     self.game.pcontinue()
-    self.insert_text(event)
+    self.refresh(event)
 
-  def insert_text(self, event):
-    # self.label.Clear()
-    # self.label.AppendText(str(self.game))
-    pass
+  def create_tables(self):
+    self.events = self.ptable_to_grid(self.game.upcoming_events)
+    self.vbox1.Add(self.events, flag=wx.ALL, border=5)
+    self.league_table = self.ptable_to_grid(self.game.team_league.league_table)
+    self.vbox1.Add(self.league_table, flag=wx.ALL, border=5)
+    self.team = self.ptable_to_grid(self.game.teams[self.game.team].player_table)
+    self.team.DeleteCols(5, 5)
+    self.team.DeleteCols(8, 2)
+    self.vbox2.Add(self.team, flag=wx.ALL, border=5)
+    self.Layout()
+
+  def refresh(self, event):
+    # self.events.SetTable(self.ptable_to_grid(self.game.upcoming_events))
+    # self.league_table.SetTable(self.ptable_to_grid(self.game.team_league.league_table))
+    # self.team.SetTable(self.ptable_to_grid(self.game.teams[self.game.team].player_table))
+    self.events.Destroy()
+    self.league_table.Destroy()
+    self.team.Destroy()
+    self.create_tables()
 
 class Game(ClGame):
   def __init__(self, team, name):
