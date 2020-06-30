@@ -2,6 +2,7 @@
 import datetime
 
 import wx
+import wx.grid
 
 from match_sim.cl.game import Game as ClGame
 from match_sim.gui.template import TemplatePanel, TemplateButton
@@ -14,7 +15,9 @@ class GamePanel(TemplatePanel):
   def __init__(self, parent):
     super().__init__(parent)
     self.game = self.GetParent().game
-    self.txt_output.AppendText(str(self.game))
+    self.txt_output.Destroy()
+    self.events = self.ptable_to_grid(self.game.upcoming_events)
+    self.hbox1.Add(self.events)
     continue_button = TemplateButton(self, 'Continue')
     continue_button.Bind(wx.EVT_BUTTON, self.on_continue)
     self.hbox3.Add(continue_button, proportion=0)
@@ -34,6 +37,29 @@ class GamePanel(TemplatePanel):
     save_button.Bind(wx.EVT_BUTTON, self.save_game)
     self.hbox3.Add(save_button, proportion=0)
     self.SetSizer(self.main_sizer)
+
+  def ptable_to_grid(self, atable):
+    x = wx.grid.Grid(self)
+    rows = atable._rows
+    cols = atable._field_names
+    x.CreateGrid(len(rows), len(cols))
+    i = 0
+    j = 0
+    G = "\033[0;32;40m" # Green
+    N = "\033[0m" # Reset
+    for col in cols:
+      x.SetColLabelValue(j, str(col))
+      j += 1
+    i = 0
+    for arow in rows:
+      j = 0
+      for acol in arow:
+        x.SetCellValue(i, j, str(acol).replace(G, '').replace(N, ''))
+        x.SetReadOnly(i, j)
+        j += 1
+      i += 1
+    x.HideRowLabels()
+    return x
 
   def on_inbox(self, event):
     self.GetParent().on_inbox(InboxPanel)
@@ -55,8 +81,9 @@ class GamePanel(TemplatePanel):
     self.insert_text(event)
 
   def insert_text(self, event):
-    self.txt_output.Clear()
-    self.txt_output.AppendText(str(self.game))
+    # self.label.Clear()
+    # self.label.AppendText(str(self.game))
+    pass
 
 class Game(ClGame):
   def __init__(self, team, name):

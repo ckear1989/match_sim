@@ -115,26 +115,14 @@ class LineupPanel(PaintPanel):
     self.draw_lineup()
 
   def draw_lineup(self):
-    # self.dc.Clear()
     self.dc = wx.ClientDC(self)
-    # print(self.dc)
-    # self.dc.Clear()
     self.draw_pitch(self.dc, self.team.name)
     for i in range(1, 22):
       players = [p for p in self.team if p.match.lineup == i]
       if len(players) > 0:
         player = players[0]
         x, y = self.team.formation.get_coords(i)
-        # print(player, x, y)
         self.draw_player(player, self.dc, x=x, y=y) 
-
-class FormationPanel(TemplatePanel):
-  def __init__(self, parent):
-    super().__init__(parent)
-
-class TacticsPanel(TemplatePanel):
-  def __init__(self, parent):
-    super().__init__(parent)
 
 class TrainingPanel(TemplatePanel):
   def __init__(self, parent):
