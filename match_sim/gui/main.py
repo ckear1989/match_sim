@@ -122,22 +122,6 @@ class MSFrame(wx.Frame):
     self.manage_panel.Hide()
     self.Layout()
 
-  def on_formation(self, apanel):
-    self.formation_panel = apanel(self)
-    self.sizer.Add(self.formation_panel, 1, wx.EXPAND)
-    self.formation_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_formation)
-    self.formation_panel.Show()
-    self.manage_panel.Hide()
-    self.Layout()
-
-  def on_tactics(self, apanel):
-    self.tactics_panel = apanel(self)
-    self.sizer.Add(self.tactics_panel, 1, wx.EXPAND)
-    self.tactics_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_tactics)
-    self.tactics_panel.Show()
-    self.manage_panel.Hide()
-    self.Layout()
-
   def on_training(self, apanel):
     self.training_panel = apanel(self)
     self.sizer.Add(self.training_panel, 1, wx.EXPAND)
@@ -162,6 +146,17 @@ class MSFrame(wx.Frame):
     self.game_panel.Hide()
     self.Layout()
 
+  def on_match(self, apanel, match):
+    self.match_panel = apanel(self, match)
+    self.sizer.Add(self.match_panel, 1, wx.EXPAND)
+    self.match_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_match)
+    self.match_panel.Show()
+    self.game_panel.Hide()
+    self.Layout()
+    # while match.status is not 'complete':
+    #   import time
+    #   time.sleep(1)
+
   def exit_game(self, event):
     self.main_panel.Show()
     self.game_panel.Hide()
@@ -182,16 +177,6 @@ class MSFrame(wx.Frame):
     self.lineup_panel.Hide()
     self.Layout()
 
-  def exit_formation(self, event):
-    self.manage_panel.Show()
-    self.formation_panel.Hide()
-    self.Layout()
-
-  def exit_tactics(self, event):
-    self.manage_panel.Show()
-    self.tactics_panel.Hide()
-    self.Layout()
-
   def exit_training(self, event):
     self.manage_panel.Show()
     self.training_panel.Hide()
@@ -205,6 +190,12 @@ class MSFrame(wx.Frame):
   def exit_settings(self, event):
     self.game_panel.Show()
     self.settings_panel.Hide()
+    self.Layout()
+
+  def exit_match(self, event):
+    self.game_panel.Show()
+    self.game_panel.Layout()
+    self.match_panel.Hide()
     self.Layout()
 
   def on_exit(self, event):

@@ -8,6 +8,7 @@ from match_sim.cl.game import Game as ClGame
 from match_sim.gui.template import TemplatePanel, TemplateButton
 from match_sim.gui.inbox import InboxPanel, Inbox
 from match_sim.gui.manage import ManagePanel
+from match_sim.gui.match import MatchPanel, Match
 from match_sim.gui.stats import StatsPanel
 from match_sim.gui.settings import SettingsPanel, Settings
 
@@ -80,7 +81,11 @@ class GamePanel(TemplatePanel):
     self.game.save()
 
   def on_continue(self, event):
-    self.game.pcontinue()
+    # self.game.pcontinue()
+    self.game.current_date += datetime.timedelta(1)
+    self.game.process_teams_daily()
+    self.process_fixtures_daily()
+    self.game.update_next_fixture()
     self.refresh(event)
 
   def create_tables(self):
@@ -95,13 +100,51 @@ class GamePanel(TemplatePanel):
     self.Layout()
 
   def refresh(self, event):
-    # self.events.SetTable(self.ptable_to_grid(self.game.upcoming_events))
-    # self.league_table.SetTable(self.ptable_to_grid(self.game.team_league.league_table))
-    # self.team.SetTable(self.ptable_to_grid(self.game.teams[self.game.team].player_table))
     self.events.Destroy()
     self.league_table.Destroy()
     self.team.Destroy()
     self.create_tables()
+
+  def process_fixtures_daily(self):
+    '''Get today\'s fixtures.  Iteratively play eatch game.'''
+    if self.game.current_date == self.game.next_fixture_date:
+      fixtures = self.game.fixtures[self.game.current_date]
+      if len(fixtures) > 1:
+        if self.game.team in fixtures[-1]:
+          for match_t in fixtures[:-1]:
+            self.process_match_tuple(match_t)
+          next_match_t = fixtures[-1]
+          self.process_match_tuple(next_match_t)
+        else:
+          for match_t in fixtures:
+            self.process_match_tuple(match_t)
+      else:
+        for match_t in fixtures:
+          self.process_match_tuple(match_t)
+
+  def process_match_tuple(self, match_t):
+    '''Determine match arguments.  Play match.'''
+    silent = False
+    time_step = 1/self.game.settings.match_speed
+    if self.game.settings.match_speed == 70:
+      time_step = 0
+    if self.game.team not in match_t:
+      silent = True
+      time_step = 0
+    extra_time_required = False
+    if 'replay' in match_t[2]:
+      extra_time_required = True
+    if silent is True:
+      match = Match(self.game.teams[match_t[0]], self.game.teams[match_t[1]],
+        self.game.current_date, silent, extra_time_required)
+      print(match)
+      match.play(0)
+    else:
+      match = Match(self.game.teams[match_t[0]], self.game.teams[match_t[1]],
+        self.game.current_date, silent, extra_time_required)
+      self.GetParent().on_match(MatchPanel, match)
+    self.game.process_match_result(match, match_t[2])
+    self.game.update_next_fixture()
 
 class Game(ClGame):
   def __init__(self, team, name):
@@ -114,3 +157,4 @@ class Game(ClGame):
     self.process_teams_daily()
     self.process_fixtures_daily()
     self.update_next_fixture()
+
