@@ -147,15 +147,13 @@ class MSFrame(wx.Frame):
     self.Layout()
 
   def on_match(self, apanel, match):
-    self.match_panel = apanel(self, match)
+    self.match = match
+    self.match_panel = apanel(self)
     self.sizer.Add(self.match_panel, 1, wx.EXPAND)
     self.match_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_match)
     self.match_panel.Show()
     self.game_panel.Hide()
     self.Layout()
-    # while match.status is not 'complete':
-    #   import time
-    #   time.sleep(1)
 
   def exit_game(self, event):
     self.main_panel.Show()
@@ -194,7 +192,6 @@ class MSFrame(wx.Frame):
 
   def exit_match(self, event):
     self.game_panel.Show()
-    self.game_panel.Layout()
     self.match_panel.Hide()
     self.Layout()
 

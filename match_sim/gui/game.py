@@ -137,14 +137,13 @@ class GamePanel(TemplatePanel):
     if silent is True:
       match = Match(self.game.teams[match_t[0]], self.game.teams[match_t[1]],
         self.game.current_date, silent, extra_time_required)
-      print(match)
       match.play(0)
+      self.game.process_match_result(match, match_t[2])
+      self.game.update_next_fixture()
     else:
       match = Match(self.game.teams[match_t[0]], self.game.teams[match_t[1]],
         self.game.current_date, silent, extra_time_required)
       self.GetParent().on_match(MatchPanel, match)
-    self.game.process_match_result(match, match_t[2])
-    self.game.update_next_fixture()
 
 class Game(ClGame):
   def __init__(self, team, name):
