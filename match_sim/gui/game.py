@@ -1,16 +1,21 @@
 
 import datetime
+import random
 
+import names
 import wx
 import wx.grid
 
 from match_sim.cl.game import Game as ClGame
+from match_sim.training import Training
+import match_sim.default as default
 from match_sim.gui.template import TemplatePanel, TemplateButton
 from match_sim.gui.inbox import InboxPanel, Inbox
 from match_sim.gui.manage import ManagePanel
 from match_sim.gui.match import MatchPanel, Match
 from match_sim.gui.stats import StatsPanel
 from match_sim.gui.settings import SettingsPanel, Settings
+from match_sim.gui.team import Team
 
 class GamePanel(TemplatePanel):
   def __init__(self, parent):
@@ -157,3 +162,20 @@ class Game(ClGame):
     self.process_fixtures_daily()
     self.update_next_fixture()
 
+  def get_teams(self):
+    '''Create teams from random data.  Instantiate competitions'''
+    self.teams = {}
+    for team in default.poss_teams:
+      if team == self.team:
+        self.teams[team] = Team(team, self.manager, control=True)
+      else:
+        self.teams[team] = Team(team, names.get_full_name())
+        self.teams[team].training = Training(self.current_date, [0, 2, 4], ['fi', 'pa', 'sh'])
+    n_teams = len(self.teams.keys())
+    poss_teams = random.sample(self.teams.keys(), n_teams)
+    teams_per_div = int(n_teams / 4)
+    teams1 = poss_teams[:teams_per_div]
+    teams2 = poss_teams[teams_per_div:(teams_per_div*2)]
+    teams3 = poss_teams[(teams_per_div*2):(teams_per_div*3)]
+    teams4 = poss_teams[(teams_per_div*3):]
+    self.init_competitions(teams1, teams2, teams3, teams4)

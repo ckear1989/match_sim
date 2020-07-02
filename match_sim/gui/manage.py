@@ -34,6 +34,7 @@ class LineupPanel(PaintPanel):
     colour = Colour()
     font = wx.Font(18, wx.DECORATIVE, wx.BOLD, wx.NORMAL)
     label_size = wx.Size(200, 50)
+    self.test_button.Destroy()
     self.team = self.GetParent().game.teams[self.GetParent().game.team]
     self.lineups = {}
     self.vbox1 = wx.BoxSizer(wx.VERTICAL)
@@ -78,8 +79,7 @@ class LineupPanel(PaintPanel):
     label.SetBackgroundColour(colour.LIME)
     self.vbox2.Add(label, proportion=1)
     self.vbox2.Add(self.tactics)
-    self.InitUI()
-    self.dc = wx.ClientDC(self)
+    # self.InitUI()
     self.refresh()
 
   def update_lineups(self, event):
@@ -115,87 +115,18 @@ class LineupPanel(PaintPanel):
     self.draw_lineup()
 
   def draw_lineup(self):
-    self.dc = wx.ClientDC(self)
-    self.draw_pitch(self.dc, self.team.name)
+    dc = wx.ClientDC(self)
+    self.draw_pitch(dc, self.team.name)
     for i in range(1, 22):
       players = [p for p in self.team if p.match.lineup == i]
       if len(players) > 0:
         player = players[0]
         x, y = self.team.formation.get_coords(i)
-        self.draw_player(player, self.dc, x=x, y=y) 
+        self.draw_player(player, dc, x=x, y=y, colour_p=self.team.colour.home_p, colour_s=self.team.colour.home_s) 
 
 class TrainingPanel(TemplatePanel):
   def __init__(self, parent):
     super().__init__(parent)
-
-class wxSDLWindow(wx.Frame):
-  def __init__(self, parent, id, title = 'SDL window', **options):
-    options['style'] = wx.DEFAULT_FRAME_STYLE | wx.TRANSPARENT_WINDOW
-    wx.Frame.__init__(*(self, parent, id, title), **options)
-
-    self._initialized = 0
-    self._resized = 0
-    self._surface = None
-    self.__needsDrawing = 1
-
-    self.Bind(wx.EVT_IDLE, self.OnIdle)
-    
-  def OnIdle(self, ev):
-    if not self._initialized or self._resized:
-      if not self._initialized:
-        # get the handle
-        hwnd = self.GetHandle()
-
-        os.environ['SDL_WINDOWID'] = str(hwnd)
-        if sys.platform == 'win32':
-          os.environ['SDL_VIDEODRIVER'] = 'windib'
-
-        # pygame.init()
-
-        self.Bind(wx.EVT_SIZE, self.OnSize)
-        self._initialized = 1
-    else:
-      self._resized = 0
-
-    x,y = self.GetSize()
-    # self._surface = pygame.display.set_mode((x,y))
-
-    if self.__needsDrawing:
-      self.draw()
-
-  def OnPaint(self, ev):
-    self.__needsDrawing = 1
-
-  def OnSize(self, ev):
-    self._resized = 1
-    ev.Skip()
-
-  def draw(self):
-    raise NotImplementedError('please define a .draw() method!')
-
-  def getSurface(self):
-    return self._surface
-
-class CircleWindow(wxSDLWindow):
-  "draw a circle in a wxPython / PyGame window"
-  def draw(self):
-    surface = self.getSurface()
-    if surface is not None:
-      topcolor = 5
-      bottomcolor = 100
-
-      print('debug1')
-      pygame.draw.circle(surface, (250,0,0), (100,100), 50)
-      print('debug2')
-      pygame.display.flip()
-      print('debug3')
-
-def pygametest():
-  app = wx.App()
-  sizeT = (640,480)
-  w = CircleWindow(None, -1, size = sizeT)
-  w.Show(1)
-  app.MainLoop()
 
 if __name__ == "__main__":
 
@@ -204,7 +135,4 @@ if __name__ == "__main__":
   panel = ManagePanel(frame)
   frame.sizer.Add(panel, 1, wx.EXPAND)
   frame.SetSizer(self.sizer)
-  frame.SetSize((800, 600))
-  frame.Centre()
-  frame.Show()
   app.MainLoop()

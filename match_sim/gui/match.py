@@ -52,32 +52,31 @@ class MatchPanel(PaintPanel):
     self.hbox5.Add(self.stopclock)
     self.hbox5.Add(self.scoreboard)
     self.vbox1.Add(self.hbox5)
-    # self.txt_output = wx.TextCtrl(self,
-    #   style=wx.TE_MULTILINE|wx.BORDER_SUNKEN|wx.TE_READONLY|wx.TE_RICH2, size=(300, 100))
     self.txt_output = wx.StaticText(self, size = wx.Size(400, 500), style=wx.ST_NO_AUTORESIZE)
     self.txt_output.SetFont(font)
     self.vbox1.Add(self.txt_output)
-    # self.InitUI()
     self.refresh()
     self.Bind(MATCH_EVENT_CUSTOM, self.on_match_event)
     self.Bind(STOPCLOCK_EVENT_CUSTOM, self.on_stopclock)
 
   def draw_lineup(self):
     dc = wx.ClientDC(self)
-    self.draw_pitch(dc, self.match.team_a.name, x0=500)
+    self.draw_pitch(dc, self.match.team_a.name, x0=460)
     for i in range(1, 22):
       players = [p for p in self.match.team_a if p.match.lineup == i]
       if len(players) > 0:
         player = players[0]
         x, y = self.match.team_a.formation.get_coords(i)
-        self.draw_player_score(player, dc, x=x, y=y, x0=500)
+        self.draw_player_score(player, dc, x=x, y=y, x0=460,
+          colour_p=self.match.team_a.colour.home_p, colour_s=self.match.team_a.colour.home_s)
     self.draw_pitch(dc, self.match.team_b.name, x0=900)
     for i in range(1, 22):
       players = [p for p in self.match.team_b if p.match.lineup == i]
       if len(players) > 0:
         player = players[0]
         x, y = self.match.team_b.formation.get_coords(i)
-        self.draw_player_score(player, dc, x=x, y=y, x0=900) 
+        self.draw_player_score(player, dc, x=x, y=y, x0=900,
+          colour_p=self.match.team_a.colour.home_p, colour_s=self.match.team_a.colour.away_s)
 
   def refresh(self):
     self.draw_lineup()

@@ -24,7 +24,7 @@
 # sudo apt-get install git curl libsdl2-mixer-2.0-0 libsdl2-image-2.0-0 libsdl2-2.0-0
 # pip3 install eyed3
 
-sudo python3.6 -m match_sim.gui.main
+python3.6 -m match_sim.gui.main
 # sudo python3.6 -m match_sim.cl.game
 # sudo python3.6 -m match_sim.gui.manage
 # python3.6 -m match_sim.gui.graphics

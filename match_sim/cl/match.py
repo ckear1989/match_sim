@@ -6,7 +6,9 @@ import time
 import sys
 import os
 import numpy as np
-import keyboard
+# print(__name__)
+if __name__ in ["__main__"]:
+  import keyboard
 import pyfiglet
 
 from match_sim.match_team import MatchTeam
