@@ -150,7 +150,6 @@ class MSFrame(wx.Frame):
     self.match = match
     self.match_panel = apanel(self)
     self.sizer.Add(self.match_panel, 1, wx.EXPAND)
-    self.match_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_match)
     self.match_panel.Show()
     self.game_panel.Hide()
     self.Layout()

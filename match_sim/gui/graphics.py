@@ -31,7 +31,7 @@ class PaintPanel(TemplatePanel):
     self.y0 = y0
     if self.y0 is None:
       self.y0 = 100
-    self.InitUI()
+    # self.InitUI()
 
   def InitUI(self): 
     self.Bind(wx.EVT_PAINT, self.get_pitch) 
@@ -47,7 +47,11 @@ class PaintPanel(TemplatePanel):
     y = 200
     dc.DrawCircle(self.x0+x, self.y0+y, 50)
 
-  def draw_player(self, player, dc=None, x=200, y=200):
+  def draw_player(self, player, dc=None, x=200, y=200, x0=None, y0=None):
+    if x0 is None:
+      x0 = self.x0
+    if y0 is None:
+      y0 = self.y0
     colour = Colour()
     if self.IsShownOnScreen():
       if not dc:
@@ -55,71 +59,83 @@ class PaintPanel(TemplatePanel):
     font = wx.Font(8, wx.ROMAN, wx.BOLD, wx.NORMAL) 
     dc.SetFont(font) 
     dc.SetBrush(wx.Brush(colour.DR))
-    dc.DrawCircle(self.x0+x, self.y0+y, 20)
+    dc.DrawCircle(x0+x, y0+y, 20)
     dc.SetBrush(wx.Brush(colour.WH))
-    dc.DrawCircle(self.x0+x, self.y0+y, 14)
+    dc.DrawCircle(x0+x, y0+y, 14)
     dc.SetTextForeground(colour.BL)
     dc.SetTextBackground(colour.LIME)
-    # print(dc.GetTextBackground())
-    dc.DrawText(str(player), self.x0+x-30, self.y0+y)
+    dc.DrawText(str(player), x0+x-30, y0+y)
 
-  def draw_pitch(self, dc=None, title=None):	
+  def draw_player_score(self, player, dc=None, x=200, y=200, x0=None, y0=None):
+    if x0 is None:
+      x0 = self.x0
+    if y0 is None:
+      y0 = self.y0
+    self.draw_player(player, dc, x, y, x0, y0)
+    if player.match.score.scoren > 0:
+      if self.IsShownOnScreen():
+        if not dc:
+          dc = wx.ClientDC(self)
+      dc.DrawText(str(player.match.score), x0+x-30, y0+y+10)
+
+  def draw_pitch(self, dc=None, title=None, x0=None, y0=None):	
+    if x0 is None:
+      x0 = self.x0
+    if y0 is None:
+      y0 = self.y0
     colour = Colour()
     if self.IsShownOnScreen():
       if not dc:
         dc = wx.ClientDC(self)
-    # dc.Clear()
-    # bmp = wx.Bitmap(default.gui_background)
-    # dc.DrawBitmap(bmp, 0, 0)
     self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
     font = wx.Font(18, wx.ROMAN, wx.ITALIC, wx.NORMAL) 
     dc.SetFont(font) 
     if title is not None:
-      dc.DrawText(title, self.x0, 10) 
+      dc.DrawText(title, x0, 10) 
 		
     pen = wx.Pen(colour.BL)
     dc.SetPen(pen)
     dc.SetBrush(wx.Brush(colour.BL))
-    dc.DrawRectangle(self.x0-2, self.y0-2, self.x+2, self.y+2)
+    dc.DrawRectangle(x0-2, y0-2, self.x+2, self.y+2)
     for i in range(self.n):
       dc.SetBrush(wx.Brush(colour.DG))
-      dc.DrawRectangle(self.x0, self.y0 + (i*2*self.y/self.n/2), self.x, self.y/self.n/2)
+      dc.DrawRectangle(x0, y0 + (i*2*self.y/self.n/2), self.x, self.y/self.n/2)
       dc.SetBrush(wx.Brush(colour.LG))
-      dc.DrawRectangle(self.x0, self.y0 + (((i*2)+1)*self.y/self.n/2), self.x, self.y/self.n/2)
+      dc.DrawRectangle(x0, y0 + (((i*2)+1)*self.y/self.n/2), self.x, self.y/self.n/2)
     pen = wx.Pen(colour.WH)
     dc.SetPen(pen)
     # 6M
     w = 14 * 4
     h = 4.5 * 4
-    x1 = self.x0 + (self.x/2) - (w/2)
-    y1 = self.y0 +1
+    x1 = x0 + (self.x/2) - (w/2)
+    y1 = y0 +1
     dc.DrawLineList([[x1, y1, x1, y1+h], [x1, y1+h, x1+w, y1+h], [x1+w, y1+h, x1+w, y1]])
-    y1 = self.y0 + self.y -  2
+    y1 = y0 + self.y -  2
     h = h * -1
     dc.DrawLineList([[x1, y1, x1, y1+h], [x1, y1+h, x1+w, y1+h], [x1+w, y1+h, x1+w, y1]])
     # penalty box
     w = 19 * 4
     h = 13 * 4
-    x2 = self.x0 +(self.x/2) - (w/2)
-    y2 = self.y0 + 1
+    x2 = x0 +(self.x/2) - (w/2)
+    y2 = y0 + 1
     dc.DrawLineList([[x2, y2, x2, y2+h], [x2+w, y2, x2+w, y2+h]])
-    y2 = self.y0 + self.y - 2
+    y2 = y0 + self.y - 2
     h = h*-1
     dc.DrawLineList([[x2, y2, x2, y2+h], [x2+w, y2, x2+w, y2+h]])
     # 13M
-    x3 = self.x0 + 1
+    x3 = x0 + 1
     h = 13 * 4
     w = self.x - 3
-    y3 = self.y0 + h
+    y3 = y0 + h
     # 20
     h = 20 * 4
-    y4 = self.y0 + h
+    y4 = y0 + h
     # 45
     h = 45 * 4
-    y5 = self.y0 + h
+    y5 = y0 + h
     # 65
     h = 65 * 4
-    y6 = self.y0 + h
+    y6 = y0 + h
     dc.DrawLineList([
       [x3, y3, x3+w, y3],
       [x3, y4, x3+w, y4],
@@ -128,13 +144,13 @@ class PaintPanel(TemplatePanel):
     ])
     # mirror
     h = 13 * 4
-    y3 = self.y0 + self.y - h - 2
+    y3 = y0 + self.y - h - 2
     h = 20 * 4
-    y4 = self.y0 + self.y - h - 2
+    y4 = y0 + self.y - h - 2
     h = 45 * 4
-    y5 = self.y0 + self.y - h - 2
+    y5 = y0 + self.y - h - 2
     h = 65 * 4
-    y6 = self.y0 + self.y - h - 2
+    y6 = y0 + self.y - h - 2
     dc.DrawLineList([
       [x3, y3, x3+w, y3],
       [x3, y4, x3+w, y4],
@@ -143,25 +159,25 @@ class PaintPanel(TemplatePanel):
     ])
     # HW
     w = 20 * 4
-    x7 = self.x0 + (self.x/2) - (w/2)
-    y7 = self.y0 + (self.y/2)
+    x7 = x0 + (self.x/2) - (w/2)
+    y7 = y0 + (self.y/2)
     dc.DrawLine(x7, y7, x7+w, y7)
     # semi circles
     r = 13 * 4
-    x8 = self.x0 + (self.x/2) - r
-    y8 = self.y0 + (20 * 4)
+    x8 = x0 + (self.x/2) - r
+    y8 = y0 + (20 * 4)
     dc.SetBrush(wx.Brush(colour.LG))
     dc.DrawArc(x8, y8, x8 + (r*2), y8, x8 + r, y8)
-    y8 = self.y0 + self.y - (20 * 4) - 2
+    y8 = y0 + self.y - (20 * 4) - 2
     dc.SetBrush(wx.Brush(colour.DG))
     dc.DrawArc(x8 + (r*2), y8, x8, y8, x8 + r, y8)
     # penalty spots
     dc.SetPen(wx.Pen(colour.BL))
     dc.SetBrush(wx.Brush(colour.WH))
-    x9 = self.x0 + (self.x/2)
-    y9 = self.y0 + (11 * 4)
+    x9 = x0 + (self.x/2)
+    y9 = y0 + (11 * 4)
     dc.DrawCircle(x9, y9, 3)
-    y10 = self.y0 + self.y - (11 * 4)
+    y10 = y0 + self.y - (11 * 4)
     dc.DrawCircle(x9, y10, 3)
 
   def get_pitch(self, event):	
