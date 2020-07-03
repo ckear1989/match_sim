@@ -139,15 +139,14 @@ class GamePanel(TemplatePanel):
     extra_time_required = False
     if 'replay' in match_t[2]:
       extra_time_required = True
+    match = Match(self.game.teams[match_t[0]], self.game.teams[match_t[1]],
+      self.game.current_date, silent, extra_time_required, match_t[2], self.GetEventHandler())
     if silent is True:
-      match = Match(self.game.teams[match_t[0]], self.game.teams[match_t[1]],
-        self.game.current_date, silent, extra_time_required, match_t[2], self.GetEventHandler())
-      match.play(0)
+      for ts in match.play(0):
+        pass
       self.game.process_match_result(match, match_t[2])
       self.game.update_next_fixture()
     else:
-      match = Match(self.game.teams[match_t[0]], self.game.teams[match_t[1]],
-        self.game.current_date, silent, extra_time_required, match_t[2], self.GetEventHandler())
       self.GetParent().on_match(MatchPanel, match)
 
 class Game(ClGame):

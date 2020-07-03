@@ -5,6 +5,7 @@ import wx
 
 import match_sim.default as default
 from match_sim.gui.graphics import PaintPanel, Colour
+from match_sim.gui.manage import LineupPanel
 from match_sim.gui.template import TemplateButton
 from match_sim.cl.match import Match as ClMatch, time_until_next_event, stopclock, printc
 
@@ -29,6 +30,7 @@ class MatchEvent(wx.PyCommandEvent):
 class MatchPanel(PaintPanel):
   def __init__(self, parent, x0=600, y0=None):
     super().__init__(parent, x0, y0)
+    colour = Colour()
     self.exit_button.Destroy()
     font = wx.Font(16, wx.ROMAN, wx.ITALIC, wx.NORMAL) 
     self.match = self.GetParent().match
@@ -42,19 +44,24 @@ class MatchPanel(PaintPanel):
     self.hbox3.Add(pause_button)
     self.vbox1 = wx.BoxSizer(wx.VERTICAL)
     self.hbox1.Add(self.vbox1)
-    self.vbox2 = wx.BoxSizer(wx.VERTICAL)
-    self.hbox1.Add(self.vbox2)
-    self.stopclock = wx.StaticText(self)
-    self.stopclock.SetLabel('00:00')
-    self.stopclock.SetFont(font)
-    self.scoreboard = wx.StaticText(self, size=wx.Size(400, 100), style=wx.ST_NO_AUTORESIZE)
-    self.scoreboard.SetLabel(str(self.match))
-    self.scoreboard.SetFont(font)
     self.hbox5 = wx.BoxSizer(wx.HORIZONTAL)
-    self.hbox5.Add(self.stopclock)
-    self.hbox5.Add(self.scoreboard)
-    self.vbox1.Add(self.hbox5)
-    self.txt_output = wx.StaticText(self, size = wx.Size(400, 500), style=wx.ST_NO_AUTORESIZE)
+    self.hbox1.Add(self.hbox5)
+    self.stopclock = wx.StaticText(self, size=wx.Size(70, 28), style=wx.ST_NO_AUTORESIZE)
+    self.stopclock.SetLabel('00:00')
+    self.stopclock.SetBackgroundColour(colour.BL)
+    self.stopclock.SetForegroundColour(colour.WH)
+    self.stopclock.SetFont(font)
+    self.scoreboard_h = wx.StaticText(self, size=wx.Size(500, 28), style=wx.ST_NO_AUTORESIZE)
+    self.scoreboard_a = wx.StaticText(self, size=wx.Size(440, 28), style=wx.ST_NO_AUTORESIZE)
+    self.scoreboard_str()
+    self.scoreboard_h.SetFont(font)
+    self.scoreboard_a.SetFont(font)
+    self.vbox1.Add(self.stopclock)
+    self.vbox1.Add((430, 28))
+    self.hbox5.Add(self.scoreboard_h)
+    self.hbox5.Add(self.scoreboard_a)
+    self.txt_output = wx.StaticText(self, size=wx.Size(420, 56), style=wx.ST_NO_AUTORESIZE)
+    self.txt_output.SetBackgroundColour(colour.LIME)
     self.txt_output.SetFont(font)
     self.vbox1.Add(self.txt_output)
     self.refresh()
@@ -62,38 +69,45 @@ class MatchPanel(PaintPanel):
     self.Bind(STOPCLOCK_EVENT_CUSTOM, self.on_stopclock)
     self.Bind(PAUSE_EVENT_CUSTOM, self.on_pause)
 
+  def scoreboard_str(self):
+    ps = str(self.match)
+    ps = ps.split(')')
+    self.scoreboard_h.SetLabel(ps[0] + ')')
+    self.scoreboard_a.SetLabel(ps[1].strip() + ')')
+
   def draw_lineup(self):
     dc = wx.ClientDC(self)
-    self.draw_pitch(dc, self.match.team_a.name, x0=460)
+    self.draw_pitch(dc, x0=500, y0=50)
     for i in range(1, 22):
       players = [p for p in self.match.team_a if p.match.lineup == i]
       if len(players) > 0:
         player = players[0]
         x, y = self.match.team_a.formation.get_coords(i)
-        self.draw_player_score(player, dc, x=x, y=y, x0=460,
+        self.draw_player_score(player, dc, x=x, y=y, x0=500, y0=50,
           colour_p=self.match.team_a.colour.home_p, colour_s=self.match.team_a.colour.home_s)
-    self.draw_pitch(dc, self.match.team_b.name, x0=900)
+    self.draw_pitch(dc, x0=940, y0=50)
     for i in range(1, 22):
       players = [p for p in self.match.team_b if p.match.lineup == i]
       if len(players) > 0:
         player = players[0]
         x, y = self.match.team_b.formation.get_coords(i)
-        self.draw_player_score(player, dc, x=x, y=y, x0=900,
+        self.draw_player_score(player, dc, x=x, y=y, x0=940, y0=50,
           colour_p=self.match.team_a.colour.away_p, colour_s=self.match.team_a.colour.away_s)
 
   def refresh(self):
     self.draw_lineup()
-    self.scoreboard.SetLabel(str(self.match))
+    self.scoreboard_str()
 
   def on_pause(self, event):
     print('pause')
     self.match.set_status('paused')
     self.play_button.SetLabel('Continue')
     self.refresh()
+    self.GetParent().on_match_manage(LineupPanel)
 
   def on_play(self, event):
     print('play')
-    if self.match.status in ['pre-match', 'paused', 'half-end']:
+    if self.match.status in ['pre-match', 'paused']:
       self.refresh()
       self.match.update_event_handler(self.GetEventHandler())
       for ts in self.match.play():
@@ -105,14 +119,16 @@ class MatchPanel(PaintPanel):
 
   def on_stopclock(self, event):
     self.stopclock.SetLabel(event.GetMyVal())
-    wx.Yield()
+    if self.match.time % 3 == 0:
+      wx.Yield()
 
   def on_match_event(self, event):
     for ps in event.GetMyVal():
-      if len(ps) > 5:
+      if len(ps) > 6:
         self.txt_output.SetLabel(ps)
         wx.Yield()
         time.sleep(0.5)
+    self.txt_output.SetLabel('')
     self.refresh()
 
   def on_exit_match(self, event):
@@ -126,10 +142,10 @@ class Match(ClMatch):
     super().__init__(team_a, team_b, current_date, silent, extra_time_required)
     self.comp_name = comp_name
     self.event_handler = event_handler
-    self.status = 'pre-match'
+    self.set_status('pre-match')
     self.at = 0
-    self.first_half_length = 2 * 60
-    self.second_half_length = 2 * 60
+    self.first_half_length = 35 * 60
+    self.second_half_length = 35 * 60
 
   def set_status(self, status):
     self.status = status
@@ -139,17 +155,15 @@ class Match(ClMatch):
 
   def half_time(self):
     '''Reset added time back to 35 minutes.  Update scorer data.  Let user manage team'''
-    print('half time')
     self.print_event_list(['And that\'s the end of the half'])
     self.at = 0
-    self.time = 2 * 60
-    self.first_half_length = 2 * 60
+    self.time = 35 * 60
+    self.first_half_length = 35 * 60
     self.stopclock_time = stopclock(self.time)
     self.emit_pause_event()
     yield 'half time'
 
   def full_time(self):
-    print('full-time')
     '''Update scorer stats.  Print final result'''
     self.print_event_list('Full time score is:\n{0}'.format(self.get_score().replace('Score is now ', '')))
     yield 'full time'
@@ -212,7 +226,10 @@ class Match(ClMatch):
   def play_half(self, end_time, time_step, tane=time_until_next_event()):
     '''Run through 35 minutes of events.  Print clock and messages if needed'''
     yield 'throw in'
-    self.throw_in()
+    if self.time == 0:
+      self.throw_in()
+    if (self.time == 35 * 60) and (self.at == 0):
+      self.throw_in()
     while self.time < (end_time + self.at):
       if self.status == 'playing':
         self.time += 1
@@ -232,7 +249,6 @@ class Match(ClMatch):
         if self.time == (end_time + self.at):
           self.set_status('half-end')
         if time_step > 0:
-          print(time_step)
           time.sleep(time_step)
       else:
         time.sleep(1)
@@ -258,4 +274,6 @@ class Match(ClMatch):
     if self.silent is not True:
       event = MatchEvent(PAUSE_EVENT, self.GetId())
       self.event_handler.ProcessEvent(event)
+    else:
+      self.set_status('playing')
 

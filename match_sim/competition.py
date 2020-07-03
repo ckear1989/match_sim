@@ -115,8 +115,8 @@ class Competition():
       self.fixtures[sunday] = this_round
 
   def schedule_replay(self, team_a, team_b, date):
-    '''Add fixture for 6 days from now for a replay'''
-    next_saturday = date + datetime.timedelta(6)
+    '''Add fixture for 3 days from now for a replay'''
+    next_saturday = date + datetime.timedelta(3)
     if next_saturday in self.fixtures.keys():
       self.fixtures[next_saturday].append([team_a, team_b, '%s replay' % self.name])
     else:
