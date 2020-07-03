@@ -40,7 +40,7 @@ class TeamColours():
     if self.home_p is None:
       self.home_p = random.choice(all_colours)
     if self.home_s is None:
-      self.home_s = random.choice(all_colours)
+      self.home_s = random.choice([x for x in all_colours if x != self.home_p])
     if self.away_p is None:
       self.away_p = self.home_s
     if self.away_s is None:

@@ -12,6 +12,8 @@ MATCH_EVENT = wx.NewEventType()
 MATCH_EVENT_CUSTOM = wx.PyEventBinder(MATCH_EVENT, 1)
 STOPCLOCK_EVENT = wx.NewEventType()
 STOPCLOCK_EVENT_CUSTOM = wx.PyEventBinder(STOPCLOCK_EVENT, 1)
+PAUSE_EVENT = wx.NewEventType()
+PAUSE_EVENT_CUSTOM = wx.PyEventBinder(PAUSE_EVENT, 1)
 
 class MatchEvent(wx.PyCommandEvent):
   def __init__(self, evtType, id):
@@ -27,14 +29,14 @@ class MatchEvent(wx.PyCommandEvent):
 class MatchPanel(PaintPanel):
   def __init__(self, parent, x0=600, y0=None):
     super().__init__(parent, x0, y0)
+    self.exit_button.Destroy()
     font = wx.Font(16, wx.ROMAN, wx.ITALIC, wx.NORMAL) 
     self.match = self.GetParent().match
     self.game = self.GetParent().game
     self.test_button.Destroy()
-    self.exit_button.Bind(wx.EVT_BUTTON, self.on_exit_match)
-    play_button = TemplateButton(self, 'Play')
-    play_button.Bind(wx.EVT_BUTTON, self.on_play)
-    self.hbox3.Add(play_button)
+    self.play_button = TemplateButton(self, 'Play')
+    self.play_button.Bind(wx.EVT_BUTTON, self.on_play)
+    self.hbox3.Add(self.play_button)
     pause_button = TemplateButton(self, 'Pause')
     pause_button.Bind(wx.EVT_BUTTON, self.on_pause)
     self.hbox3.Add(pause_button)
@@ -58,6 +60,7 @@ class MatchPanel(PaintPanel):
     self.refresh()
     self.Bind(MATCH_EVENT_CUSTOM, self.on_match_event)
     self.Bind(STOPCLOCK_EVENT_CUSTOM, self.on_stopclock)
+    self.Bind(PAUSE_EVENT_CUSTOM, self.on_pause)
 
   def draw_lineup(self):
     dc = wx.ClientDC(self)
@@ -76,7 +79,7 @@ class MatchPanel(PaintPanel):
         player = players[0]
         x, y = self.match.team_b.formation.get_coords(i)
         self.draw_player_score(player, dc, x=x, y=y, x0=900,
-          colour_p=self.match.team_a.colour.home_p, colour_s=self.match.team_a.colour.away_s)
+          colour_p=self.match.team_a.colour.away_p, colour_s=self.match.team_a.colour.away_s)
 
   def refresh(self):
     self.draw_lineup()
@@ -84,17 +87,21 @@ class MatchPanel(PaintPanel):
 
   def on_pause(self, event):
     print('pause')
+    self.match.set_status('paused')
+    self.play_button.SetLabel('Continue')
     self.refresh()
 
   def on_play(self, event):
     print('play')
-    if self.match.status in ['pre-match']:
+    if self.match.status in ['pre-match', 'paused', 'half-end']:
       self.refresh()
       self.match.update_event_handler(self.GetEventHandler())
       for ts in self.match.play():
         pass
+    elif self.match.status in ['finished']:
       self.game.process_match_result(self.match, self.match.comp_name)
       self.game.update_next_fixture()
+      self.on_exit_match(event)
 
   def on_stopclock(self, event):
     self.stopclock.SetLabel(event.GetMyVal())
@@ -110,6 +117,7 @@ class MatchPanel(PaintPanel):
 
   def on_exit_match(self, event):
     print('exit')
+    print(self.match.status)
     if self.match.status in ['finished']:
       self.GetParent().exit_match(event)
 
@@ -119,18 +127,29 @@ class Match(ClMatch):
     self.comp_name = comp_name
     self.event_handler = event_handler
     self.status = 'pre-match'
+    self.at = 0
+    self.first_half_length = 2 * 60
+    self.second_half_length = 2 * 60
+
+  def set_status(self, status):
+    self.status = status
 
   def update_event_handler(self, event_handler):
     self.event_handler = event_handler
 
   def half_time(self):
     '''Reset added time back to 35 minutes.  Update scorer data.  Let user manage team'''
-    self.time = 35 * 60
-    self.first_half_length = 35 * 60
+    print('half time')
+    self.print_event_list(['And that\'s the end of the half'])
+    self.at = 0
+    self.time = 2 * 60
+    self.first_half_length = 2 * 60
     self.stopclock_time = stopclock(self.time)
+    self.emit_pause_event()
     yield 'half time'
 
   def full_time(self):
+    print('full-time')
     '''Update scorer stats.  Print final result'''
     self.print_event_list('Full time score is:\n{0}'.format(self.get_score().replace('Score is now ', '')))
     yield 'full time'
@@ -174,11 +193,12 @@ class Match(ClMatch):
   def play(self, time_step=0):
     '''Play through various stages of matches.  Update timekeeping.'''
     yield 'pre match'
-    self.status = 'playing'
+    self.set_status('playing')
     for ts in self.play_half(self.first_half_length, time_step):
       yield ts
-    for ts in self.half_time():
-      yield ts
+    if self.status == 'half-end':
+      for ts in self.half_time():
+        yield ts
     second_half_end = self.first_half_length + self.second_half_length
     second_half_tane = (self.first_half_length) + time_until_next_event()
     for ts in self.play_half(second_half_end, time_step, tane=second_half_tane):
@@ -187,38 +207,41 @@ class Match(ClMatch):
       yield ts
     for ts in self.extra_time(time_step):
       yield ts
-    self.status = 'finished'
+    self.set_status('finished')
 
   def play_half(self, end_time, time_step, tane=time_until_next_event()):
     '''Run through 35 minutes of events.  Print clock and messages if needed'''
     yield 'throw in'
     self.throw_in()
-    at = 0
-    while self.time < (end_time + at):
-      self.time += 1
-      if self.time % 1 == 0:
-        self.stopclock_time = stopclock(self.time)
-        yield '1 second'
+    while self.time < (end_time + self.at):
+      if self.status == 'playing':
+        self.time += 1
+        if self.time % 1 == 0:
+          self.stopclock_time = stopclock(self.time)
+          yield '1 second'
+          self.print_stopclock()
+        if self.time % 60 == 0:
+          yield '1 minute'
+          self.update_team_condition()
+        if self.time % (34 * 60) == 0:
+          self.at = self.added_time()
+        if self.time == tane:
+          self.event()
+          tune = time_until_next_event()
+          tane += tune
+        if self.time == (end_time + self.at):
+          self.set_status('half-end')
+        if time_step > 0:
+          print(time_step)
+          time.sleep(time_step)
+      else:
+        time.sleep(1)
         self.print_stopclock()
-      if self.time % 60 == 0:
-        yield '1 minute'
-        self.update_team_condition()
-      if self.time % (34 * 60) == 0:
-        at = self.added_time()
-      if self.time == tane:
-        self.event()
-        tune = time_until_next_event()
-        tane += tune
-      if time_step > 0:
-        print(time_step)
-        time.sleep(time_step)
-    self.print_event_list(['{0} And that\'s the end of the half'.format(self.stopclock_time)])
 
   def GetId(self):
     return wx.ID_ANY
 
   def print_stopclock(self):
-    '''Print each line in list.  Pause appropriately.'''
     if self.silent is not True:
       event = MatchEvent(STOPCLOCK_EVENT, self.GetId())
       event.SetMyVal(self.stopclock_time)
@@ -229,5 +252,10 @@ class Match(ClMatch):
     if self.silent is not True:
       event = MatchEvent(MATCH_EVENT, self.GetId())
       event.SetMyVal(pl)
+      self.event_handler.ProcessEvent(event)
+
+  def emit_pause_event(self):
+    if self.silent is not True:
+      event = MatchEvent(PAUSE_EVENT, self.GetId())
       self.event_handler.ProcessEvent(event)
 

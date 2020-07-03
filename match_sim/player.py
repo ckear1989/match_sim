@@ -14,7 +14,7 @@ class Score():
     self.goals = 0
     self.points = 0
     self.scoren = 0
-    self.score = ''
+    self.score = '0-0 (0)'
 
   def __repr__(self):
     '''User friendly representation of score'''
