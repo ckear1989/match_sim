@@ -46,21 +46,26 @@ class MatchPanel(PaintPanel):
     self.hbox1.Add(self.vbox1)
     self.hbox5 = wx.BoxSizer(wx.HORIZONTAL)
     self.hbox1.Add(self.hbox5)
-    self.stopclock = wx.StaticText(self, size=wx.Size(70, 28), style=wx.ST_NO_AUTORESIZE)
+    self.stopclock = wx.StaticText(self, size=wx.Size(68, 28), style=wx.ST_NO_AUTORESIZE)
     self.stopclock.SetLabel('00:00')
     self.stopclock.SetBackgroundColour(colour.BL)
     self.stopclock.SetForegroundColour(colour.WH)
     self.stopclock.SetFont(font)
-    self.scoreboard_h = wx.StaticText(self, size=wx.Size(500, 28), style=wx.ST_NO_AUTORESIZE)
-    self.scoreboard_a = wx.StaticText(self, size=wx.Size(440, 28), style=wx.ST_NO_AUTORESIZE)
+    self.scoreboard_h = wx.StaticText(self, size=wx.Size(400, 28), style=wx.ST_NO_AUTORESIZE)
+    self.scoreboard_a = wx.StaticText(self, size=wx.Size(400, 28), style=wx.ST_NO_AUTORESIZE)
     self.scoreboard_str()
     self.scoreboard_h.SetFont(font)
     self.scoreboard_a.SetFont(font)
+    self.scoreboard_h.SetBackgroundColour(self.match.team_a.colour.home_p)
+    self.scoreboard_a.SetBackgroundColour(self.match.team_b.colour.away_p)
+    self.scoreboard_h.SetForegroundColour(self.match.team_a.colour.home_s)
+    self.scoreboard_a.SetForegroundColour(self.match.team_b.colour.away_s)
     self.vbox1.Add(self.stopclock)
-    self.vbox1.Add((430, 28))
+    self.vbox1.Add((478, 28))
     self.hbox5.Add(self.scoreboard_h)
+    self.hbox5.Add((40, 28))
     self.hbox5.Add(self.scoreboard_a)
-    self.txt_output = wx.StaticText(self, size=wx.Size(420, 56), style=wx.ST_NO_AUTORESIZE)
+    self.txt_output = wx.StaticText(self, size=wx.Size(420, 84), style=wx.ST_NO_AUTORESIZE)
     self.txt_output.SetBackgroundColour(colour.LIME)
     self.txt_output.SetFont(font)
     self.vbox1.Add(self.txt_output)
@@ -92,7 +97,7 @@ class MatchPanel(PaintPanel):
         player = players[0]
         x, y = self.match.team_b.formation.get_coords(i)
         self.draw_player_score(player, dc, x=x, y=y, x0=940, y0=50,
-          colour_p=self.match.team_a.colour.away_p, colour_s=self.match.team_a.colour.away_s)
+          colour_p=self.match.team_b.colour.away_p, colour_s=self.match.team_b.colour.away_s)
 
   def refresh(self):
     self.draw_lineup()
@@ -103,13 +108,18 @@ class MatchPanel(PaintPanel):
     self.match.set_status('paused')
     self.play_button.SetLabel('Continue')
     self.refresh()
+    print('debug1')
     self.GetParent().on_match_manage(LineupPanel)
+    wx.Yield()
+    print('debug2')
 
   def on_play(self, event):
     print('play')
     if self.match.status in ['pre-match', 'paused']:
       self.refresh()
       self.match.update_event_handler(self.GetEventHandler())
+      self.match.team_a.update_event_handler(self.GetEventHandler())
+      self.match.team_b.update_event_handler(self.GetEventHandler())
       for ts in self.match.play():
         pass
     elif self.match.status in ['finished']:
@@ -135,6 +145,8 @@ class MatchPanel(PaintPanel):
     print('exit')
     print(self.match.status)
     if self.match.status in ['finished']:
+      self.match.team_a.update_event_handler()
+      self.match.team_b.update_event_handler()
       self.GetParent().exit_match(event)
 
 class Match(ClMatch):
@@ -240,6 +252,12 @@ class Match(ClMatch):
         if self.time % 60 == 0:
           yield '1 minute'
           self.update_team_condition()
+        # test forced sub
+        if self.silent is not True:
+          if self.time % 120 == 0:
+            shooting_player = self.team_a.choose_player(0.01, 0.1, 0.3)
+            shooting_player.gain_injury(self.date)
+            self.team_a.forced_substitution(shooting_player)
         if self.time % (34 * 60) == 0:
           self.at = self.added_time()
         if self.time == tane:

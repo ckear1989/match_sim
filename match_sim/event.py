@@ -101,7 +101,6 @@ class Event():
       branch3()
       self.foul(self.posession_player)
     self.attackers.condition_deteriorate(0.1)
-    self.shooting_player.update_score()
     self.attackers.update_score()
     self.pl.append(amatch.get_score())
 
@@ -146,6 +145,7 @@ class Event():
       shooting_player.score_goal()
       assisting_player.assist()
       self.pl.append('And he scores.')
+      shooting_player.update_score()
     elif p0 < 0.95:
       self.pl.append('It\'s saved by the goalkeeper.')
       self.goalkeeper.save_goal()
@@ -163,6 +163,7 @@ class Event():
       self.pl.append('And he scores.')
       shooting_player.score_point()
       assisting_player.assist()
+      shooting_player.update_score()
     else:
       self.pl.append('But he misses.')
 

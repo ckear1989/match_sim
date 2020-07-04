@@ -28,6 +28,18 @@ class ManagePanel(TemplatePanel):
   def on_training(self, event):
     self.GetParent().on_training(TrainingPanel)
 
+class MyTarget(wx.TextDropTarget):
+ def __init__(self, obj):
+  wx.TextDropTarget.__init__(self)
+  self.object = obj
+
+ def OnDropText(self, x, y, data):
+  try:
+    self.object.InsertItem(0, data)
+  except:
+    return False
+  return True
+
 class LineupPanel(PaintPanel):
   def __init__(self, parent, x0=600, y0=None):
     super().__init__(parent, x0, y0)
@@ -36,51 +48,86 @@ class LineupPanel(PaintPanel):
     label_size = wx.Size(200, 50)
     self.test_button.Destroy()
     self.team = self.GetParent().game.teams[self.GetParent().game.team]
-    self.lineups = {}
+    # self.lineups = {}
     self.vbox1 = wx.BoxSizer(wx.VERTICAL)
-    label = wx.StaticText(self, label='Choose Starting Lineup:', size=label_size)
+    label = wx.StaticText(self, label='Starting Lineup:', size=label_size)
     label.SetFont(font)
     label.SetForegroundColour(colour.BL)
     label.SetBackgroundColour(colour.LIME)
     self.vbox1.Add(label, proportion=1)
-    self.hbox1.Add(self.vbox1)
+    self.hbox1.Add(self.vbox1, flag=wx.EXPAND)
     self.vbox2 = wx.BoxSizer(wx.VERTICAL)
-    label = wx.StaticText(self, label='Choose Substitutes:', size=label_size)
+    label = wx.StaticText(self, label='Substitutes:', size=label_size)
     label.SetFont(font)
     label.SetForegroundColour(colour.BL)
     label.SetBackgroundColour(colour.LIME)
     self.vbox2.Add(label, proportion=1)
-    self.hbox1.Add(self.vbox2)
-    for i in range(1, 16):
-      self.lineups[i] = wx.ComboBox(self, choices=[str(x) for x in self.team] + [''])
-      self.lineups[i].SetStringSelection([str(x) for x in self.team if x.match.lineup == i][0])
-      self.lineups[i].Bind(wx.EVT_COMBOBOX, self.update_lineups)
-      self.vbox1.Add(self.lineups[i], flag=wx.ALL, border=2)
-    for i in range(16, 22):
-      self.lineups[i] = wx.ComboBox(self, choices=[str(x) for x in self.team] + [''])
-      self.lineups[i].SetStringSelection([str(x) for x in self.team if x.match.lineup == i][0])
-      self.lineups[i].Bind(wx.EVT_COMBOBOX, self.update_lineups)
-      self.vbox2.Add(self.lineups[i], flag=wx.ALL, border=2)
-    self.formation = wx.ComboBox(self, choices=default.formations)
-    self.formation.SetStringSelection(self.team.formation.nlist)
-    self.formation.Bind(wx.EVT_COMBOBOX, self.update_formation)
-    label = wx.StaticText(self, label='Choose Formation:', size=label_size)
+    self.hbox1.Add(self.vbox2, flag=wx.EXPAND)
+    self.vbox3 = wx.BoxSizer(wx.VERTICAL)
+    label = wx.StaticText(self, label='Reserves:', size=label_size)
     label.SetFont(font)
     label.SetForegroundColour(colour.BL)
     label.SetBackgroundColour(colour.LIME)
-    self.vbox1.Add(label, proportion=1)
-    self.vbox1.Add(self.formation)
-    self.tactics = wx.ComboBox(self, choices=default.tactics)
-    self.tactics.SetStringSelection(self.team.tactics.tactics)
-    self.tactics.Bind(wx.EVT_COMBOBOX, self.update_tactics)
-    label = wx.StaticText(self, label='Choose Tactics:', size=label_size)
-    label.SetFont(font)
-    label.SetForegroundColour(colour.BL)
-    label.SetBackgroundColour(colour.LIME)
-    self.vbox2.Add(label, proportion=1)
-    self.vbox2.Add(self.tactics)
-    # self.InitUI()
+    self.vbox3.Add(label, proportion=1)
+    self.hbox1.Add(self.vbox3, flag=wx.EXPAND)
+    # for i in range(1, 16):
+    #   self.lineups[i] = wx.ComboBox(self, choices=[str(x) for x in self.team] + [''])
+    #   self.lineups[i].SetStringSelection([str(x) for x in self.team if x.match.lineup == i][0])
+    #   self.lineups[i].Bind(wx.EVT_COMBOBOX, self.update_lineups)
+    #   self.vbox1.Add(self.lineups[i], flag=wx.ALL, border=2)
+    # for i in range(16, 22):
+    #   self.lineups[i] = wx.ComboBox(self, choices=[str(x) for x in self.team] + [''])
+    #   self.lineups[i].SetStringSelection([str(x) for x in self.team if x.match.lineup == i][0])
+    #   self.lineups[i].Bind(wx.EVT_COMBOBOX, self.update_lineups)
+    #   self.vbox2.Add(self.lineups[i], flag=wx.ALL, border=2)
+    self.starting = wx.ListCtrl(self, -1, style=wx.LC_LIST)
+    self.subs = wx.ListCtrl(self, -1, style=wx.LC_LIST)
+    self.reserves = wx.ListCtrl(self, -1, style=wx.LC_LIST)
+    for player in self.team:
+      if player.match.lineup in range(1, 16):
+        self.starting.InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
+      elif player.match.lineup in range(16, 22):
+        self.subs.InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
+      else:
+        self.reserves.InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
+    self.vbox1.Add(self.starting, proportion=1, flag=wx.EXPAND)
+    self.vbox2.Add(self.subs, proportion=1, flag=wx.EXPAND)
+    self.vbox3.Add(self.reserves, proportion=1, flag=wx.EXPAND)
+    dt = MyTarget(self.subs)
+    self.subs.SetDropTarget(dt)
+    wx.EVT_LIST_BEGIN_DRAG(self, self.starting.GetId(), self.OnDragInit)
+    # self.Bind(wx.EVT_LIST_BEGIN_DRAG, self.OnDragInt)
+
+    # self.formation = wx.ComboBox(self, choices=default.formations)
+    # self.formation.SetStringSelection(self.team.formation.nlist)
+    # self.formation.Bind(wx.EVT_COMBOBOX, self.update_formation)
+    # label = wx.StaticText(self, label='Choose Formation:', size=label_size)
+    # label.SetFont(font)
+    # label.SetForegroundColour(colour.BL)
+    # label.SetBackgroundColour(colour.LIME)
+    # self.vbox1.Add(label, proportion=1)
+    # self.vbox1.Add(self.formation)
+    # self.tactics = wx.ComboBox(self, choices=default.tactics)
+    # self.tactics.SetStringSelection(self.team.tactics.tactics)
+    # self.tactics.Bind(wx.EVT_COMBOBOX, self.update_tactics)
+    # label = wx.StaticText(self, label='Choose Tactics:', size=label_size)
+    # label.SetFont(font)
+    # label.SetForegroundColour(colour.BL)
+    # label.SetBackgroundColour(colour.LIME)
+    # self.vbox2.Add(label, proportion=1)
+    # self.vbox2.Add(self.tactics)
     self.refresh()
+
+  def OnDragInit(self, event):
+    text = self.starting.GetItemText(event.GetIndex())
+    print(text)
+    tobj = wx.TextDataObject(text)
+    print(tobj)
+    src = wx.DropSource(self.starting)
+    print(src)
+    src.SetData(tobj)
+    src.DoDragDrop(True)
+    self.starting.DeleteItem(event.GetIndex())
 
   def update_lineups(self, event):
     for i in range(1, 22):

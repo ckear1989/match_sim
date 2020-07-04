@@ -132,7 +132,7 @@ class PaintPanel(TemplatePanel):
     pen = wx.Pen(colour.BL)
     dc.SetPen(pen)
     dc.SetBrush(wx.Brush(colour.BL))
-    dc.DrawRectangle(x0-3, y0-3, self.x+3, self.y+3)
+    dc.DrawRectangle(x0-3, y0-3, self.x+6, self.y+6)
     for i in range(self.n):
       dc.SetBrush(wx.Brush(colour.VLG))
       dc.DrawRectangle(x0, y0 + (i*2*self.y/self.n/2), self.x, self.y/self.n/2)
