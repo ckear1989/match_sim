@@ -118,8 +118,8 @@ class MSFrame(wx.Frame):
     self.lineup_panel = apanel(self)
     self.sizer.Add(self.lineup_panel, 1, wx.EXPAND)
     self.lineup_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_lineup)
-    self.lineup_panel.refresh()
     self.lineup_panel.Show()
+    self.lineup_panel.refresh()
     self.manage_panel.Hide()
     self.Layout()
 

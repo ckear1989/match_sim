@@ -93,10 +93,14 @@ class LineupPanel(PaintPanel):
     self.vbox1.Add(self.starting, proportion=1, flag=wx.EXPAND)
     self.vbox2.Add(self.subs, proportion=1, flag=wx.EXPAND)
     self.vbox3.Add(self.reserves, proportion=1, flag=wx.EXPAND)
-    dt = MyTarget(self.subs)
-    self.subs.SetDropTarget(dt)
-    wx.EVT_LIST_BEGIN_DRAG(self, self.starting.GetId(), self.OnDragInit)
-    # self.Bind(wx.EVT_LIST_BEGIN_DRAG, self.OnDragInt)
+    self.starting_t = MyTarget(self.starting)
+    self.starting.SetDropTarget(self.starting_t)
+    self.subs_t = MyTarget(self.subs)
+    self.subs.SetDropTarget(self.subs_t)
+    self.reserves_t = MyTarget(self.reserves)
+    self.reserves.SetDropTarget(self.reserves_t)
+    # wx.EVT_LIST_BEGIN_DRAG(self, self.starting.GetId(), self.OnDragInit)
+    self.Bind(wx.EVT_LIST_BEGIN_DRAG, self.make_a_sub)
 
     # self.formation = wx.ComboBox(self, choices=default.formations)
     # self.formation.SetStringSelection(self.team.formation.nlist)
@@ -118,16 +122,52 @@ class LineupPanel(PaintPanel):
     # self.vbox2.Add(self.tactics)
     self.refresh()
 
-  def OnDragInit(self, event):
-    text = self.starting.GetItemText(event.GetIndex())
-    print(text)
-    tobj = wx.TextDataObject(text)
-    print(tobj)
-    src = wx.DropSource(self.starting)
-    print(src)
-    src.SetData(tobj)
-    src.DoDragDrop(True)
-    self.starting.DeleteItem(event.GetIndex())
+  def make_a_sub(self, event):
+    text = event.GetText()
+    text_p = int(text.split(' ')[0])
+    text_n = ' '.join(text.split(' ')[1:])
+    team_lineups = [p.match.lineup for p in self.team]
+    for player in self.team:
+      if player.match.lineup == text_p:
+        if str(player) == text_n:
+          this_player = player
+          if text_n in range(1, 16):
+            src = wx.DropSource(self.starting)
+            available_pos = [x for x in range(16, 22) if x not in team_lineups]
+            if len(available_pos) > 0:
+              available_pos = available_pos[0]
+            else:
+              available_pos = 0
+            this_player.set_lineup(available_pos)
+            tobj = wx.TextDataObject(text)
+            src.SetData(tobj)
+            src.DoDragDrop(True)
+            self.starting.DeleteItem(event.GetIndex())
+          elif text_n in range(16, 22):
+            src = wx.DropSource(self.subs)
+            available_pos = [x for x in range(1, 16) if x not in team_lineups]
+            if len(available_pos) > 0:
+              available_pos = available_pos[0]
+            else:
+              available_pos = 0
+            this_player.set_lineup(available_pos)
+            tobj = wx.TextDataObject(text)
+            src.SetData(tobj)
+            src.DoDragDrop(True)
+            self.subs.DeleteItem(event.GetIndex())
+          else:
+            src = wx.DropSource(self.reserves)
+            available_pos = [x for x in range(1, 22) if x not in team_lineups]
+            if len(available_pos) > 0:
+              available_pos = available_pos[0]
+            else:
+              available_pos = 0
+            this_player.set_lineup(available_pos)
+            tobj = wx.TextDataObject(text)
+            src.SetData(tobj)
+            src.DoDragDrop(True)
+            self.starting.DeleteItem(event.GetIndex())
+    self.refresh()
 
   def update_lineups(self, event):
     for i in range(1, 22):
@@ -153,11 +193,21 @@ class LineupPanel(PaintPanel):
     self.refresh()
 
   def refresh(self):
-    for i in range(1, 22):
-      players = [p for p in self.team if p.match.lineup == i]
-      if len(players) == 0:
-        self.lineups[i].SetSelection(wx.NOT_FOUND)
-        self.lineups[i].SetStringSelection('')
+    # for i in range(1, 22):
+    #   players = [p for p in self.team if p.match.lineup == i]
+    #   if len(players) == 0:
+    #     self.lineups[i].SetSelection(wx.NOT_FOUND)
+    #     self.lineups[i].SetStringSelection('')
+    self.starting.ClearAll()
+    self.subs.ClearAll()
+    self.reserves.ClearAll()
+    for player in self.team:
+      if player.match.lineup in range(1, 16):
+        self.starting.InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
+      elif player.match.lineup in range(16, 22):
+        self.subs.InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
+      else:
+        self.reserves.InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
     self.team.update_playing_positions()
     self.draw_lineup()
 

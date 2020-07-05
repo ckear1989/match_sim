@@ -294,6 +294,10 @@ class Player():
     '''Update suspension object'''
     self.season.gain_suspension(status, date)
 
+  def set_lineup(self, lineup):
+    '''Update match lineup'''
+    self.match.lineup = lineup
+
 if __name__ == "__main__":
 
   player = Player('a')
