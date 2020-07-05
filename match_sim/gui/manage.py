@@ -70,26 +70,10 @@ class LineupPanel(PaintPanel):
     label.SetBackgroundColour(colour.LIME)
     self.vbox3.Add(label, proportion=1)
     self.hbox1.Add(self.vbox3, flag=wx.EXPAND)
-    # for i in range(1, 16):
-    #   self.lineups[i] = wx.ComboBox(self, choices=[str(x) for x in self.team] + [''])
-    #   self.lineups[i].SetStringSelection([str(x) for x in self.team if x.match.lineup == i][0])
-    #   self.lineups[i].Bind(wx.EVT_COMBOBOX, self.update_lineups)
-    #   self.vbox1.Add(self.lineups[i], flag=wx.ALL, border=2)
-    # for i in range(16, 22):
-    #   self.lineups[i] = wx.ComboBox(self, choices=[str(x) for x in self.team] + [''])
-    #   self.lineups[i].SetStringSelection([str(x) for x in self.team if x.match.lineup == i][0])
-    #   self.lineups[i].Bind(wx.EVT_COMBOBOX, self.update_lineups)
-    #   self.vbox2.Add(self.lineups[i], flag=wx.ALL, border=2)
-    self.starting = wx.ListCtrl(self, -1, style=wx.LC_LIST)
-    self.subs = wx.ListCtrl(self, -1, style=wx.LC_LIST)
-    self.reserves = wx.ListCtrl(self, -1, style=wx.LC_LIST)
-    for player in self.team:
-      if player.match.lineup in range(1, 16):
-        self.starting.InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
-      elif player.match.lineup in range(16, 22):
-        self.subs.InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
-      else:
-        self.reserves.InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
+    self.starting = wx.ListCtrl(self, -1, style=wx.LC_LIST|wx.LC_SORT_ASCENDING)
+    self.subs = wx.ListCtrl(self, -1, style=wx.LC_LIST|wx.LC_SORT_ASCENDING)
+    self.reserves = wx.ListCtrl(self, -1, style=wx.LC_LIST|wx.LC_SORT_ASCENDING)
+    self.update_lists()
     self.vbox1.Add(self.starting, proportion=1, flag=wx.EXPAND)
     self.vbox2.Add(self.subs, proportion=1, flag=wx.EXPAND)
     self.vbox3.Add(self.reserves, proportion=1, flag=wx.EXPAND)
@@ -99,27 +83,26 @@ class LineupPanel(PaintPanel):
     self.subs.SetDropTarget(self.subs_t)
     self.reserves_t = MyTarget(self.reserves)
     self.reserves.SetDropTarget(self.reserves_t)
-    # wx.EVT_LIST_BEGIN_DRAG(self, self.starting.GetId(), self.OnDragInit)
     self.Bind(wx.EVT_LIST_BEGIN_DRAG, self.make_a_sub)
 
-    # self.formation = wx.ComboBox(self, choices=default.formations)
-    # self.formation.SetStringSelection(self.team.formation.nlist)
-    # self.formation.Bind(wx.EVT_COMBOBOX, self.update_formation)
-    # label = wx.StaticText(self, label='Choose Formation:', size=label_size)
-    # label.SetFont(font)
-    # label.SetForegroundColour(colour.BL)
-    # label.SetBackgroundColour(colour.LIME)
-    # self.vbox1.Add(label, proportion=1)
-    # self.vbox1.Add(self.formation)
-    # self.tactics = wx.ComboBox(self, choices=default.tactics)
-    # self.tactics.SetStringSelection(self.team.tactics.tactics)
-    # self.tactics.Bind(wx.EVT_COMBOBOX, self.update_tactics)
-    # label = wx.StaticText(self, label='Choose Tactics:', size=label_size)
-    # label.SetFont(font)
-    # label.SetForegroundColour(colour.BL)
-    # label.SetBackgroundColour(colour.LIME)
-    # self.vbox2.Add(label, proportion=1)
-    # self.vbox2.Add(self.tactics)
+    self.formation = wx.ComboBox(self, choices=default.formations)
+    self.formation.SetStringSelection(self.team.formation.nlist)
+    self.formation.Bind(wx.EVT_COMBOBOX, self.update_formation)
+    label = wx.StaticText(self, label='Choose Formation:', size=label_size)
+    label.SetFont(font)
+    label.SetForegroundColour(colour.BL)
+    label.SetBackgroundColour(colour.LIME)
+    self.vbox1.Add(label, proportion=1)
+    self.vbox1.Add(self.formation)
+    self.tactics = wx.ComboBox(self, choices=default.tactics)
+    self.tactics.SetStringSelection(self.team.tactics.tactics)
+    self.tactics.Bind(wx.EVT_COMBOBOX, self.update_tactics)
+    label = wx.StaticText(self, label='Choose Tactics:', size=label_size)
+    label.SetFont(font)
+    label.SetForegroundColour(colour.BL)
+    label.SetBackgroundColour(colour.LIME)
+    self.vbox2.Add(label, proportion=1)
+    self.vbox2.Add(self.tactics)
     self.refresh()
 
   def make_a_sub(self, event):
@@ -192,12 +175,7 @@ class LineupPanel(PaintPanel):
     self.team.tactics_change(self.tactics.GetValue())
     self.refresh()
 
-  def refresh(self):
-    # for i in range(1, 22):
-    #   players = [p for p in self.team if p.match.lineup == i]
-    #   if len(players) == 0:
-    #     self.lineups[i].SetSelection(wx.NOT_FOUND)
-    #     self.lineups[i].SetStringSelection('')
+  def update_lists(self):
     self.starting.ClearAll()
     self.subs.ClearAll()
     self.reserves.ClearAll()
@@ -208,6 +186,9 @@ class LineupPanel(PaintPanel):
         self.subs.InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
       else:
         self.reserves.InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
+
+  def refresh(self):
+    self.update_lists()
     self.team.update_playing_positions()
     self.draw_lineup()
 
