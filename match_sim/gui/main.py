@@ -114,15 +114,6 @@ class MSFrame(wx.Frame):
     self.game_panel.Hide()
     self.Layout()
 
-  def on_lineup(self, apanel):
-    self.lineup_panel = apanel(self)
-    self.sizer.Add(self.lineup_panel, 1, wx.EXPAND)
-    self.lineup_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_lineup)
-    self.lineup_panel.Show()
-    self.lineup_panel.refresh()
-    self.manage_panel.Hide()
-    self.Layout()
-
   def on_training(self, apanel):
     self.training_panel = apanel(self)
     self.sizer.Add(self.training_panel, 1, wx.EXPAND)
@@ -162,6 +153,7 @@ class MSFrame(wx.Frame):
     self.sizer.Add(self.match_manage_panel, 1, wx.EXPAND)
     self.match_manage_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_match_manage)
     self.match_manage_panel.Show()
+    self.match_manage_panel.refresh()
     self.match_panel.Hide()
     self.Layout()
     print('debug4')
@@ -179,11 +171,6 @@ class MSFrame(wx.Frame):
   def exit_manage(self, event):
     self.game_panel.Show()
     self.manage_panel.Hide()
-    self.Layout()
-
-  def exit_lineup(self, event):
-    self.manage_panel.Show()
-    self.lineup_panel.Hide()
     self.Layout()
 
   def exit_training(self, event):

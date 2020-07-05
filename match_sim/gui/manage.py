@@ -11,23 +11,6 @@ import wx
 from match_sim.gui.graphics import PaintPanel, Colour
 import match_sim.default as default
 
-class ManagePanel(TemplatePanel):
-  def __init__(self, parent):
-    super().__init__(parent)
-    lineup_button = TemplateButton(self, 'Lineup')
-    lineup_button.Bind(wx.EVT_BUTTON, self.on_lineup)
-    self.hbox3.Add(lineup_button)
-    training_button = TemplateButton(self, 'Training')
-    training_button.Bind(wx.EVT_BUTTON, self.on_training)
-    self.hbox3.Add(training_button)
-    self.SetSizer(self.main_sizer)
-
-  def on_lineup(self, event):
-    self.GetParent().on_lineup(LineupPanel)
-
-  def on_training(self, event):
-    self.GetParent().on_training(TrainingPanel)
-
 class MyTarget(wx.TextDropTarget):
  def __init__(self, obj):
   wx.TextDropTarget.__init__(self)
@@ -40,13 +23,16 @@ class MyTarget(wx.TextDropTarget):
     return False
   return True
 
-class LineupPanel(PaintPanel):
+class ManagePanel(PaintPanel):
   def __init__(self, parent, x0=600, y0=None):
     super().__init__(parent, x0, y0)
     colour = Colour()
     font = wx.Font(18, wx.DECORATIVE, wx.BOLD, wx.NORMAL)
     label_size = wx.Size(200, 50)
     self.test_button.Destroy()
+    training_button = TemplateButton(self, 'Training')
+    training_button.Bind(wx.EVT_BUTTON, self.on_training)
+    self.hbox3.Add(training_button)
     self.team = self.GetParent().game.teams[self.GetParent().game.team]
     # self.lineups = {}
     self.vbox1 = wx.BoxSizer(wx.VERTICAL)
@@ -104,6 +90,9 @@ class LineupPanel(PaintPanel):
     self.vbox2.Add(label, proportion=1)
     self.vbox2.Add(self.tactics)
     self.refresh()
+
+  def on_training(self, event):
+    self.GetParent().on_training(TrainingPanel)
 
   def make_a_sub(self, event):
     text = event.GetText()

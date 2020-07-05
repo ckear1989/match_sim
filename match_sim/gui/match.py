@@ -5,7 +5,7 @@ import wx
 
 import match_sim.default as default
 from match_sim.gui.graphics import PaintPanel, Colour
-from match_sim.gui.manage import LineupPanel
+from match_sim.gui.manage import ManagePanel
 from match_sim.gui.template import TemplateButton
 from match_sim.cl.match import Match as ClMatch, time_until_next_event, stopclock, printc
 
@@ -109,7 +109,7 @@ class MatchPanel(PaintPanel):
     self.play_button.SetLabel('Continue')
     self.refresh()
     print('debug1')
-    self.GetParent().on_match_manage(LineupPanel)
+    self.GetParent().on_match_manage(ManagePanel)
     wx.Yield()
     print('debug2')
 
