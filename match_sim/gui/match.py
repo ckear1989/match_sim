@@ -15,6 +15,8 @@ STOPCLOCK_EVENT = wx.NewEventType()
 STOPCLOCK_EVENT_CUSTOM = wx.PyEventBinder(STOPCLOCK_EVENT, 1)
 PAUSE_EVENT = wx.NewEventType()
 PAUSE_EVENT_CUSTOM = wx.PyEventBinder(PAUSE_EVENT, 1)
+FORCED_SUB_EVENT = wx.NewEventType()
+FORCED_SUB_EVENT_CUSTOM = wx.PyEventBinder(FORCED_SUB_EVENT, 1)
 
 class MatchEvent(wx.PyCommandEvent):
   def __init__(self, evtType, id):
@@ -73,6 +75,7 @@ class MatchPanel(PaintPanel):
     self.Bind(MATCH_EVENT_CUSTOM, self.on_match_event)
     self.Bind(STOPCLOCK_EVENT_CUSTOM, self.on_stopclock)
     self.Bind(PAUSE_EVENT_CUSTOM, self.on_pause)
+    self.Bind(FORCED_SUB_EVENT_CUSTOM, self.on_forced_sub)
 
   def scoreboard_str(self):
     ps = str(self.match)
@@ -108,10 +111,21 @@ class MatchPanel(PaintPanel):
     self.match.set_status('paused')
     self.play_button.SetLabel('Continue')
     self.refresh()
-    print('debug1')
     self.GetParent().on_match_manage(ManagePanel)
-    wx.Yield()
-    print('debug2')
+
+  def on_forced_sub(self, event):
+    self.match.set_status('forced-sub')
+    self.play_button.SetLabel('Continue')
+    self.refresh()
+    self.GetParent().on_match_manage(ManagePanel)
+    team = event.GetMyVal()[0]
+    player = event.GetMyVal()[1]
+    reason = event.GetMyVal()[2]
+    # TODO emit reason to panel
+    print(reason)
+    while team.check_sub_made(player) is False:
+      wx.Yield()
+    self.match.set_status('paused')
 
   def on_play(self, event):
     print('play')
@@ -145,8 +159,6 @@ class MatchPanel(PaintPanel):
     print('exit')
     print(self.match.status)
     if self.match.status in ['finished']:
-      self.match.team_a.update_event_handler()
-      self.match.team_b.update_event_handler()
       self.GetParent().exit_match(event)
 
 class Match(ClMatch):
@@ -252,12 +264,6 @@ class Match(ClMatch):
         if self.time % 60 == 0:
           yield '1 minute'
           self.update_team_condition()
-        # test forced sub
-        if self.silent is not True:
-          if self.time % 120 == 0:
-            shooting_player = self.team_a.choose_player(0.01, 0.1, 0.3)
-            shooting_player.gain_injury(self.date)
-            self.team_a.forced_substitution(shooting_player)
         if self.time % (34 * 60) == 0:
           self.at = self.added_time()
         if self.time == tane:

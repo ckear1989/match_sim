@@ -4,7 +4,7 @@ import time
 import wx
 
 from match_sim.match_team import MatchTeam
-from match_sim.gui.match import MatchEvent, PAUSE_EVENT
+from match_sim.gui.match import MatchEvent, FORCED_SUB_EVENT, PAUSE_EVENT
 from match_sim.gui.graphics import TeamColours
 
 class Team(MatchTeam):
@@ -29,18 +29,14 @@ class Team(MatchTeam):
           player.physical.position, player, player.season.injury.status.lower(),
           player.season.injury.part)
       if self.control is True:
-        sub_made = False
-        event = MatchEvent(PAUSE_EVENT, wx.ID_ANY)
+        event = MatchEvent(FORCED_SUB_EVENT, wx.ID_ANY)
+        event.SetMyVal([self, player, reason])
         self.event_handler.ProcessEvent(event)
-        while sub_made is not True:
-          print(reason)
-          sub_made = self.check_sub_made(player)
-          time.sleep(1)
-          wx.Yield()
       else:
         self.auto_sub(player, preferred_position)
 
   def check_sub_made(self, player):
+    self.update_playing_positions()
     if player in self.playing:
       return False
     return True

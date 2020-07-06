@@ -149,7 +149,6 @@ class MSFrame(wx.Frame):
 
   def on_match_manage(self, apanel):
     self.match_manage_panel = apanel(self, x0=700, y0=50)
-    self.match_manage_panel.training_button.Destroy()
     self.sizer.Add(self.match_manage_panel, 1, wx.EXPAND)
     self.match_manage_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_match_manage)
     self.match_manage_panel.Show()

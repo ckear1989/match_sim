@@ -36,6 +36,7 @@ class PlayerTarget(MyTarget):
       if player.match.lineup == player_n:
         if str(player) == text_n:
           player.set_lineup(self.pos)
+    self.team.playing = [x for x in self.team if x.match.lineup in range(1, 16)]
     return True
 
 class ReservesTarget(PlayerTarget):
