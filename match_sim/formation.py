@@ -31,6 +31,7 @@ class Formation():
     self.pos = [int(i) for i in self.nlist.split('-')]
 
   def get_pos_lineups(self):
+    # TODO formation changes during match after sub made
     self.goalkeeper_lineups = [1]
     i = 2
     j = self.pos[0] + i
@@ -47,20 +48,30 @@ class Formation():
     i = j
     j = self.pos[4] + i
     self.full_forward_lineups = list(range(i, j))
+    self.playing_lineups = self.goalkeeper_lineups + self.full_back_lineups + \
+      self.half_back_lineups + self.midfielder_lineups + self.half_forward_lineups + self.full_forward_lineups
 
   def ammend_pos_lineups(self, off, on):
     if off in self.goalkeeper_lineups:
+      self.goalkeeper_lineups.remove(off)
       self.goalkeeper_lineups.append(on)
     if off in self.full_back_lineups:
+      self.full_back_lineups.remove(off)
       self.full_back_lineups.append(on)
     if off in self.half_back_lineups:
+      self.half_back_lineups.remove(off)
       self.half_back_lineups.append(on)
     if off in self.midfielder_lineups:
+      self.midfielder_lineups.remove(off)
       self.midfielder_lineups.append(on)
     if off in self.half_forward_lineups:
+      self.half_forward_lineups.remove(off)
       self.half_forward_lineups.append(on)
     if off in self.full_forward_lineups:
+      self.full_forward_lineups.remove(off)
       self.full_forward_lineups.append(on)
+    self.playing_lineups = self.goalkeeper_lineups + self.full_back_lineups + \
+      self.half_back_lineups + self.midfielder_lineups + self.half_forward_lineups + self.full_forward_lineups
 
   def get_preferred_position(self, lineup):
     if lineup in self.goalkeeper_lineups + [16]:

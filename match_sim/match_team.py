@@ -156,6 +156,8 @@ class MatchTeam(Team):
           raise Exception('team {0} unable to fill lineup number {1}\n{2}'.format(
             self.name, i, self))
     self.playing = [p for p in self.eligible if p.match.lineup in range(1, 16)]
+    if self.name == 'Merrifield':
+      print(self.playing)
     self.subs = [p for p in self.eligible if p.match.lineup in range(16, 22)]
     self.update_playing_positions()
 

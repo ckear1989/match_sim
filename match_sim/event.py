@@ -49,6 +49,8 @@ class Event():
       self.defensive_setup()
     self.attackers.update_playing_positions()
     self.defenders.update_playing_positions()
+    self.attackers.update_score()
+    self.defenders.update_score()
 
   def recycle_posession(self):
     self.pl.append('He cycles back to retain posession.')
@@ -189,7 +191,7 @@ class Event():
     shooting_player = self.attackers.choose_player(0.01, 0.1, 0.3)
     p0 = random.random()
     if p0 < 0.95:
-      self.pl.append('{0} steps up to take the free kick.'.format(self.shooting_player))
+      self.pl.append('{0} steps up to take the free kick.'.format(shooting_player))
       self.shooting_player_point_attempt(shooting_player, assister)
     else:
       self.pl.append('It\'s inside the box.It will be a penalty.')

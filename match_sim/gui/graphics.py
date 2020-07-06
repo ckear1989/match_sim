@@ -81,7 +81,8 @@ class PaintPanel(TemplatePanel):
     y = 200
     dc.DrawCircle(self.x0+x, self.y0+y, 50)
 
-  def draw_player(self, player, dc=None, x=200, y=200, x0=None, y0=None, colour_p=None, colour_s=None):
+  def draw_player(self, player, dc=None, x=200, y=200,
+    x0=None, y0=None, colour_p=None, colour_s=None):
     if x0 is None:
       x0 = self.x0
     if y0 is None:
@@ -100,9 +101,11 @@ class PaintPanel(TemplatePanel):
     dc.DrawCircle(x0+x, y0+y, 14)
     font = wx.Font(8, wx.ROMAN, wx.BOLD, wx.NORMAL) 
     dc.SetFont(font)
+    dc.DrawText(str(player.match.lineup), x0+x, y0+y)
     dc.DrawText(str(player), x0+x-30, y0+y+10)
 
-  def draw_player_score(self, player, dc=None, x=200, y=200, x0=None, y0=None, colour_p=None, colour_s=None):
+  def draw_player_score(self, player, dc=None, x=200, y=200,
+    x0=None, y0=None, colour_p=None, colour_s=None):
     if x0 is None:
       x0 = self.x0
     if y0 is None:

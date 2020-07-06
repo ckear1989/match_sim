@@ -5,7 +5,7 @@ import wx
 
 import match_sim.default as default
 from match_sim.gui.graphics import PaintPanel, Colour
-from match_sim.gui.manage import ManagePanel
+from match_sim.gui.manage import ManagePanel, MatchManagePanel
 from match_sim.gui.template import TemplateButton
 from match_sim.cl.match import Match as ClMatch, time_until_next_event, stopclock, printc
 
@@ -86,21 +86,27 @@ class MatchPanel(PaintPanel):
   def draw_lineup(self):
     dc = wx.ClientDC(self)
     self.draw_pitch(dc, x0=500, y0=50)
-    for i in range(1, 22):
-      players = [p for p in self.match.team_a if p.match.lineup == i]
-      if len(players) > 0:
-        player = players[0]
-        x, y = self.match.team_a.formation.get_coords(i)
-        self.draw_player_score(player, dc, x=x, y=y, x0=500, y0=50,
-          colour_p=self.match.team_a.colour.home_p, colour_s=self.match.team_a.colour.home_s)
+    for player in self.match.team_a.playing + self.match.team_a.subs:
+      if player.match.lineup in self.match.team_a.formation.goalkeeper_lineups:
+        colour_p = self.match.team_a.colour.goalkeeper_p
+        colour_s = self.match.team_a.colour.goalkeeper_s
+      else:
+        colour_p = self.match.team_a.colour.home_p
+        colour_s = self.match.team_a.colour.home_s
+      x, y = self.match.team_a.formation.get_coords(player.match.lineup)
+      self.draw_player_score(player, dc, x=x, y=y, x0=500, y0=50,
+        colour_p=colour_p, colour_s=colour_s)
     self.draw_pitch(dc, x0=940, y0=50)
-    for i in range(1, 22):
-      players = [p for p in self.match.team_b if p.match.lineup == i]
-      if len(players) > 0:
-        player = players[0]
-        x, y = self.match.team_b.formation.get_coords(i)
+    for player in self.match.team_b.playing + self.match.team_b.subs:
+      if player.match.lineup in self.match.team_b.formation.goalkeeper_lineups:
+        colour_p = self.match.team_b.colour.goalkeeper_p
+        colour_s = self.match.team_b.colour.goalkeeper_s
+      else:
+        colour_p = self.match.team_b.colour.away_p
+        colour_s = self.match.team_b.colour.away_s
+        x, y = self.match.team_b.formation.get_coords(player.match.lineup)
         self.draw_player_score(player, dc, x=x, y=y, x0=940, y0=50,
-          colour_p=self.match.team_b.colour.away_p, colour_s=self.match.team_b.colour.away_s)
+          colour_p=colour_p, colour_s=colour_s)
 
   def refresh(self):
     self.draw_lineup()
@@ -108,16 +114,20 @@ class MatchPanel(PaintPanel):
 
   def on_pause(self, event):
     print('pause')
-    self.match.set_status('paused')
-    self.play_button.SetLabel('Continue')
     self.refresh()
-    self.GetParent().on_match_manage(ManagePanel)
+    if self.match.time == 0:
+      self.match.set_status('pre-match')
+      self.GetParent().on_match_manage(ManagePanel)
+    else:
+      self.match.set_status('paused')
+      self.GetParent().on_match_manage(MatchManagePanel)
+    while self.match.status in ['pre-match', 'paused']:
+      wx.Yield()
 
   def on_forced_sub(self, event):
     self.match.set_status('forced-sub')
-    self.play_button.SetLabel('Continue')
     self.refresh()
-    self.GetParent().on_match_manage(ManagePanel)
+    self.GetParent().on_match_manage(MatchManagePanel)
     team = event.GetMyVal()[0]
     player = event.GetMyVal()[1]
     reason = event.GetMyVal()[2]
@@ -129,17 +139,19 @@ class MatchPanel(PaintPanel):
 
   def on_play(self, event):
     print('play')
-    if self.match.status in ['pre-match', 'paused']:
+    if self.match.status in ['pre-match']:
+      self.play_button.SetLabel('Continue')
       self.refresh()
       self.match.update_event_handler(self.GetEventHandler())
       self.match.team_a.update_event_handler(self.GetEventHandler())
       self.match.team_b.update_event_handler(self.GetEventHandler())
       for ts in self.match.play():
         pass
-    elif self.match.status in ['finished']:
+    if self.match.status in ['finished']:
       self.game.process_match_result(self.match, self.match.comp_name)
       self.game.update_next_fixture()
       self.on_exit_match(event)
+    self.match.set_status('playing')
 
   def on_stopclock(self, event):
     self.stopclock.SetLabel(event.GetMyVal())
@@ -234,9 +246,8 @@ class Match(ClMatch):
     self.set_status('playing')
     for ts in self.play_half(self.first_half_length, time_step):
       yield ts
-    if self.status == 'half-end':
-      for ts in self.half_time():
-        yield ts
+    for ts in self.half_time():
+      yield ts
     second_half_end = self.first_half_length + self.second_half_length
     second_half_tane = (self.first_half_length) + time_until_next_event()
     for ts in self.play_half(second_half_end, time_step, tane=second_half_tane):
@@ -259,24 +270,20 @@ class Match(ClMatch):
         self.time += 1
         if self.time % 1 == 0:
           self.stopclock_time = stopclock(self.time)
-          yield '1 second'
           self.print_stopclock()
         if self.time % 60 == 0:
           yield '1 minute'
           self.update_team_condition()
         if self.time % (34 * 60) == 0:
-          self.at = self.added_time()
+          self.at = self.added_time() * 60
         if self.time == tane:
           self.event()
           tune = time_until_next_event()
           tane += tune
-        if self.time == (end_time + self.at):
-          self.set_status('half-end')
         if time_step > 0:
           time.sleep(time_step)
       else:
-        time.sleep(1)
-        self.print_stopclock()
+        wx.Yield()
 
   def GetId(self):
     return wx.ID_ANY
