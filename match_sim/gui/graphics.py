@@ -101,7 +101,7 @@ class PaintPanel(TemplatePanel):
     dc.DrawCircle(x0+x, y0+y, 14)
     font = wx.Font(8, wx.ROMAN, wx.BOLD, wx.NORMAL) 
     dc.SetFont(font)
-    dc.DrawText(str(player.match.lineup), x0+x, y0+y)
+    dc.DrawText(str(player.match.lineup), x0+x-3, y0+y-3)
     dc.DrawText(str(player), x0+x-30, y0+y+10)
 
   def draw_player_score(self, player, dc=None, x=200, y=200,

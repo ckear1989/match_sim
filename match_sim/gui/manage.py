@@ -40,28 +40,32 @@ class PlayerTarget(MyTarget):
 
 class MatchPlayerTarget(PlayerTarget):
   def OnDropText(self, x, y, data):
-    player_n = int(data.split(' ')[0])
-    text_n = ' '.join(data.split(' ')[1:])
+    new_lineup = int(data.split(' ')[0])
+    new_name = ' '.join(data.split(' ')[1:])
+    if (new_lineup in self.team.formation.playing_lineups) and (self.pos in self.team.formation.playing_lineups):
+      return False
+    if (new_lineup not in self.team.formation.playing_lineups) and (self.pos not in self.team.formation.playing_lineups):
+      return False
     if self.pos in self.team.formation.playing_lineups:
       for player in self.team.playing:
         if player.match.lineup == self.pos:
           self.team.playing.remove(player)
       for player in self.team.subs:
-        if player.match.lineup == player_n:
-          if str(player) == text_n:
+        if player.match.lineup == new_lineup:
+          if str(player) == new_name:
             self.team.playing.append(player)
             self.team.subs.remove(player)
-      self.team.formation.ammend_pos_lineups(self.pos, player_n)
+      self.team.formation.ammend_pos_lineups(self.pos, new_lineup)
     else:
       for player in self.team.subs:
         if player.match.lineup == self.pos:
           self.team.playing.append(player)
           self.team.subs.remove(player)
       for player in self.team.playing:
-        if player.match.lineup == player_n:
-          if str(player) == text_n:
+        if player.match.lineup == new_lineup:
+          if str(player) == new_name:
             self.team.playing.remove(player)
-      self.team.formation.ammend_pos_lineups(player_n, self.pos)
+      self.team.formation.ammend_pos_lineups(new_lineup, self.pos)
     self.team.update_playing_positions()
     return True
 
