@@ -35,6 +35,17 @@ class Team(MatchTeam):
       else:
         self.auto_sub(player, preferred_position)
 
+  def send_off_player(self, player):
+    self.emit_send_off_event(player)
+    self.playing.remove(player)
+
+  def emit_send_off_event(self, player):
+    if self.control is True:
+      print('debug')
+      event = MatchEvent(PAUSE_EVENT, wx.ID_ANY)
+      event.SetMyVal([self, player])
+      self.event_handler.ProcessEvent(event)
+
   def check_sub_made(self, player):
     self.update_playing_positions()
     if player in self.playing:

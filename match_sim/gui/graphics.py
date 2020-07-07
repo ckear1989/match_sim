@@ -81,6 +81,24 @@ class PaintPanel(TemplatePanel):
     y = 200
     dc.DrawCircle(self.x0+x, self.y0+y, 50)
 
+  def draw_manager(self, manager, dc=None, x=200, y=200,
+    x0=None, y0=None):
+    if x0 is None:
+      x0 = self.x0
+    if y0 is None:
+      y0 = self.y0
+    colour = Colour()
+    if self.IsShownOnScreen():
+      if not dc:
+        dc = wx.ClientDC(self)
+    dc.SetBrush(wx.Brush(colour.WH))
+    dc.DrawCircle(x0+x, y0+y, 20)
+    dc.SetBrush(wx.Brush(colour.BL))
+    dc.DrawCircle(x0+x, y0+y, 14)
+    font = wx.Font(8, wx.ROMAN, wx.BOLD, wx.NORMAL) 
+    dc.SetFont(font)
+    dc.DrawText(manager, x0+x-30, y0+y+18)
+
   def draw_player(self, player, dc=None, x=200, y=200,
     x0=None, y0=None, colour_p=None, colour_s=None):
     if x0 is None:
@@ -102,7 +120,7 @@ class PaintPanel(TemplatePanel):
     font = wx.Font(8, wx.ROMAN, wx.BOLD, wx.NORMAL) 
     dc.SetFont(font)
     dc.DrawText(str(player.match.lineup), x0+x-3, y0+y-3)
-    dc.DrawText(str(player), x0+x-30, y0+y+10)
+    dc.DrawText(str(player), x0+x-30, y0+y+18)
 
   def draw_player_score(self, player, dc=None, x=200, y=200,
     x0=None, y0=None, colour_p=None, colour_s=None):
@@ -115,9 +133,9 @@ class PaintPanel(TemplatePanel):
       if self.IsShownOnScreen():
         if not dc:
           dc = wx.ClientDC(self)
-      dc.DrawText(str(player.match.score), x0+x-30, y0+y+20)
+      dc.DrawText(str(player.match.score), x0+x-30, y0+y+28)
 
-  def draw_pitch(self, dc=None, title=None, x0=None, y0=None):	
+  def draw_pitch(self, dc=None, title=None, x0=None, y0=None, header_border=False):
     if x0 is None:
       x0 = self.x0
     if y0 is None:
@@ -131,18 +149,21 @@ class PaintPanel(TemplatePanel):
     dc.SetFont(font) 
     if title is not None:
       dc.DrawText(title, x0, 10) 
-		
-    pen = wx.Pen(colour.BL)
-    dc.SetPen(pen)
+    dc.SetPen(wx.Pen(colour.BL))
     dc.SetBrush(wx.Brush(colour.BL))
     dc.DrawRectangle(x0-3, y0-3, self.x+6, self.y+6)
+    if header_border:
+      dc.DrawRectangle(x0-3, y0-34, self.x+6, 4)
+      dc.DrawRectangle(x0-3, y0-34, 4, y0)
+      dc.DrawRectangle(x0+self.x-1, y0-34, 4, y0)
     for i in range(self.n):
       dc.SetBrush(wx.Brush(colour.VLG))
+      dc.SetPen(wx.Pen(colour.VLG))
       dc.DrawRectangle(x0, y0 + (i*2*self.y/self.n/2), self.x, self.y/self.n/2)
       dc.SetBrush(wx.Brush(colour.LG))
+      dc.SetPen(wx.Pen(colour.LG))
       dc.DrawRectangle(x0, y0 + (((i*2)+1)*self.y/self.n/2), self.x, self.y/self.n/2)
-    pen = wx.Pen(colour.WH)
-    dc.SetPen(pen)
+    dc.SetPen(wx.Pen(colour.WH))
     # 6M
     w = 14 * 4
     h = 4.5 * 4

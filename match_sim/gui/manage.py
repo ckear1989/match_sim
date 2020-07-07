@@ -47,9 +47,11 @@ class MatchPlayerTarget(PlayerTarget):
     if (new_lineup not in self.team.formation.playing_lineups) and (self.pos not in self.team.formation.playing_lineups):
       return False
     if self.pos in self.team.formation.playing_lineups:
+      # dragged player coming on
       for player in self.team.playing:
         if player.match.lineup == self.pos:
           self.team.playing.remove(player)
+          player.set_lineup(0)
       for player in self.team.subs:
         if player.match.lineup == new_lineup:
           if str(player) == new_name:
@@ -57,6 +59,7 @@ class MatchPlayerTarget(PlayerTarget):
             self.team.subs.remove(player)
       self.team.formation.ammend_pos_lineups(self.pos, new_lineup)
     else:
+      # dragged player coming on
       for player in self.team.subs:
         if player.match.lineup == self.pos:
           self.team.playing.append(player)
@@ -65,6 +68,7 @@ class MatchPlayerTarget(PlayerTarget):
         if player.match.lineup == new_lineup:
           if str(player) == new_name:
             self.team.playing.remove(player)
+            player.set_lineup(0)
       self.team.formation.ammend_pos_lineups(new_lineup, self.pos)
     self.team.update_playing_positions()
     return True

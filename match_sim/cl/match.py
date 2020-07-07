@@ -89,7 +89,6 @@ class Match():
     event = Event(self)
     at = event.added_time()
     self.print_event_list(event.pl)
-    at = random.choice(range(1, 7))
     return at
 
   def play_half(self, end_time, time_step, tane=time_until_next_event()):

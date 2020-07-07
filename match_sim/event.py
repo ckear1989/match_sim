@@ -209,7 +209,7 @@ class Event():
         self.defending_player.gain_card('r')
         self.pl.append('And it\'s his second yellow.  He is sent off by the referee.')
         self.defending_player.gain_suspension('yellow', self.date)
-        self.defenders.playing.remove(self.defending_player)
+        self.defenders.send_off_player(self.defending_player)
       p1 = random.random()
       if p1 < 0.2:
         attacker.gain_injury(self.date)
@@ -218,7 +218,7 @@ class Event():
       self.pl.append('{0} receives a red card.'.format(self.defending_player))
       self.defending_player.gain_card('r')
       self.defending_player.gain_suspension('red', self.date)
-      self.defenders.playing.remove(self.defending_player)
+      self.defenders.send_off_player(self.defending_player)
       if self.defending_player.physical.position == 'GK':
         player_off = random.choice(self.defenders.playing)
         self.defenders.forced_substitution(player_off, 'GK',

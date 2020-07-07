@@ -159,6 +159,9 @@ class MatchTeam(Team):
     self.subs = [p for p in self.eligible if p.match.lineup in range(16, 22)]
     self.update_playing_positions()
 
+  def send_off_player(self, player):
+    self.playing.remove(player)
+
   def auto_sub(self, player, preferred_position=None):
     '''For non-controlled teams choose sub'''
     if preferred_position is None:

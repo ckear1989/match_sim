@@ -41,9 +41,9 @@ class MatchPanel(PaintPanel):
     self.play_button = TemplateButton(self, 'Play')
     self.play_button.Bind(wx.EVT_BUTTON, self.on_play)
     self.hbox3.Add(self.play_button)
-    pause_button = TemplateButton(self, 'Pause')
-    pause_button.Bind(wx.EVT_BUTTON, self.on_pause)
-    self.hbox3.Add(pause_button)
+    self.pause_button = TemplateButton(self, 'Pause')
+    self.pause_button.Bind(wx.EVT_BUTTON, self.on_pause)
+    self.hbox3.Add(self.pause_button)
     self.vbox1 = wx.BoxSizer(wx.VERTICAL)
     self.hbox1.Add(self.vbox1)
     self.hbox5 = wx.BoxSizer(wx.HORIZONTAL)
@@ -53,8 +53,8 @@ class MatchPanel(PaintPanel):
     self.stopclock.SetBackgroundColour(colour.BL)
     self.stopclock.SetForegroundColour(colour.WH)
     self.stopclock.SetFont(font)
-    self.scoreboard_h = wx.StaticText(self, size=wx.Size(400, 28), style=wx.ST_NO_AUTORESIZE)
-    self.scoreboard_a = wx.StaticText(self, size=wx.Size(400, 28), style=wx.ST_NO_AUTORESIZE)
+    self.scoreboard_h = wx.StaticText(self, size=wx.Size(338, 27), style=wx.ST_NO_AUTORESIZE|wx.STAY_ON_TOP)
+    self.scoreboard_a = wx.StaticText(self, size=wx.Size(338, 27), style=wx.ST_NO_AUTORESIZE)
     self.scoreboard_str()
     self.scoreboard_h.SetFont(font)
     self.scoreboard_a.SetFont(font)
@@ -63,15 +63,15 @@ class MatchPanel(PaintPanel):
     self.scoreboard_h.SetForegroundColour(self.match.team_a.colour.home_s)
     self.scoreboard_a.SetForegroundColour(self.match.team_b.colour.away_s)
     self.vbox1.Add(self.stopclock)
-    self.vbox1.Add((478, 28))
+    self.vbox1.Add((481, 28))
     self.hbox5.Add(self.scoreboard_h)
-    self.hbox5.Add((40, 28))
+    self.hbox5.Add((102, 28))
     self.hbox5.Add(self.scoreboard_a)
     self.txt_output = wx.StaticText(self, size=wx.Size(420, 84), style=wx.ST_NO_AUTORESIZE)
     self.txt_output.SetBackgroundColour(colour.LIME)
     self.txt_output.SetFont(font)
     self.vbox1.Add(self.txt_output)
-    self.refresh()
+    self.Bind(wx.EVT_ERASE_BACKGROUND, self.refresh)
     self.Bind(MATCH_EVENT_CUSTOM, self.on_match_event)
     self.Bind(STOPCLOCK_EVENT_CUSTOM, self.on_stopclock)
     self.Bind(PAUSE_EVENT_CUSTOM, self.on_pause)
@@ -82,10 +82,12 @@ class MatchPanel(PaintPanel):
     ps = ps.split(')')
     self.scoreboard_h.SetLabel(ps[0] + ')')
     self.scoreboard_a.SetLabel(ps[1].strip() + ')')
+    self.scoreboard_h.Show()
+    self.scoreboard_a.Show()
 
   def draw_lineup(self):
     dc = wx.ClientDC(self)
-    self.draw_pitch(dc, x0=500, y0=50)
+    self.draw_pitch(dc, x0=500, y0=50, header_border=True)
     for player in self.match.team_a.playing + self.match.team_a.subs:
       if player.match.lineup in self.match.team_a.formation.goalkeeper_lineups:
         colour_p = self.match.team_a.colour.goalkeeper_p
@@ -96,7 +98,8 @@ class MatchPanel(PaintPanel):
       x, y = self.match.team_a.formation.get_coords(player.match.lineup)
       self.draw_player_score(player, dc, x=x, y=y, x0=500, y0=50,
         colour_p=colour_p, colour_s=colour_s)
-    self.draw_pitch(dc, x0=940, y0=50)
+    self.draw_manager(self.match.team_a.manager, dc, x=380, y=-8, x0=500, y0=50)
+    self.draw_pitch(dc, x0=940, y0=50, header_border=True)
     for player in self.match.team_b.playing + self.match.team_b.subs:
       if player.match.lineup in self.match.team_b.formation.goalkeeper_lineups:
         colour_p = self.match.team_b.colour.goalkeeper_p
@@ -107,12 +110,15 @@ class MatchPanel(PaintPanel):
       x, y = self.match.team_b.formation.get_coords(player.match.lineup)
       self.draw_player_score(player, dc, x=x, y=y, x0=940, y0=50,
         colour_p=colour_p, colour_s=colour_s)
+    self.draw_manager(self.match.team_b.manager, dc, x=380, y=-8, x0=940, y0=50)
 
   def refresh(self):
     self.draw_lineup()
     self.scoreboard_str()
+    wx.Yield()
 
   def on_pause(self, event):
+    self.pause_button.Hide()
     print('pause')
     self.refresh()
     if self.match.time == 0:
@@ -120,26 +126,37 @@ class MatchPanel(PaintPanel):
       self.GetParent().on_match_manage(ManagePanel)
     else:
       self.match.set_status('paused')
+      if event.IsCommandEvent() is False:
+        if event.GetMyVal() is not None:
+          self.txt_output.SetLabel(
+          '{0} have lost {1} from their lineup.'.format(event.GetMyVal()[0].name, event.GetMyVal()[1]))
+      time.sleep(0.5)
+      wx.Yield()
       self.GetParent().on_match_manage(MatchManagePanel)
     while self.match.status in ['pre-match', 'paused']:
       wx.Yield()
 
   def on_forced_sub(self, event):
+    self.pause_button.Hide()
     self.match.set_status('forced-sub')
     self.refresh()
-    self.GetParent().on_match_manage(MatchManagePanel)
     team = event.GetMyVal()[0]
     player = event.GetMyVal()[1]
     reason = event.GetMyVal()[2]
-    # TODO emit reason to panel
-    print(reason)
+    self.txt_output.SetLabel(
+      '{0} have lost a player through injury. {1}'.format(team.name, reason))
+    wx.Yield()
+    time.sleep(0.5)
+    self.GetParent().on_match_manage(MatchManagePanel)
     while team.check_sub_made(player) is False:
       wx.Yield()
+    self.txt_output.SetLabel('')
     self.match.set_status('paused')
 
   def on_play(self, event):
     print('play')
     if self.match.status in ['pre-match']:
+      self.pause_button.Show()
       self.play_button.SetLabel('Continue')
       self.refresh()
       self.match.update_event_handler(self.GetEventHandler())
@@ -152,6 +169,7 @@ class MatchPanel(PaintPanel):
       self.game.update_next_fixture()
       self.on_exit_match(event)
     self.match.set_status('playing')
+    self.pause_button.Show()
 
   def on_stopclock(self, event):
     self.stopclock.SetLabel(event.GetMyVal())
@@ -231,6 +249,10 @@ class Match(ClMatch):
             yield ps
     yield 'extra time'
 
+  def OnEraseBackground(self, evt):
+    super().OnEraseBackground(evt)
+    self.refresh()
+
   def shootout(self):
     '''Coin toss to determine winner'''
     p0 = random.random()
@@ -277,7 +299,7 @@ class Match(ClMatch):
           yield '1 minute'
           self.update_team_condition()
         if self.time % (34 * 60) == 0:
-          self.at = self.added_time() * 60
+          self.at = self.added_time()
         if self.time == tane:
           self.event()
           tune = time_until_next_event()
