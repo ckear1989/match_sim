@@ -104,9 +104,9 @@ class MatchPanel(PaintPanel):
       else:
         colour_p = self.match.team_b.colour.away_p
         colour_s = self.match.team_b.colour.away_s
-        x, y = self.match.team_b.formation.get_coords(player.match.lineup)
-        self.draw_player_score(player, dc, x=x, y=y, x0=940, y0=50,
-          colour_p=colour_p, colour_s=colour_s)
+      x, y = self.match.team_b.formation.get_coords(player.match.lineup)
+      self.draw_player_score(player, dc, x=x, y=y, x0=940, y0=50,
+        colour_p=colour_p, colour_s=colour_s)
 
   def refresh(self):
     self.draw_lineup()
