@@ -196,6 +196,8 @@ class Match(ClMatch):
     self.time = 35 * 60
     self.first_half_length = 35 * 60
     self.stopclock_time = stopclock(self.time)
+    self.print_stopclock()
+    wx.Yield()
     self.emit_pause_event()
     yield 'half time'
 

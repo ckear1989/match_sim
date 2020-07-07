@@ -34,4 +34,4 @@ class SettingsPanel(TemplatePanel):
 
 class Settings(ClSettings):
   def __init__(self):
-    super().__init__(self)
+    super().__init__()
