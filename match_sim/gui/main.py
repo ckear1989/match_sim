@@ -143,7 +143,6 @@ class MSFrame(wx.Frame):
     self.match_panel = apanel(self)
     self.sizer.Add(self.match_panel, 1, wx.EXPAND)
     self.match_panel.Show()
-    self.match_panel.refresh()
     self.game_panel.Hide()
     self.Layout()
 
@@ -152,7 +151,6 @@ class MSFrame(wx.Frame):
     self.sizer.Add(self.match_manage_panel, 1, wx.EXPAND)
     self.match_manage_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_match_manage)
     self.match_manage_panel.Show()
-    self.match_manage_panel.refresh()
     self.match_panel.Hide()
     self.Layout()
 
@@ -194,7 +192,6 @@ class MSFrame(wx.Frame):
 
   def exit_match_manage(self, event):
     self.match_panel.Show()
-    self.match_panel.refresh()
     self.match_manage_panel.Hide()
     self.Layout()
 

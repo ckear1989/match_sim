@@ -4,30 +4,18 @@ import time
 import wx
 
 import match_sim.default as default
+from match_sim.gui.event import Event, MATCH_EVENT_CUSTOM, REFRESH_EVENT_CUSTOM, MatchEvent
 from match_sim.gui.graphics import PaintPanel, Colour
 from match_sim.gui.manage import ManagePanel, MatchManagePanel
 from match_sim.gui.template import TemplateButton
 from match_sim.cl.match import Match as ClMatch, time_until_next_event, stopclock, printc
 
-MATCH_EVENT = wx.NewEventType()
-MATCH_EVENT_CUSTOM = wx.PyEventBinder(MATCH_EVENT, 1)
 STOPCLOCK_EVENT = wx.NewEventType()
 STOPCLOCK_EVENT_CUSTOM = wx.PyEventBinder(STOPCLOCK_EVENT, 1)
 PAUSE_EVENT = wx.NewEventType()
 PAUSE_EVENT_CUSTOM = wx.PyEventBinder(PAUSE_EVENT, 1)
 FORCED_SUB_EVENT = wx.NewEventType()
 FORCED_SUB_EVENT_CUSTOM = wx.PyEventBinder(FORCED_SUB_EVENT, 1)
-
-class MatchEvent(wx.PyCommandEvent):
-  def __init__(self, evtType, id):
-    wx.PyCommandEvent.__init__(self, evtType, id)
-    myVal = None
-
-  def SetMyVal(self, val):
-    self.myVal = val
-
-  def GetMyVal(self):
-    return self.myVal
 
 class MatchPanel(PaintPanel):
   def __init__(self, parent, x0=600, y0=None):
@@ -71,11 +59,12 @@ class MatchPanel(PaintPanel):
     self.txt_output.SetBackgroundColour(colour.LIME)
     self.txt_output.SetFont(font)
     self.vbox1.Add(self.txt_output)
-    self.Bind(wx.EVT_ERASE_BACKGROUND, self.refresh)
+    self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
     self.Bind(MATCH_EVENT_CUSTOM, self.on_match_event)
     self.Bind(STOPCLOCK_EVENT_CUSTOM, self.on_stopclock)
     self.Bind(PAUSE_EVENT_CUSTOM, self.on_pause)
     self.Bind(FORCED_SUB_EVENT_CUSTOM, self.on_forced_sub)
+    self.Bind(REFRESH_EVENT_CUSTOM, self.refresh)
 
   def scoreboard_str(self):
     ps = str(self.match)
@@ -112,15 +101,14 @@ class MatchPanel(PaintPanel):
         colour_p=colour_p, colour_s=colour_s)
     self.draw_manager(self.match.team_b.manager, dc, x=380, y=-8, x0=940, y0=50)
 
-  def refresh(self):
+  def refresh(self, event):
     self.draw_lineup()
     self.scoreboard_str()
     wx.Yield()
 
   def on_pause(self, event):
-    self.pause_button.Hide()
     print('pause')
-    self.refresh()
+    self.pause_button.Hide()
     if self.match.time == 0:
       self.match.set_status('pre-match')
       self.GetParent().on_match_manage(ManagePanel)
@@ -133,13 +121,17 @@ class MatchPanel(PaintPanel):
       time.sleep(0.5)
       wx.Yield()
       self.GetParent().on_match_manage(MatchManagePanel)
+      if event.IsCommandEvent() is False:
+        if event.GetMyVal() is not None:
+          self.GetParent().match_manage_panel.txt_output.SetLabel(
+            '{0} have lost {1} from their lineup.'.format(event.GetMyVal()[0].name, event.GetMyVal()[1]))
     while self.match.status in ['pre-match', 'paused']:
       wx.Yield()
 
   def on_forced_sub(self, event):
+    print('forced sub')
     self.pause_button.Hide()
     self.match.set_status('forced-sub')
-    self.refresh()
     team = event.GetMyVal()[0]
     player = event.GetMyVal()[1]
     reason = event.GetMyVal()[2]
@@ -148,8 +140,12 @@ class MatchPanel(PaintPanel):
     wx.Yield()
     time.sleep(0.5)
     self.GetParent().on_match_manage(MatchManagePanel)
+    self.GetParent().match_manage_panel.txt_output.SetLabel(
+      '{0} have lost a player through injury. {1}'.format(team.name, reason))
     while team.check_sub_made(player) is False:
+      self.GetParent().match_manage_panel.exit_button.Hide()
       wx.Yield()
+    self.GetParent().match_manage_panel.exit_button.Show()
     self.txt_output.SetLabel('')
     self.match.set_status('paused')
 
@@ -158,7 +154,6 @@ class MatchPanel(PaintPanel):
     if self.match.status in ['pre-match']:
       self.pause_button.Show()
       self.play_button.SetLabel('Continue')
-      self.refresh()
       self.match.update_event_handler(self.GetEventHandler())
       self.match.team_a.update_event_handler(self.GetEventHandler())
       self.match.team_b.update_event_handler(self.GetEventHandler())
@@ -177,17 +172,15 @@ class MatchPanel(PaintPanel):
       wx.Yield()
 
   def on_match_event(self, event):
-    for ps in event.GetMyVal():
-      if len(ps) > 6:
-        self.txt_output.SetLabel(ps)
-        wx.Yield()
-        time.sleep(0.5)
+    ps = event.GetMyVal()
+    if len(ps) > 6:
+      self.txt_output.SetLabel(ps)
+      wx.Yield()
+      time.sleep(0.5)
     self.txt_output.SetLabel('')
-    self.refresh()
 
   def on_exit_match(self, event):
     print('exit')
-    print(self.match.status)
     if self.match.status in ['finished']:
       self.GetParent().exit_match(event)
 
@@ -209,7 +202,8 @@ class Match(ClMatch):
 
   def half_time(self):
     '''Reset added time back to 35 minutes.  Update scorer data.  Let user manage team'''
-    self.print_event_list(['And that\'s the end of the half'])
+    event = Event(self, self.event_handler)
+    event.half_time()
     self.at = 0
     self.time = 35 * 60
     self.first_half_length = 35 * 60
@@ -221,7 +215,8 @@ class Match(ClMatch):
 
   def full_time(self):
     '''Update scorer stats.  Print final result'''
-    self.print_event_list('Full time score is:\n{0}'.format(self.get_score().replace('Score is now ', '')))
+    event = Event(self, self.event_handler)
+    event.full_time()
     yield 'full time'
 
   def extra_time(self, time_step):
@@ -248,10 +243,6 @@ class Match(ClMatch):
           for ps in self.shootout():
             yield ps
     yield 'extra time'
-
-  def OnEraseBackground(self, evt):
-    super().OnEraseBackground(evt)
-    self.refresh()
 
   def shootout(self):
     '''Coin toss to determine winner'''
@@ -318,13 +309,6 @@ class Match(ClMatch):
       event.SetMyVal(self.stopclock_time)
       self.event_handler.ProcessEvent(event)
 
-  def print_event_list(self, pl):
-    '''Print each line in list.  Pause appropriately.'''
-    if self.silent is not True:
-      event = MatchEvent(MATCH_EVENT, self.GetId())
-      event.SetMyVal(pl)
-      self.event_handler.ProcessEvent(event)
-
   def emit_pause_event(self):
     if self.silent is not True:
       event = MatchEvent(PAUSE_EVENT, self.GetId())
@@ -332,3 +316,19 @@ class Match(ClMatch):
     else:
       self.set_status('playing')
 
+  def event(self):
+    '''Instatiate event.  Run it'''
+    event = Event(self, self.event_handler)
+    event.run(self)
+    self.abandon()
+
+  def throw_in(self):
+    '''Call event throw in method.  Print if necessary'''
+    event = Event(self, self.event_handler)
+    event.throw_in()
+
+  def added_time(self):
+    '''Call event method'''
+    event = Event(self, self.event_handler)
+    at = event.added_time()
+    return at

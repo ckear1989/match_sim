@@ -75,10 +75,11 @@ class Event():
 
   def added_time(self):
     '''Determine how many minutes and seconds to be played'''
-    at = random.choice(range(1, 7))
-    self.pl.append('{0} {1} minutes added time indicated by the linesman.'.format(self.stopclock_time, at))
+    at = random.choice([1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 6, 7])
+    self.pl.append(self.stopclock_time)
+    self.pl.append(' {0} minutes added time indicated by the linesman.'.format(at))
     at = float(at)
-    at += np.random.normal(0.5, 0.1)
+    at += np.random.normal(0.5, 0.2)
     at = at * 60
     return at
 

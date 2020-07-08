@@ -208,7 +208,9 @@ class MatchManagePanel(ManagePanel):
     super().__init__(parent, x0, y0)
     self.training_button.Destroy()
     self.vbox3.Clear(True)
-    self.hbox1.Remove(self.vbox3)
+    # self.hbox1.Remove(self.vbox3)
+    self.txt_output = wx.StaticText(self)
+    self.vbox3.Add(self.txt_output)
     self.exit_button.SetLabel('Continue')
     for i in range(1, 16):
       self.targets[i] = MatchPlayerTarget(self.lineups[i], i, self.team)
