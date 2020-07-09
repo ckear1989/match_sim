@@ -4,7 +4,7 @@ path = pathlib.Path(__file__).parent.absolute()
 
 import wx
 
-import match_sim.default as default
+import match_sim.cl.default as default
 
 class TemplateFrame(wx.Frame):
   def __init__(self):

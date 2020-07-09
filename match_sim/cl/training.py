@@ -3,8 +3,8 @@
 import datetime
 import calendar
 
-import default
-from utils import x_0_100_cap, random_0_100_normal
+import match_sim.cl.default
+from match_sim.cl.utils import x_0_100_cap, random_0_100_normal
 
 def options_from_list(alist):
   '''String format list'''

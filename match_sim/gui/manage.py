@@ -9,7 +9,7 @@ path = pathlib.Path(__file__).parent.absolute()
 import wx
 
 from match_sim.gui.graphics import PaintPanel, Colour
-import match_sim.default as default
+import match_sim.cl.default as default
 
 class MyTarget(wx.TextDropTarget):
  def __init__(self, obj):

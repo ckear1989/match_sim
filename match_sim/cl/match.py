@@ -11,8 +11,8 @@ if __name__ in ["__main__"]:
   import keyboard
 import pyfiglet
 
-from match_sim.match_team import MatchTeam
-from match_sim.event import Event
+from match_sim.cl.match_team import MatchTeam
+from match_sim.cl.event import Event
 
 def printc(x):
   '''Print and clear'''

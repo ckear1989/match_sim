@@ -4,9 +4,9 @@ import random
 import names
 import numpy as np
 
-from injury import Injury
-from suspension import Suspension
-from utils import random_0_100_normal
+from match_sim.cl.injury import Injury
+from match_sim.cl.suspension import Suspension
+from match_sim.cl.utils import random_0_100_normal
 
 class Score():
   '''Store data on score'''

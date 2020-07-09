@@ -1,7 +1,7 @@
 
 import datetime
 
-from default import suspensions
+from match_sim.cl.default import suspensions
 
 class Suspension():
   def __init__(self):

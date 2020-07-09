@@ -3,10 +3,10 @@
 import random
 import time
 
-from utils import is_int
-from team import Team
-from formation import Formation
-from tactics import Tactics
+from match_sim.cl.utils import is_int
+from match_sim.cl.team import Team
+from match_sim.cl.formation import Formation
+from match_sim.cl.tactics import Tactics
 
 class MatchTeam(Team):
   '''Contain all data on team and players'''

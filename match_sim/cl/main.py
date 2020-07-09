@@ -4,8 +4,8 @@ import os
 import pickle
 import pyfiglet
 
-from cl.game import Game
-import match_sim.default as default
+from match_sim.cl.game import Game
+import match_sim.cl.default as default
 
 def home_screen():
   '''Welcome user.  Offer option to begin or resume game'''

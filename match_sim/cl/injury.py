@@ -3,7 +3,7 @@ import datetime
 import random
 import numpy as np
 
-from default import body_parts
+from match_sim.cl.default import body_parts
 
 class Injury():
   def __init__(self):

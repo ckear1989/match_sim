@@ -3,7 +3,7 @@ import time
 
 import wx
 
-from match_sim.match_team import MatchTeam
+from match_sim.cl.match_team import MatchTeam
 from match_sim.gui.match import MatchEvent, FORCED_SUB_EVENT, PAUSE_EVENT
 from match_sim.gui.graphics import TeamColours
 

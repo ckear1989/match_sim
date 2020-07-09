@@ -4,13 +4,13 @@ import json
 import pathlib
 path = pathlib.Path(__file__).parent.absolute()
 
-from utils import is_int
+from match_sim.cl.utils import is_int
 
 class Settings():
   '''Create object to store game settings populated with defaults'''
   def __init__(self):
-    self.defaults_file = '{0}/data/settings/defaults.json'.format(path)
-    self.defaults_file_test = '{0}/data/settings/defaults_test.json'.format(path)
+    self.defaults_file = '{0}/../data/settings/defaults.json'.format(path)
+    self.defaults_file_test = '{0}/../data/settings/defaults_test.json'.format(path)
     with open(self.defaults_file, 'r') as f:
       self.defaults = json.load(f)
     self.autosave = self.defaults['autosave']

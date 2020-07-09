@@ -3,7 +3,7 @@ import random
 
 import wx
 
-import match_sim.default as default
+import match_sim.cl.default as default
 from match_sim.gui.template import TemplateFrame, TemplatePanel, TemplateButton
 
 class Colour():

@@ -1,5 +1,5 @@
 
-from default import formations, formations_ascii
+from match_sim.cl.default import formations, formations_ascii
 
 class Formation():
   def __init__(self):

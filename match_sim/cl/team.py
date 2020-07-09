@@ -5,8 +5,8 @@ import numpy as np
 from prettytable import PrettyTable
 import names
 
-from player import Player, Score
-from training import Training, train
+from match_sim.cl.player import Player, Score
+from match_sim.cl.training import Training, train
 
 class TeamIterator:
   '''https://thispointer.com/python-how-to-make-a-class-

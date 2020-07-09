@@ -1,7 +1,7 @@
 
 import wx
 
-from match_sim.event import Event as ClEvent
+from match_sim.cl.event import Event as ClEvent
 
 MATCH_EVENT = wx.NewEventType()
 MATCH_EVENT_CUSTOM = wx.PyEventBinder(MATCH_EVENT, 1)

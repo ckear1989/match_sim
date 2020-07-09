@@ -11,13 +11,13 @@ import pyfiglet
 random.seed(12345)
 poss_teams = [barnum.create_city_state_zip()[1] for i in range(16)][:8]
 
-save_dir = '{0}/data/games/'.format(path)
+save_dir = '{0}/../data/games/'.format(path)
 def check_save_dir():
   if os.path.isdir(save_dir) is False:
      os.mkdir(save_dir)
 
 welcome_message = pyfiglet.figlet_format('Match\nSimulator\n2020\n')
-image_dir = '{0}/data/image/'.format(path)
+image_dir = '{0}/../data/image/'.format(path)
 gui_background = '{0}{1}'.format(image_dir, 'puma-40-20-artificial-grass-2.jpg')
 
 dow = {
@@ -37,7 +37,7 @@ dow = {
   'su': 6
 }
 
-with open('{0}/data/defaults/training_focus.txt'.format(path), 'r') as f:
+with open('{0}/../data/defaults/training_focus.txt'.format(path), 'r') as f:
   focus = [x.strip() for x in f.readlines()]
 focus += [f[:2] for f in focus]
 
@@ -49,7 +49,7 @@ formations = [
   '2-2-1-4-5'
 ]
 
-formations_ascii = {x:open('{0}/data/formations/{1}.txt'.format(path, x)).read() for x in formations}
+formations_ascii = {x:open('{0}/../data/formations/{1}.txt'.format(path, x)).read() for x in formations}
 
 tactics = [
   'neutral',

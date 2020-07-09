@@ -3,12 +3,12 @@ import time
 
 import wx
 
-import match_sim.default as default
+import match_sim.cl.default as default
+from match_sim.cl.match import Match as ClMatch, time_until_next_event, stopclock, printc
 from match_sim.gui.event import Event, MATCH_EVENT_CUSTOM, REFRESH_EVENT_CUSTOM, MatchEvent
 from match_sim.gui.graphics import PaintPanel, Colour
 from match_sim.gui.manage import ManagePanel, MatchManagePanel
 from match_sim.gui.template import TemplateButton
-from match_sim.cl.match import Match as ClMatch, time_until_next_event, stopclock, printc
 
 STOPCLOCK_EVENT = wx.NewEventType()
 STOPCLOCK_EVENT_CUSTOM = wx.PyEventBinder(STOPCLOCK_EVENT, 1)

@@ -9,8 +9,8 @@ from io import StringIO
 from prettytable import PrettyTable
 from bracket import bracket
 
-from team import Team
-from utils import print_side_by_side, get_sundays
+from match_sim.cl.team import Team
+from match_sim.cl.utils import print_side_by_side, get_sundays
 
 class Capturing(list):
   '''https://stackoverflow.com/questions/16571150/

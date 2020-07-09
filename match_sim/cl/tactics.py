@@ -1,5 +1,5 @@
 
-from default import tactics, tactics_s
+from match_sim.cl.default import tactics, tactics_s
 
 class Tactics():
   def __init__(self):

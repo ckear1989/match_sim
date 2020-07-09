@@ -7,8 +7,8 @@ import wx
 import wx.grid
 
 from match_sim.cl.game import Game as ClGame
-from match_sim.training import Training
-import match_sim.default as default
+import match_sim.cl.default as default
+from match_sim.cl.training import Training
 from match_sim.gui.template import TemplatePanel, TemplateButton
 from match_sim.gui.inbox import InboxPanel, Inbox
 from match_sim.gui.manage import ManagePanel

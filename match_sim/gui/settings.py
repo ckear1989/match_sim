@@ -2,8 +2,8 @@
 
 import wx
 
+from match_sim.cl.settings import Settings as ClSettings
 from match_sim.gui.template import TemplatePanel
-from match_sim.settings import Settings as ClSettings
 
 class SettingsPanel(TemplatePanel):
   def __init__(self, parent):

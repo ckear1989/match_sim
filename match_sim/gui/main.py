@@ -7,7 +7,7 @@ path = pathlib.Path(__file__).parent.absolute()
 
 import wx
 
-import match_sim.default as default
+import match_sim.cl.default as default
 from match_sim.gui.template import TemplatePanel, TemplateButton
 from match_sim.gui.game import GamePanel, Game
 
