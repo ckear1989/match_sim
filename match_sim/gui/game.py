@@ -2,6 +2,7 @@
 import datetime
 import random
 
+import dill as pickle
 import names
 import wx
 import wx.grid
@@ -86,7 +87,6 @@ class GamePanel(TemplatePanel):
     self.game.save()
 
   def on_continue(self, event):
-    # self.game.pcontinue()
     self.game.current_date += datetime.timedelta(1)
     self.game.process_teams_daily()
     self.process_fixtures_daily()
@@ -144,7 +144,7 @@ class GamePanel(TemplatePanel):
     if silent is True:
       for ts in match.play(0):
         pass
-      self.game.process_match_result(match, match_t[2])
+      self.game.process_match_result(match, match.comp_name)
       self.game.update_next_fixture()
     else:
       self.GetParent().on_match(MatchPanel, match)
@@ -178,3 +178,11 @@ class Game(ClGame):
     teams3 = poss_teams[(teams_per_div*2):(teams_per_div*3)]
     teams4 = poss_teams[(teams_per_div*3):]
     self.init_competitions(teams1, teams2, teams3, teams4)
+
+  def save(self):
+    with open(self.save_file, 'wb') as f:
+      pickle.dump(self, f)
+      # debug failed save
+      # for key, value in self.__dict__.items():
+      #   print(key)
+      #   pickle.dump(value, f)

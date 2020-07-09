@@ -182,6 +182,8 @@ class MatchPanel(PaintPanel):
   def on_exit_match(self, event):
     print('exit')
     if self.match.status in ['finished']:
+      self.match.team_a.update_event_handler()
+      self.match.team_b.update_event_handler()
       self.GetParent().exit_match(event)
 
 class Match(ClMatch):
@@ -197,7 +199,7 @@ class Match(ClMatch):
   def set_status(self, status):
     self.status = status
 
-  def update_event_handler(self, event_handler):
+  def update_event_handler(self, event_handler=None):
     self.event_handler = event_handler
 
   def half_time(self):
@@ -205,8 +207,7 @@ class Match(ClMatch):
     event = Event(self, self.event_handler)
     event.half_time()
     self.at = 0
-    self.time = 35 * 60
-    self.first_half_length = 35 * 60
+    self.time = self.first_half_length
     self.stopclock_time = stopclock(self.time)
     self.print_stopclock()
     wx.Yield()
