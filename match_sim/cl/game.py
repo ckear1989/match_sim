@@ -49,6 +49,8 @@ class Game(Season):
       process_league_match_result(match)
     elif compo.form == 'cup':
       self.process_cup_match_result(match, compo)
+    self.teams[match.team_a.name] = copy.deepcopy(match.team_a)
+    self.teams[match.team_b.name] = copy.deepcopy(match.team_b)
     self.teams[match.team_a.name].update_postmatch_stats(compo)
     self.teams[match.team_a.name].reset_match_stats()
     self.teams[match.team_b.name].update_postmatch_stats(compo)

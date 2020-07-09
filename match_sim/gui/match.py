@@ -160,6 +160,8 @@ class MatchPanel(PaintPanel):
       for ts in self.match.play():
         pass
     if self.match.status in ['finished']:
+      self.match.team_a.update_event_handler()
+      self.match.team_b.update_event_handler()
       self.game.process_match_result(self.match, self.match.comp_name)
       self.game.update_next_fixture()
       self.on_exit_match(event)
@@ -182,8 +184,6 @@ class MatchPanel(PaintPanel):
   def on_exit_match(self, event):
     print('exit')
     if self.match.status in ['finished']:
-      self.match.team_a.update_event_handler()
-      self.match.team_b.update_event_handler()
       self.GetParent().exit_match(event)
 
 class Match(ClMatch):
