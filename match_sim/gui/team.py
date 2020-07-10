@@ -43,6 +43,7 @@ class Team(MatchTeam):
     if self.control is True:
       event = MatchEvent(PAUSE_EVENT, wx.ID_ANY)
       event.SetMyVal([self, player])
+      event.SetId(999)
       self.event_handler.ProcessEvent(event)
 
   def check_sub_made(self, player):

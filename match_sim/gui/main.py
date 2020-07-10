@@ -139,8 +139,7 @@ class MSFrame(wx.Frame):
     self.Layout()
 
   def on_match(self, apanel, match):
-    self.match = match
-    self.match_panel = apanel(self)
+    self.match_panel = apanel(self, match)
     self.sizer.Add(self.match_panel, 1, wx.EXPAND)
     self.match_panel.Show()
     self.game_panel.Hide()

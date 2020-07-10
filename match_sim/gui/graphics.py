@@ -52,11 +52,6 @@ class TeamColours():
 
 class PaintPanel(TemplatePanel):
   def __init__(self, parent, x0=None, y0=None):
-    super().__init__(parent)
-    self.txt_output.Destroy()
-    self.test_button = TemplateButton(self, 'test')
-    self.test_button.Bind(wx.EVT_BUTTON, self.test_draw)
-    self.hbox3.Add(self.test_button, proportion=0)
     self.x, self.y = (85 * 4, 140 * 4)
     self.n = 5
     self.x0 = x0
@@ -65,6 +60,11 @@ class PaintPanel(TemplatePanel):
     self.y0 = y0
     if self.y0 is None:
       self.y0 = 100
+    super().__init__(parent)
+    self.txt_output.Destroy()
+    self.test_button = TemplateButton(self, 'test')
+    self.test_button.Bind(wx.EVT_BUTTON, self.test_draw)
+    self.hbox3.Add(self.test_button, proportion=0)
     # self.InitUI()
 
   def InitUI(self): 
@@ -119,7 +119,7 @@ class PaintPanel(TemplatePanel):
     dc.DrawCircle(x0+x, y0+y, 14)
     font = wx.Font(8, wx.ROMAN, wx.BOLD, wx.NORMAL) 
     dc.SetFont(font)
-    dc.DrawText(str(player.match.lineup), x0+x-3, y0+y-3)
+    dc.DrawText(str(player.match.lineup), x0+x-3, y0+y-5)
     dc.DrawText(str(player), x0+x-30, y0+y+18)
 
   def draw_player_score(self, player, dc=None, x=200, y=200,
@@ -144,7 +144,6 @@ class PaintPanel(TemplatePanel):
     if self.IsShownOnScreen():
       if not dc:
         dc = wx.ClientDC(self)
-    self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
     font = wx.Font(18, wx.ROMAN, wx.ITALIC, wx.NORMAL) 
     dc.SetFont(font) 
     if title is not None:

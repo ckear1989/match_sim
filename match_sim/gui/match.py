@@ -18,12 +18,12 @@ FORCED_SUB_EVENT = wx.NewEventType()
 FORCED_SUB_EVENT_CUSTOM = wx.PyEventBinder(FORCED_SUB_EVENT, 1)
 
 class MatchPanel(PaintPanel):
-  def __init__(self, parent, x0=600, y0=None):
+  def __init__(self, parent, match, x0=600, y0=None):
+    self.match = match
     super().__init__(parent, x0, y0)
     colour = Colour()
     self.exit_button.Destroy()
     font = wx.Font(16, wx.ROMAN, wx.ITALIC, wx.NORMAL) 
-    self.match = self.GetParent().match
     self.game = self.GetParent().game
     self.test_button.Destroy()
     self.play_button = TemplateButton(self, 'Play')
@@ -41,8 +41,6 @@ class MatchPanel(PaintPanel):
     self.stopclock.SetBackgroundColour(colour.BL)
     self.stopclock.SetForegroundColour(colour.WH)
     self.stopclock.SetFont(font)
-    self.scoreboard_h = wx.StaticText(self, size=wx.Size(338, 27), style=wx.ST_NO_AUTORESIZE|wx.STAY_ON_TOP)
-    self.scoreboard_a = wx.StaticText(self, size=wx.Size(338, 27), style=wx.ST_NO_AUTORESIZE)
     self.scoreboard_str()
     self.scoreboard_h.SetFont(font)
     self.scoreboard_a.SetFont(font)
@@ -65,16 +63,24 @@ class MatchPanel(PaintPanel):
     self.Bind(FORCED_SUB_EVENT_CUSTOM, self.on_forced_sub)
     self.Bind(REFRESH_EVENT_CUSTOM, self.refresh)
 
+  def refresh(self, event):
+    self.UpdateDrawing()
+
   def scoreboard_str(self):
     ps = str(self.match)
     ps = ps.split(')')
-    self.scoreboard_h.SetLabel(ps[0] + ')')
-    self.scoreboard_a.SetLabel(ps[1].strip() + ')')
-    self.scoreboard_h.Show()
-    self.scoreboard_a.Show()
+    try:
+      self.scoreboard_h.SetLabel(ps[0] + ')')
+      self.scoreboard_a.SetLabel(ps[1].strip() + ')')
+      self.scoreboard_h.Show()
+      self.scoreboard_a.Show()
+    except AttributeError:
+      self.scoreboard_h = wx.StaticText(self, size=wx.Size(338, 27), style=wx.ST_NO_AUTORESIZE)
+      self.scoreboard_a = wx.StaticText(self, size=wx.Size(338, 27), style=wx.ST_NO_AUTORESIZE)
+      self.scoreboard_str()
 
-  def draw_lineup(self):
-    dc = wx.ClientDC(self)
+  def draw_lineup(self, dc):
+    # dc = wx.ClientDC(self)
     self.draw_pitch(dc, x0=500, y0=50, header_border=True)
     for player in self.match.team_a.playing + self.match.team_a.subs:
       if player.match.lineup in self.match.team_a.formation.goalkeeper_lineups:
@@ -100,8 +106,11 @@ class MatchPanel(PaintPanel):
         colour_p=colour_p, colour_s=colour_s)
     self.draw_manager(self.match.team_b.manager, dc, x=380, y=-8, x0=940, y0=50)
 
-  def refresh(self, event):
-    self.draw_lineup()
+  def Draw(self, dc):
+    dc.Clear() # make sure you clear the bitmap!
+    bmp = wx.Bitmap(default.gui_background)
+    dc.DrawBitmap(bmp, 0, 0)
+    self.draw_lineup(dc)
     self.scoreboard_str()
     wx.Yield()
 
@@ -113,17 +122,15 @@ class MatchPanel(PaintPanel):
       self.GetParent().on_match_manage(ManagePanel)
     else:
       self.match.set_status('paused')
-      if event.IsCommandEvent() is False:
-        if event.GetMyVal() is not None:
-          self.txt_output.SetLabel(
-          '{0} have lost {1} from their lineup.'.format(event.GetMyVal()[0].name, event.GetMyVal()[1]))
+      if event.GetId() == 999:
+        self.txt_output.SetLabel(
+        '{0} have lost {1} from their lineup.'.format(event.GetMyVal()[0].name, event.GetMyVal()[1]))
       time.sleep(0.5)
       wx.Yield()
       self.GetParent().on_match_manage(MatchManagePanel)
-      if event.IsCommandEvent() is False:
-        if event.GetMyVal() is not None:
-          self.GetParent().match_manage_panel.txt_output.SetLabel(
-            '{0} have lost {1} from their lineup.'.format(event.GetMyVal()[0].name, event.GetMyVal()[1]))
+      if event.GetId() == 999:
+        self.GetParent().match_manage_panel.txt_output.SetLabel(
+          '{0} have lost {1} from their lineup.'.format(event.GetMyVal()[0].name, event.GetMyVal()[1]))
     while self.match.status in ['pre-match', 'paused']:
       wx.Yield()
 
@@ -170,6 +177,7 @@ class MatchPanel(PaintPanel):
   def on_stopclock(self, event):
     self.stopclock.SetLabel(event.GetMyVal())
     if self.match.time % 3 == 0:
+      self.UpdateDrawing()
       wx.Yield()
 
   def on_match_event(self, event):
