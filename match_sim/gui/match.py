@@ -59,7 +59,6 @@ class MatchPanel(PaintPanel):
     self.txt_output.SetBackgroundColour(colour.LIME)
     self.txt_output.SetFont(font)
     self.vbox1.Add(self.txt_output)
-    self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
     self.Bind(MATCH_EVENT_CUSTOM, self.on_match_event)
     self.Bind(STOPCLOCK_EVENT_CUSTOM, self.on_stopclock)
     self.Bind(PAUSE_EVENT_CUSTOM, self.on_pause)

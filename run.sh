@@ -25,6 +25,7 @@
 # pip3 install eyed3
 
 python3.6 -m match_sim.gui.main
+# python3.6 -m match_sim.gui.template
 # sudo python3.6 -m match_sim.cl.game
 # sudo python3.6 -m match_sim.gui.manage
 # python3.6 -m match_sim.gui.graphics
