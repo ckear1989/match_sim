@@ -23,6 +23,7 @@ class Formation():
     if x in formations:
       self.nlist = x
       self.get_pos()
+      # TODO mid match change sub / send off
       self.get_pos_lineups()
       self.get_ascii()
       self.update_ascii(team)

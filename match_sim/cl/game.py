@@ -57,6 +57,8 @@ class Game(Season):
     self.teams[match.team_b.name].reset_match_stats()
     self.teams[match.team_a.name].get_player_report(self.inbox, self.current_date)
     self.teams[match.team_b.name].get_player_report(self.inbox, self.current_date)
+    self.teams[match.team_a.name].auto_lineup()
+    self.teams[match.team_b.name].auto_lineup()
     self.update_league()
     self.update_cup()
     result = Result(match)

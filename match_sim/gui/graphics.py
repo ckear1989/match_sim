@@ -113,16 +113,27 @@ class PaintPanel(TemplatePanel):
     if self.IsShownOnScreen():
       if not dc:
         dc = wx.ClientDC(self)
+    dc.SetTextForeground(colour.BL)
     dc.SetBrush(wx.Brush(colour_s))
     dc.DrawCircle(x0+x, y0+y, 20)
     dc.SetBrush(wx.Brush(colour_p))
     dc.DrawCircle(x0+x, y0+y, 14)
+    if player.season.injury.status is not None:
+      dc.SetTextForeground(colour.DR)
+      font = wx.Font(12, wx.ROMAN, wx.BOLD, wx.NORMAL) 
+      dc.SetFont(font)
+      dc.DrawRotatedText('injured', x0+x-20, y0+y-20, -45)
+    if player.season.suspension.status is not None:
+      dc.SetTextForeground(colour.DR)
+      font = wx.Font(12, wx.ROMAN, wx.BOLD, wx.NORMAL) 
+      dc.SetFont(font)
+      dc.DrawRotatedText('suspended', x0+x-20, y0+y-20, -45)
     font = wx.Font(8, wx.ROMAN, wx.BOLD, wx.NORMAL) 
     dc.SetFont(font)
     dc.DrawText(str(player.match.lineup), x0+x-3, y0+y-5)
     dc.DrawText(str(player), x0+x-30, y0+y+18)
 
-  def draw_player_score(self, player, dc=None, x=200, y=200,
+  def draw_player_match(self, player, dc=None, x=200, y=200,
     x0=None, y0=None, colour_p=None, colour_s=None):
     if x0 is None:
       x0 = self.x0

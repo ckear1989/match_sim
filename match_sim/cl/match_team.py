@@ -160,6 +160,7 @@ class MatchTeam(Team):
     self.update_playing_positions()
 
   def send_off_player(self, player):
+    self.formation.playing_lineups.remove(player.match.lineup)
     self.playing.remove(player)
 
   def auto_sub(self, player, preferred_position=None):

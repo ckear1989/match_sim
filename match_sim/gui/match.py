@@ -89,7 +89,7 @@ class MatchPanel(PaintPanel):
         colour_p = self.match.team_a.colour.home_p
         colour_s = self.match.team_a.colour.home_s
       x, y = self.match.team_a.formation.get_coords(player.match.lineup)
-      self.draw_player_score(player, dc, x=x, y=y, x0=500, y0=50,
+      self.draw_player_match(player, dc, x=x, y=y, x0=500, y0=50,
         colour_p=colour_p, colour_s=colour_s)
     self.draw_manager(self.match.team_a.manager, dc, x=380, y=-8, x0=500, y0=50)
     self.draw_pitch(dc, x0=940, y0=50, header_border=True)
@@ -101,7 +101,7 @@ class MatchPanel(PaintPanel):
         colour_p = self.match.team_b.colour.away_p
         colour_s = self.match.team_b.colour.away_s
       x, y = self.match.team_b.formation.get_coords(player.match.lineup)
-      self.draw_player_score(player, dc, x=x, y=y, x0=940, y0=50,
+      self.draw_player_match(player, dc, x=x, y=y, x0=940, y0=50,
         colour_p=colour_p, colour_s=colour_s)
     self.draw_manager(self.match.team_b.manager, dc, x=380, y=-8, x0=940, y0=50)
 

@@ -70,14 +70,15 @@ class Event():
       posession_player = self.attackers.choose_player(0.01, 0.04, 0.9)
     else:
       posession_player = self.defenders.choose_player(0.01, 0.04, 0.9)
-    self.pl.append('{0} The referee throws the ball in.{1} wins posession for {2}'.format(
-      self.stopclock_time, posession_player, posession_player.team))
+    self.pl.append('{0} '.format(self.stopclock_time))
+    self.pl.append('The referee throws the ball in.{0} wins posession for {1}'.format(
+      posession_player, posession_player.team))
 
   def added_time(self):
     '''Determine how many minutes and seconds to be played'''
     at = random.choice([1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 6, 7])
-    self.pl.append(self.stopclock_time)
-    self.pl.append(' {0} minutes added time indicated by the linesman.'.format(at))
+    self.pl.append('{0} '.format(self.stopclock_time))
+    self.pl.append('{0} minutes added time indicated by the linesman.'.format(at))
     at = float(at)
     at += np.random.normal(0.5, 0.2)
     at = at * 60

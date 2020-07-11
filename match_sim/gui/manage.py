@@ -28,14 +28,15 @@ class PlayerTarget(MyTarget):
 
   def OnDropText(self, x, y, data):
     player_n = int(data.split(' ')[0])
-    for player in self.team:
-      if player.match.lineup == self.pos:
-        player.set_lineup(player_n)
-    text_n = ' '.join(data.split(' ')[1:])
-    for player in self.team:
-      if player.match.lineup == player_n:
-        if str(player) == text_n:
-          player.set_lineup(self.pos)
+    if player_n > -1:
+      for player in self.team:
+        if player.match.lineup == self.pos:
+          player.set_lineup(player_n)
+      text_n = ' '.join(data.split(' ')[1:])
+      for player in self.team:
+        if player.match.lineup == player_n:
+          if str(player) == text_n:
+            player.set_lineup(self.pos)
     return True
 
 class MatchPlayerTarget(PlayerTarget):
