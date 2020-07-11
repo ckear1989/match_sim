@@ -40,8 +40,12 @@ class PlayerTarget(MyTarget):
 
 class MatchPlayerTarget(PlayerTarget):
   def OnDropText(self, x, y, data):
+    # debug
     new_lineup = int(data.split(' ')[0])
     new_name = ' '.join(data.split(' ')[1:])
+    # debug
+    # print('target', self.pos)
+    # print('dropped', new_lineup)
     if (new_lineup in self.team.formation.playing_lineups) and (self.pos in self.team.formation.playing_lineups):
       return False
     if (new_lineup not in self.team.formation.playing_lineups) and (self.pos not in self.team.formation.playing_lineups):
@@ -89,7 +93,7 @@ class ManagePanel(PaintPanel):
     super().__init__(parent, x0, y0)
     colour = Colour()
     font = wx.Font(18, wx.DECORATIVE, wx.BOLD, wx.NORMAL)
-    label_size = wx.Size(200, 50)
+    label_size = wx.Size(200, 28)
     self.test_button.Destroy()
     self.training_button = TemplateButton(self, 'Training')
     self.training_button.Bind(wx.EVT_BUTTON, self.on_training)
@@ -206,11 +210,14 @@ class ManagePanel(PaintPanel):
 class MatchManagePanel(ManagePanel):
   def __init__(self, parent, x0=None, y0=None):
     super().__init__(parent, x0, y0)
+    colour = Colour()
+    font = wx.Font(12, wx.DECORATIVE, wx.BOLD, wx.NORMAL)
     self.training_button.Destroy()
     self.vbox3.Clear(True)
-    # self.hbox1.Remove(self.vbox3)
-    self.txt_output = wx.StaticText(self)
-    self.vbox3.Add(self.txt_output)
+    self.txt_output = wx.StaticText(self, size=wx.Size(200, (28*4)), style=wx.ST_NO_AUTORESIZE)
+    self.txt_output.SetFont(font)
+    self.txt_output.SetBackgroundColour(colour.LIME)
+    self.vbox1.Add(self.txt_output)
     self.exit_button.SetLabel('Continue')
     for i in range(1, 16):
       self.targets[i] = MatchPlayerTarget(self.lineups[i], i, self.team)

@@ -53,7 +53,7 @@ class MatchPanel(PaintPanel):
     self.hbox5.Add(self.scoreboard_h)
     self.hbox5.Add((102, 28))
     self.hbox5.Add(self.scoreboard_a)
-    self.txt_output = wx.StaticText(self, size=wx.Size(420, 84), style=wx.ST_NO_AUTORESIZE)
+    self.txt_output = wx.StaticText(self, size=wx.Size(420, (28*4)), style=wx.ST_NO_AUTORESIZE)
     self.txt_output.SetBackgroundColour(colour.LIME)
     self.txt_output.SetFont(font)
     self.vbox1.Add(self.txt_output)
@@ -177,13 +177,18 @@ class MatchPanel(PaintPanel):
   def on_stopclock(self, event):
     self.stopclock.SetLabel(event.GetMyVal())
     if self.match.time % 3 == 0:
-      self.UpdateDrawing()
+      # self.UpdateDrawing() # why need to update drawing to change txt output and stopclock?
+      # self.Refresh() # why need to update drawing to change txt output and stopclock?
+      self.Update() # why need to update drawing to change txt output and stopclock?
       wx.Yield()
 
   def on_match_event(self, event):
     ps = event.GetMyVal()
     if len(ps) > 6:
       self.txt_output.SetLabel(ps)
+      self.UpdateDrawing() # why need to update drawing to change txt output and stopclock?
+      # self.Refresh() # why need to update drawing to change txt output and stopclock?
+      self.Update() # why need to update drawing to change txt output and stopclock?
       wx.Yield()
       time.sleep(0.5)
     self.txt_output.SetLabel('')
