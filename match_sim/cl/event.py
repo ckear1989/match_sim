@@ -196,7 +196,7 @@ class Event():
       self.shooting_player_point_attempt(shooting_player, assister)
     else:
       self.pl.append('It\'s inside the box.It will be a penalty.')
-      self.pl.append('The penalty is to be taken by {0}.'.format(self.shooting_player))
+      self.pl.append('The penalty is to be taken by {0}.'.format(shooting_player))
       self.shooting_player_goal_attempt(shooting_player, assister)
 
   def foul(self, attacker):
