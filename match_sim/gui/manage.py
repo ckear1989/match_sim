@@ -89,7 +89,8 @@ class ReservesTarget(PlayerTarget):
     return True
 
 class ManagePanel(PaintPanel):
-  def __init__(self, parent, x0=None, y0=None):
+  def __init__(self, parent, team, x0=None, y0=None):
+    self.team = team
     super().__init__(parent, x0, y0)
     colour = Colour()
     font = wx.Font(18, wx.DECORATIVE, wx.BOLD, wx.NORMAL)
@@ -98,7 +99,6 @@ class ManagePanel(PaintPanel):
     self.training_button = TemplateButton(self, 'Training')
     self.training_button.Bind(wx.EVT_BUTTON, self.on_training)
     self.hbox3.Add(self.training_button)
-    self.team = self.GetParent().game.teams[self.GetParent().game.team]
     # self.lineups = {}
     self.vbox1 = wx.BoxSizer(wx.VERTICAL)
     label = wx.StaticText(self, label='Starting Lineup:', size=label_size)
@@ -192,13 +192,18 @@ class ManagePanel(PaintPanel):
       else:
         self.reserves.InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
 
+  def Draw(self, dc):
+    dc.Clear() # make sure you clear the bitmap!
+    bmp = wx.Bitmap(default.gui_background)
+    dc.DrawBitmap(bmp, 0, 0)
+    self.draw_lineup(dc)
+
   def refresh(self):
     self.update_lists()
     self.team.update_playing_positions()
-    self.draw_lineup()
+    self.UpdateDrawing()
 
-  def draw_lineup(self):
-    dc = wx.ClientDC(self)
+  def draw_lineup(self, dc):
     self.draw_pitch(dc, self.team.name)
     for i in range(1, 22):
       players = [p for p in self.team if p.match.lineup == i]
@@ -208,8 +213,8 @@ class ManagePanel(PaintPanel):
         self.draw_player(player, dc, x=x, y=y, colour_p=self.team.colour.home_p, colour_s=self.team.colour.home_s) 
 
 class MatchManagePanel(ManagePanel):
-  def __init__(self, parent, x0=None, y0=None):
-    super().__init__(parent, x0, y0)
+  def __init__(self, parent, team, x0=None, y0=None):
+    super().__init__(parent, team, x0, y0)
     colour = Colour()
     font = wx.Font(12, wx.DECORATIVE, wx.BOLD, wx.NORMAL)
     self.training_button.Destroy()

@@ -80,7 +80,6 @@ class MatchPanel(PaintPanel):
       self.scoreboard_str()
 
   def draw_lineup(self, dc):
-    # dc = wx.ClientDC(self)
     self.draw_pitch(dc, x0=500, y0=50, header_border=True)
     for player in self.match.team_a.playing + self.match.team_a.subs:
       if player.match.lineup in self.match.team_a.formation.goalkeeper_lineups:
@@ -177,18 +176,14 @@ class MatchPanel(PaintPanel):
   def on_stopclock(self, event):
     self.stopclock.SetLabel(event.GetMyVal())
     if self.match.time % 3 == 0:
-      # self.UpdateDrawing() # why need to update drawing to change txt output and stopclock?
-      # self.Refresh() # why need to update drawing to change txt output and stopclock?
-      self.Update() # why need to update drawing to change txt output and stopclock?
+      self.Update()
       wx.Yield()
 
   def on_match_event(self, event):
     ps = event.GetMyVal()
     if len(ps) > 6:
       self.txt_output.SetLabel(ps)
-      self.UpdateDrawing() # why need to update drawing to change txt output and stopclock?
-      # self.Refresh() # why need to update drawing to change txt output and stopclock?
-      self.Update() # why need to update drawing to change txt output and stopclock?
+      self.Update()
       wx.Yield()
       time.sleep(0.5)
     self.txt_output.SetLabel('')
