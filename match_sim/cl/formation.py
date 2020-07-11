@@ -52,6 +52,29 @@ class Formation():
     self.playing_lineups = self.goalkeeper_lineups + self.full_back_lineups + \
       self.half_back_lineups + self.midfielder_lineups + self.half_forward_lineups + self.full_forward_lineups
 
+  def which_lineups(self, x):
+    if x in self.goalkeeper_lineups:
+      return self.goalkeeper_lineups
+    elif x in self.full_back_lineups:
+      return self.full_back_lineups
+    elif x in self.half_back_lineups:
+      return self.half_back_lineups
+    elif x in self.midfielder_lineups:
+      return self.midfielder_lineups
+    elif x in self.half_forward_lineups:
+      return self.half_forward_lineups
+    elif x in self.full_forward_lineups:
+      return self.full_forward_lineups
+
+  def swap_playing_positions(self, x, y):
+    x_lineups = self.which_lineups(x)
+    y_lineups = self.which_lineups(y)
+    # might be the same so use this verbose method
+    x_index = x_lineups.index(x)
+    y_index = y_lineups.index(y)
+    x_lineups[x_index] = y
+    y_lineups[y_index] = x
+
   def ammend_pos_lineups(self, off, on):
     if off in self.goalkeeper_lineups:
       self.goalkeeper_lineups.remove(off)

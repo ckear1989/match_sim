@@ -21,40 +21,51 @@ class MyTarget(wx.TextDropTarget):
   return True
 
 class PlayerTarget(MyTarget):
-  def __init__(self, obj, pos, team):
+  def __init__(self, obj, lineup, team):
     super().__init__(self)
-    self.pos = pos
+    self.lineup = lineup
     self.team = team
 
   def OnDropText(self, x, y, data):
     player_n = int(data.split(' ')[0])
     if player_n > -1:
       for player in self.team:
-        if player.match.lineup == self.pos:
+        if player.match.lineup == self.lineup:
           player.set_lineup(player_n)
       text_n = ' '.join(data.split(' ')[1:])
       for player in self.team:
         if player.match.lineup == player_n:
           if str(player) == text_n:
-            player.set_lineup(self.pos)
+            player.set_lineup(self.lineup)
     return True
 
-class MatchPlayerTarget(PlayerTarget):
+class MatchPlayerTarget(MyTarget):
+  def __init__(self, parent, lineup, team):
+      MyTarget.__init__(self, parent.lineups[lineup])
+      self.parent = parent
+      self.lineup = lineup
+      self.team = team
+
   def OnDropText(self, x, y, data):
     # debug
     new_lineup = int(data.split(' ')[0])
     new_name = ' '.join(data.split(' ')[1:])
     # debug
-    # print('target', self.pos)
+    # print('target', self.lineup)
     # print('dropped', new_lineup)
-    if (new_lineup in self.team.formation.playing_lineups) and (self.pos in self.team.formation.playing_lineups):
+    if (new_lineup in self.team.formation.playing_lineups) and \
+      (self.lineup in self.team.formation.playing_lineups):
+      # swap positions on pitch
+      self.team.formation.swap_playing_positions(new_lineup, self.lineup)
+      self.parent.lineups[new_lineup].lineup = self.lineup
+      self.lineup = new_lineup
+    elif (new_lineup not in self.team.formation.playing_lineups) and \
+      (self.lineup not in self.team.formation.playing_lineups):
       return False
-    if (new_lineup not in self.team.formation.playing_lineups) and (self.pos not in self.team.formation.playing_lineups):
-      return False
-    if self.pos in self.team.formation.playing_lineups:
+    elif self.lineup in self.team.formation.playing_lineups:
       # dragged player coming on
       for player in self.team.playing:
-        if player.match.lineup == self.pos:
+        if player.match.lineup == self.lineup:
           self.team.playing.remove(player)
           player.set_lineup(0)
       for player in self.team.subs:
@@ -62,11 +73,11 @@ class MatchPlayerTarget(PlayerTarget):
           if str(player) == new_name:
             self.team.playing.append(player)
             self.team.subs.remove(player)
-      self.team.formation.ammend_pos_lineups(self.pos, new_lineup)
+      self.team.formation.ammend_pos_lineups(self.lineup, new_lineup)
     else:
       # dragged player coming on
       for player in self.team.subs:
-        if player.match.lineup == self.pos:
+        if player.match.lineup == self.lineup:
           self.team.playing.append(player)
           self.team.subs.remove(player)
       for player in self.team.playing:
@@ -74,7 +85,7 @@ class MatchPlayerTarget(PlayerTarget):
           if str(player) == new_name:
             self.team.playing.remove(player)
             player.set_lineup(0)
-      self.team.formation.ammend_pos_lineups(new_lineup, self.pos)
+      self.team.formation.ammend_pos_lineups(new_lineup, self.lineup)
     self.team.update_playing_positions()
     return True
 
@@ -90,8 +101,9 @@ class ReservesTarget(PlayerTarget):
     return True
 
 class ManagePanel(PaintPanel):
-  def __init__(self, parent, team, x0=None, y0=None):
+  def __init__(self, parent, team, home=True, x0=None, y0=None):
     self.team = team
+    self.home = home
     super().__init__(parent, x0, y0)
     colour = Colour()
     font = wx.Font(18, wx.DECORATIVE, wx.BOLD, wx.NORMAL)
@@ -211,11 +223,21 @@ class ManagePanel(PaintPanel):
       if len(players) > 0:
         player = players[0]
         x, y = self.team.formation.get_coords(i)
-        self.draw_player(player, dc, x=x, y=y, colour_p=self.team.colour.home_p, colour_s=self.team.colour.home_s) 
+        if player.match.lineup in self.team.formation.goalkeeper_lineups:
+          colour_p = self.team.colour.goalkeeper_p
+          colour_s = self.team.colour.goalkeeper_s
+        else:
+          if self.home is True:
+            colour_p = self.team.colour.home_p
+            colour_s = self.team.colour.home_s
+          else:
+            colour_p = self.team.colour.away_p
+            colour_s = self.team.colour.away_s
+        self.draw_player(player, dc, x=x, y=y, colour_p=colour_p, colour_s=colour_s) 
 
 class MatchManagePanel(ManagePanel):
-  def __init__(self, parent, team, x0=None, y0=None):
-    super().__init__(parent, team, x0, y0)
+  def __init__(self, parent, team, home=True, x0=None, y0=None):
+    super().__init__(parent, team, home, x0, y0)
     colour = Colour()
     font = wx.Font(12, wx.DECORATIVE, wx.BOLD, wx.NORMAL)
     self.training_button.Destroy()
@@ -226,10 +248,10 @@ class MatchManagePanel(ManagePanel):
     self.vbox1.Add(self.txt_output)
     self.exit_button.SetLabel('Continue')
     for i in range(1, 16):
-      self.targets[i] = MatchPlayerTarget(self.lineups[i], i, self.team)
+      self.targets[i] = MatchPlayerTarget(self, i, self.team)
       self.lineups[i].SetDropTarget(self.targets[i])
     for i in range(16, 22):
-      self.targets[i] = MatchPlayerTarget(self.lineups[i], i, self.team)
+      self.targets[i] = MatchPlayerTarget(self, i, self.team)
       self.lineups[i].SetDropTarget(self.targets[i])
 
   def make_a_sub(self, event):

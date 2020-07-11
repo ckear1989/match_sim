@@ -25,6 +25,9 @@ class MatchPanel(PaintPanel):
     self.exit_button.Destroy()
     font = wx.Font(16, wx.ROMAN, wx.ITALIC, wx.NORMAL) 
     self.game = self.GetParent().game
+    self.home = True
+    if self.game.team == self.match.team_b.name:
+      self.home = False
     self.test_button.Destroy()
     self.play_button = TemplateButton(self, 'Play')
     self.play_button.Bind(wx.EVT_BUTTON, self.on_play)
@@ -118,7 +121,7 @@ class MatchPanel(PaintPanel):
     self.pause_button.Hide()
     if self.match.time == 0:
       self.match.set_status('pre-match')
-      self.GetParent().on_match_manage(ManagePanel)
+      self.GetParent().on_match_manage(ManagePanel, self.home)
     else:
       self.match.set_status('paused')
       if event.GetId() == 999:
@@ -126,7 +129,7 @@ class MatchPanel(PaintPanel):
         '{0} have lost {1} from their lineup.'.format(event.GetMyVal()[0].name, event.GetMyVal()[1]))
       time.sleep(0.5)
       wx.Yield()
-      self.GetParent().on_match_manage(MatchManagePanel)
+      self.GetParent().on_match_manage(MatchManagePanel, self.home)
       if event.GetId() == 999:
         self.GetParent().match_manage_panel.txt_output.SetLabel(
           '{0} have lost {1} from their lineup.'.format(event.GetMyVal()[0].name, event.GetMyVal()[1]))
@@ -144,7 +147,7 @@ class MatchPanel(PaintPanel):
       '{0} have lost a player through injury. {1}'.format(team.name, reason))
     wx.Yield()
     time.sleep(0.5)
-    self.GetParent().on_match_manage(MatchManagePanel)
+    self.GetParent().on_match_manage(MatchManagePanel, self.home)
     self.GetParent().match_manage_panel.txt_output.SetLabel(
       '{0} have lost a player through injury. {1}'.format(team.name, reason))
     while team.check_sub_made(player) is False:
