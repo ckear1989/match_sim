@@ -7,6 +7,7 @@ class Formation():
     self.get_pos()
     self.get_pos_lineups()
     self.get_ascii()
+    self.pos_lineup_changes = []
 
   def __repr__(self):
     ps = '{0}\n'.format(self.nlist)
@@ -17,22 +18,42 @@ class Formation():
   def __str__(self):
     return self.__repr__()
 
+  def post_match_reset(self, team):
+    self.pos_lineup_changes = []
+    self.change(team, self.nlist)
+
   def change(self, team, x=None):
     if x is None:
       x = input('choose formation:\n{0}\n'.format(', '.join(sorted(formations)))).strip()
     if x in formations:
       self.nlist = x
       self.get_pos()
-      # TODO mid match change sub / send off
       self.get_pos_lineups()
+      self.check_pos_lineup_changes()
       self.get_ascii()
       self.update_ascii(team)
+
+  def check_pos_lineup_changes(self):
+    for pair in self.pos_lineup_changes:
+      off = pair[0]
+      on = pair[1]
+      for lineup in [
+        self.goalkeeper_lineups,
+        self.full_back_lineups,
+        self.half_back_lineups,
+        self.midfielder_lineups,
+        self.half_forward_lineups,
+        self.full_forward_lineups
+      ]:
+        if off in lineup:
+          lineup[lineup.index(off)] = on
+    self.playing_lineups = self.goalkeeper_lineups + self.full_back_lineups + \
+      self.half_back_lineups + self.midfielder_lineups + self.half_forward_lineups + self.full_forward_lineups
 
   def get_pos(self):
     self.pos = [int(i) for i in self.nlist.split('-')]
 
   def get_pos_lineups(self):
-    # TODO formation changes during match after sub made
     self.goalkeeper_lineups = [1]
     i = 2
     j = self.pos[0] + i
@@ -67,6 +88,8 @@ class Formation():
       return self.full_forward_lineups
 
   def swap_playing_positions(self, x, y):
+    self.pos_lineup_changes.append([x, y])
+    self.pos_lineup_changes.append([y, x])
     x_lineups = self.which_lineups(x)
     y_lineups = self.which_lineups(y)
     # might be the same so use this verbose method
@@ -76,22 +99,23 @@ class Formation():
     y_lineups[y_index] = x
 
   def ammend_pos_lineups(self, off, on):
+    self.pos_lineup_changes.append([off, on])
     if off in self.goalkeeper_lineups:
       self.goalkeeper_lineups.remove(off)
       self.goalkeeper_lineups.append(on)
-    if off in self.full_back_lineups:
+    elif off in self.full_back_lineups:
       self.full_back_lineups.remove(off)
       self.full_back_lineups.append(on)
-    if off in self.half_back_lineups:
+    elif off in self.half_back_lineups:
       self.half_back_lineups.remove(off)
       self.half_back_lineups.append(on)
-    if off in self.midfielder_lineups:
+    elif off in self.midfielder_lineups:
       self.midfielder_lineups.remove(off)
       self.midfielder_lineups.append(on)
-    if off in self.half_forward_lineups:
+    elif off in self.half_forward_lineups:
       self.half_forward_lineups.remove(off)
       self.half_forward_lineups.append(on)
-    if off in self.full_forward_lineups:
+    elif off in self.full_forward_lineups:
       self.full_forward_lineups.remove(off)
       self.full_forward_lineups.append(on)
     self.playing_lineups = self.goalkeeper_lineups + self.full_back_lineups + \

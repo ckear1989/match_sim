@@ -135,6 +135,7 @@ class MatchTeam(Team):
 
   def auto_lineup(self):
     '''Set team lineup for non-controlled team.  Force changes only when necessary'''
+    self.formation.post_match_reset(self)
     self.eligible = [p for p in self if (p.season.injury.status is None) and (p.season.suspension.status is None)]
     for x in self:
       x.match.lineup = -1
@@ -161,6 +162,7 @@ class MatchTeam(Team):
 
   def send_off_player(self, player):
     self.formation.playing_lineups.remove(player.match.lineup)
+    player.update_lineup(-1)
     self.playing.remove(player)
 
   def auto_sub(self, player, preferred_position=None):
