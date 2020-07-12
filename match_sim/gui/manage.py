@@ -47,7 +47,6 @@ class MatchPlayerTarget(MyTarget):
       self.team = team
 
   def OnDropText(self, x, y, data):
-    # debug
     new_lineup = int(data.split(' ')[0])
     new_name = ' '.join(data.split(' ')[1:])
     # debug
@@ -57,8 +56,6 @@ class MatchPlayerTarget(MyTarget):
       (self.lineup in self.team.formation.playing_lineups):
       # swap positions on pitch
       self.team.formation.swap_playing_positions(new_lineup, self.lineup)
-      self.parent.lineups[new_lineup].lineup = self.lineup
-      self.lineup = new_lineup
     elif (new_lineup not in self.team.formation.playing_lineups) and \
       (self.lineup not in self.team.formation.playing_lineups):
       return False
@@ -66,26 +63,44 @@ class MatchPlayerTarget(MyTarget):
       # dragged player coming on
       for player in self.team.playing:
         if player.match.lineup == self.lineup:
-          self.team.playing.remove(player)
-          player.set_lineup(0)
+          player_off = player
       for player in self.team.subs:
         if player.match.lineup == new_lineup:
           if str(player) == new_name:
-            self.team.playing.append(player)
-            self.team.subs.remove(player)
-      self.team.formation.ammend_pos_lineups(self.lineup, new_lineup)
+            player_on = player
+            # confirm dialog
+            dlg = wx.MessageDialog(self.parent, '{0} coming off for {1}'.format(
+              player_off, player_on), style=wx.OK|wx.CANCEL)
+            resp = dlg.ShowModal()
+            if resp == wx.ID_OK:
+              self.team.playing.remove(player_off)
+              player_off.set_lineup(0)
+              self.team.playing.append(player_on)
+              self.team.subs.remove(player_on)
+              self.team.formation.ammend_pos_lineups(self.lineup, new_lineup)
+            else:
+              return False
     else:
-      # dragged player coming on
+      # dragged player coming off
       for player in self.team.subs:
         if player.match.lineup == self.lineup:
-          self.team.playing.append(player)
-          self.team.subs.remove(player)
+          player_on = player
       for player in self.team.playing:
         if player.match.lineup == new_lineup:
           if str(player) == new_name:
-            self.team.playing.remove(player)
-            player.set_lineup(0)
-      self.team.formation.ammend_pos_lineups(new_lineup, self.lineup)
+            player_off = player
+            # confirm dialog
+            dlg = wx.MessageDialog(self.parent, '{0} coming off for {1}'.format(
+              player_off, player_on), style=wx.OK|wx.CANCEL)
+            resp = dlg.ShowModal()
+            if resp == wx.ID_OK:
+              self.team.playing.remove(player_off)
+              player_off.set_lineup(0)
+              self.team.playing.append(player_on)
+              self.team.subs.remove(player_on)
+              self.team.formation.ammend_pos_lineups(new_lineup, self.lineup)
+            else:
+              return False
     self.team.update_playing_positions()
     return True
 
