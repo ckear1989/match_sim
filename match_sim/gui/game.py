@@ -116,9 +116,11 @@ class GamePanel(TemplatePanel):
       fixtures = self.game.fixtures[self.game.current_date]
       if len(fixtures) > 1:
         if self.game.team in fixtures[-1]:
+          self.progress = wx.ProgressDialog('Processing games', "please wait", parent=self, style=wx.PD_SMOOTH)
           for match_t in fixtures[:-1]:
             self.process_match_tuple(match_t)
           next_match_t = fixtures[-1]
+          self.progress.Destroy()
           self.process_match_tuple(next_match_t)
         else:
           for match_t in fixtures:

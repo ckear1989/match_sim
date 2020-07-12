@@ -73,14 +73,19 @@ class MSFrame(wx.Frame):
     team = dlg.team.GetString(dlg.team.GetSelection())
     if name:
       if team:
-        self.game = Game(team, name)
-        self.game_panel = GamePanel(self)
-        self.sizer.Add(self.game_panel, 1, wx.EXPAND)
-        self.game_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_game)
-        self.game_panel.Show()
-        self.main_panel.Hide()
-        self.Layout()
+        self.create_game(team, name)
     dlg.Destroy()
+
+  def create_game(self, team, name):
+    self.progress = wx.ProgressDialog('Creating game', "please wait", parent=self)
+    self.game = Game(team, name)
+    self.progress.Destroy()
+    self.game_panel = GamePanel(self)
+    self.sizer.Add(self.game_panel, 1, wx.EXPAND)
+    self.game_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_game)
+    self.game_panel.Show()
+    self.main_panel.Hide()
+    self.Layout()
 
   def on_load(self, event):
     title = "Choose a game file:"
@@ -88,15 +93,19 @@ class MSFrame(wx.Frame):
     dlg.SetDirectory('{0}/../data/games/'.format(path))
     if dlg.ShowModal() == wx.ID_OK:
       game_listing = dlg.GetPath()
+      dlg.Destroy
+      self.progress = wx.ProgressDialog('Loading game', "please wait", parent=self)
       with open(game_listing, 'rb') as f:
         self.game = pickle.load(f)
+      self.progress.Destroy()
       self.game_panel = GamePanel(self)
       self.sizer.Add(self.game_panel, 1, wx.EXPAND)
       self.game_panel.exit_button.Bind(wx.EVT_BUTTON, self.exit_game)
       self.game_panel.Show()
       self.main_panel.Hide()
       self.Layout()
-    dlg.Destroy()
+    else:
+      dlg.Destroy()
 
   def on_inbox(self, apanel):
     self.inbox_panel = apanel(self)
