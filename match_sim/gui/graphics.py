@@ -145,6 +145,15 @@ class PaintPanel(TemplatePanel):
         if not dc:
           dc = wx.ClientDC(self)
       dc.DrawText(str(player.match.score), x0+x-30, y0+y+28)
+    if len(player.match.cards) > 0:
+      for card in player.match.cards:
+        print(player.match.cards)
+        if card == 'y':
+          dc.SetBrush(wx.Brush(Colour().YEL))
+          dc.DrawRectangle(x0+x-20, y0+y+32, 5, 10)
+        elif card == 'r':
+          dc.SetBrush(wx.Brush(Colour().DR))
+          dc.DrawRectangle(x0+x-20, y0+y+32, 5, 10)
 
   def draw_pitch(self, dc=None, title=None, x0=None, y0=None, header_border=False):
     if x0 is None:

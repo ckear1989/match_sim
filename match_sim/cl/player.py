@@ -55,6 +55,10 @@ class MatchStats():
     self.lineup = 0
     self.minutes = 0
     self.rating = 0.0
+    self.cards = []
+
+  def gain_card(self, card):
+    self.cards.append(card)
 
   def reset_match_stats(self):
     '''Reset stats accrued during match'''
@@ -62,6 +66,7 @@ class MatchStats():
     self.assists = 0
     self.minutes = 0
     self.rating = 0.0
+    self.cards = []
 
   def age_match_minute(self):
     '''Increment minutes played'''
@@ -218,6 +223,7 @@ class Player():
 
   def gain_card(self, card):
     '''Add card to currently held cards'''
+    self.match.gain_card(card)
     self.season.gain_card(card)
 
   def assist(self):
