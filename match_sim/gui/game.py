@@ -17,6 +17,7 @@ from match_sim.gui.match import MatchPanel, Match
 from match_sim.gui.stats import StatsPanel
 from match_sim.gui.settings import SettingsPanel, Settings
 from match_sim.gui.team import Team
+from match_sim.gui.utils import ptable_to_grid
 
 class GamePanel(TemplatePanel):
   def __init__(self, parent):
@@ -48,29 +49,6 @@ class GamePanel(TemplatePanel):
     self.hbox3.Add(save_button, proportion=0)
     self.SetSizer(self.main_sizer)
 
-  def ptable_to_grid(self, atable):
-    x = wx.grid.Grid(self)
-    rows = atable._rows
-    cols = atable._field_names
-    x.CreateGrid(min(15, len(rows)), len(cols))
-    i = 0
-    j = 0
-    G = "\033[0;32;40m" # Green
-    N = "\033[0m" # Reset
-    for col in cols:
-      x.SetColLabelValue(j, str(col))
-      j += 1
-    i = 0
-    for arow in rows:
-      j = 0
-      if i < 15:
-        for acol in arow:
-          x.SetCellValue(i, j, str(acol).replace(G, '').replace(N, ''))
-          x.SetReadOnly(i, j)
-          j += 1
-      i += 1
-    x.HideRowLabels()
-    return x
 
   def on_inbox(self, event):
     self.GetParent().on_inbox(InboxPanel)
@@ -97,7 +75,7 @@ class GamePanel(TemplatePanel):
   def create_tables(self):
     font = wx.Font(16, wx.ROMAN, wx.ITALIC, wx.NORMAL) 
     label_size = wx.Size((200, 28))
-    self.events = self.ptable_to_grid(self.game.upcoming_events)
+    self.events = ptable_to_grid(self, self.game.upcoming_events)
     label1 = wx.StaticText(self, size=label_size)
     label1.SetFont(font)
     label1.SetLabel('Upcoming Events')
@@ -109,10 +87,10 @@ class GamePanel(TemplatePanel):
     label3.SetLabel('Team Status')
     self.vbox1.Add(label1, flag=wx.ALL, border=5)
     self.vbox1.Add(self.events, flag=wx.ALL, border=5)
-    self.league_table = self.ptable_to_grid(self.game.team_league.league_table)
+    self.league_table = ptable_to_grid(self, self.game.team_league.league_table)
     self.vbox1.Add(label2, flag=wx.ALL, border=5)
     self.vbox1.Add(self.league_table, flag=wx.ALL, border=5)
-    self.team = self.ptable_to_grid(self.game.teams[self.game.team].player_table)
+    self.team = ptable_to_grid(self, self.game.teams[self.game.team].player_table)
     self.team.DeleteCols(5, 5)
     self.team.DeleteCols(8, 2)
     self.vbox2.Add(label3, flag=wx.ALL, border=5)
