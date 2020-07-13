@@ -52,7 +52,7 @@ class GamePanel(TemplatePanel):
     x = wx.grid.Grid(self)
     rows = atable._rows
     cols = atable._field_names
-    x.CreateGrid(len(rows), len(cols))
+    x.CreateGrid(min(15, len(rows)), len(cols))
     i = 0
     j = 0
     G = "\033[0;32;40m" # Green
@@ -63,10 +63,11 @@ class GamePanel(TemplatePanel):
     i = 0
     for arow in rows:
       j = 0
-      for acol in arow:
-        x.SetCellValue(i, j, str(acol).replace(G, '').replace(N, ''))
-        x.SetReadOnly(i, j)
-        j += 1
+      if i < 15:
+        for acol in arow:
+          x.SetCellValue(i, j, str(acol).replace(G, '').replace(N, ''))
+          x.SetReadOnly(i, j)
+          j += 1
       i += 1
     x.HideRowLabels()
     return x
@@ -94,13 +95,27 @@ class GamePanel(TemplatePanel):
     self.refresh(event)
 
   def create_tables(self):
+    font = wx.Font(16, wx.ROMAN, wx.ITALIC, wx.NORMAL) 
+    label_size = wx.Size((200, 28))
     self.events = self.ptable_to_grid(self.game.upcoming_events)
+    label1 = wx.StaticText(self, size=label_size)
+    label1.SetFont(font)
+    label1.SetLabel('Upcoming Events')
+    label2 = wx.StaticText(self, size=label_size)
+    label2.SetFont(font)
+    label2.SetLabel('{0} Table'.format(self.game.team_league.name))
+    label3 = wx.StaticText(self, size=label_size)
+    label3.SetFont(font)
+    label3.SetLabel('Team Status')
+    self.vbox1.Add(label1, flag=wx.ALL, border=5)
     self.vbox1.Add(self.events, flag=wx.ALL, border=5)
     self.league_table = self.ptable_to_grid(self.game.team_league.league_table)
+    self.vbox1.Add(label2, flag=wx.ALL, border=5)
     self.vbox1.Add(self.league_table, flag=wx.ALL, border=5)
     self.team = self.ptable_to_grid(self.game.teams[self.game.team].player_table)
     self.team.DeleteCols(5, 5)
     self.team.DeleteCols(8, 2)
+    self.vbox2.Add(label3, flag=wx.ALL, border=5)
     self.vbox2.Add(self.team, flag=wx.ALL, border=5)
     self.Layout()
 
