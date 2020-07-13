@@ -8,6 +8,7 @@ from match_sim.cl.match import Match as ClMatch, time_until_next_event, stopcloc
 from match_sim.gui.event import Event, MATCH_EVENT_CUSTOM, REFRESH_EVENT_CUSTOM, MatchEvent
 from match_sim.gui.graphics import PaintPanel, Colour
 from match_sim.gui.manage import ManagePanel, MatchManagePanel
+from match_sim.gui.settings import MatchSettings
 from match_sim.gui.template import TemplateButton
 
 STOPCLOCK_EVENT = wx.NewEventType()
@@ -32,7 +33,7 @@ class MatchPanel(PaintPanel):
     self.play_button = TemplateButton(self, 'Play')
     self.play_button.Bind(wx.EVT_BUTTON, self.on_play)
     self.hbox3.Add(self.play_button)
-    self.pause_button = TemplateButton(self, 'Pause')
+    self.pause_button = TemplateButton(self, 'Choose Lineup')
     self.pause_button.Bind(wx.EVT_BUTTON, self.on_pause)
     self.hbox3.Add(self.pause_button)
     self.vbox1 = wx.BoxSizer(wx.VERTICAL)
@@ -125,9 +126,12 @@ class MatchPanel(PaintPanel):
     else:
       self.match.set_status('paused')
       if event.GetId() == 999:
+        time.sleep(0.5)
         self.txt_output.SetLabel(
         '{0} have lost {1} from their lineup.'.format(event.GetMyVal()[0].name, event.GetMyVal()[1]))
+        self.Update()
       time.sleep(0.5)
+      self.Update()
       wx.Yield()
       self.GetParent().on_match_manage(MatchManagePanel, self.home)
       if event.GetId() == 999:
@@ -160,12 +164,13 @@ class MatchPanel(PaintPanel):
   def on_play(self, event):
     print('play')
     if self.match.status in ['pre-match']:
+      self.pause_button.SetLabel('Pause')
       self.pause_button.Show()
       self.play_button.SetLabel('Continue')
       self.match.update_event_handler(self.GetEventHandler())
       self.match.team_a.update_event_handler(self.GetEventHandler())
       self.match.team_b.update_event_handler(self.GetEventHandler())
-      for ts in self.match.play():
+      for ts in self.match.play(self.match.settings.time_step):
         pass
     if self.match.status in ['finished']:
       self.match.team_a.update_event_handler()
@@ -174,13 +179,13 @@ class MatchPanel(PaintPanel):
       self.game.update_next_fixture()
       self.on_exit_match(event)
     self.match.set_status('playing')
+    self.pause_button.SetLabel('Pause')
     self.pause_button.Show()
 
   def on_stopclock(self, event):
     self.stopclock.SetLabel(event.GetMyVal())
-    if self.match.time % 3 == 0:
-      self.Update()
-      wx.Yield()
+    self.Update()
+    wx.Yield()
 
   def on_match_event(self, event):
     ps = event.GetMyVal()
@@ -197,7 +202,7 @@ class MatchPanel(PaintPanel):
       self.GetParent().exit_match(event)
 
 class Match(ClMatch):
-  def __init__(self, team_a, team_b, current_date, silent, extra_time_required, comp_name, event_handler):
+  def __init__(self, team_a, team_b, current_date, silent, extra_time_required, comp_name, event_handler, time_step):
     super().__init__(team_a, team_b, current_date, silent, extra_time_required)
     self.comp_name = comp_name
     self.event_handler = event_handler
@@ -205,6 +210,7 @@ class Match(ClMatch):
     self.at = 0
     self.first_half_length = 35 * 60
     self.second_half_length = 35 * 60
+    self.settings = MatchSettings(time_step)
 
   def set_status(self, status):
     self.status = status

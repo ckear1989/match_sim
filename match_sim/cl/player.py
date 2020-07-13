@@ -105,6 +105,8 @@ class PhysicalStats():
     self.shooting = random_0_100_normal(70, 20)
     self.fitness = random_0_100_normal(70, 20)
     self.condition = float(min(self.fitness, random_0_100_normal(70, 20)))
+    self.right = random.choice([random_0_100_normal(25, 20)] + [random_0_100_normal(75, 20) for i in range(7)])
+    self.left = 100 - self.right
     self.get_overall()
 
   def get_overall(self):

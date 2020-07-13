@@ -5,6 +5,10 @@ import wx
 from match_sim.cl.settings import Settings as ClSettings
 from match_sim.gui.template import TemplatePanel
 
+class MatchSettings():
+  def __init__(self, time_step):
+    self.time_step = time_step
+
 class SettingsPanel(TemplatePanel):
   def __init__(self, parent):
     super().__init__(parent)

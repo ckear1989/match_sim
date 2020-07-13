@@ -113,7 +113,6 @@ class PaintPanel(TemplatePanel):
     if self.IsShownOnScreen():
       if not dc:
         dc = wx.ClientDC(self)
-    dc.SetTextForeground(colour.BL)
     dc.SetBrush(wx.Brush(colour_s))
     dc.DrawCircle(x0+x, y0+y, 20)
     dc.SetBrush(wx.Brush(colour_p))
@@ -130,7 +129,12 @@ class PaintPanel(TemplatePanel):
       dc.DrawRotatedText('suspended', x0+x-20, y0+y-20, -45)
     font = wx.Font(8, wx.ROMAN, wx.BOLD, wx.NORMAL) 
     dc.SetFont(font)
+    if colour_p == colour.BL:
+      dc.SetTextForeground(colour.WH)
+    else:
+      dc.SetTextForeground(colour.BL)
     dc.DrawText(str(player.match.lineup), x0+x-3, y0+y-5)
+    dc.SetTextForeground(colour.BL)
     dc.DrawText(str(player), x0+x-30, y0+y+18)
 
   def draw_player_match(self, player, dc=None, x=200, y=200,
@@ -149,10 +153,10 @@ class PaintPanel(TemplatePanel):
       for card in player.match.cards:
         if card == 'y':
           dc.SetBrush(wx.Brush(Colour().YEL))
-          dc.DrawRectangle(x0+x-20, y0+y+38, 6, 12)
+          dc.DrawRectangle(x0+x-28, y0+y, 6, 12)
         elif card == 'r':
           dc.SetBrush(wx.Brush(Colour().DR))
-          dc.DrawRectangle(x0+x-20, y0+y+38, 6, 12)
+          dc.DrawRectangle(x0+x-28, y0+y, 6, 12)
 
   def draw_pitch(self, dc=None, title=None, x0=None, y0=None, header_border=False):
     if x0 is None:

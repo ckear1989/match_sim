@@ -168,8 +168,11 @@ class Event():
       shooting_player.score_point()
       assisting_player.assist()
       shooting_player.update_score()
-    else:
+    elif p0 < 0.97:
       self.pl.append('But he misses.')
+    else:
+      self.pl.append('His shot comes off a defender and out for a 45.')
+      self.free_kick_45()
 
   def shooting_player_posession(self):
     '''Shooting player receives ball.  Loses ball or shoots or fouled is determined'''
@@ -188,9 +191,22 @@ class Event():
     else:
       self.foul(self.shooting_player)
 
+  def free_kick_45(self):
+    shooting_player = self.attackers.choose_free_taker_45()
+    self.pl.append('{0} steps up to take the 45.'.format(shooting_player))
+    p0 = random.random()
+    if p0 < 0.7:
+      self.pl.append('It goes ofver the bar!')
+      shooting_player.score_point()
+      shooting_player.update_score()
+    elif p0 < 0.85:
+      self.pl.append('But the kick drops short')
+    else:
+      self.pl.append('But the kick goes wide')
+
   def free_kick(self, assister):
     '''Shooting player chosen.   Free kick or penalty decided.  Attempt method called'''
-    shooting_player = self.attackers.choose_player(0.01, 0.1, 0.3)
+    shooting_player = self.attackers.choose_free_taker()
     p0 = random.random()
     if p0 < 0.95:
       self.pl.append('{0} steps up to take the free kick.'.format(shooting_player))

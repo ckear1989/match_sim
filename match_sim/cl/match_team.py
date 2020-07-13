@@ -16,6 +16,12 @@ class MatchTeam(Team):
     self.tactics = Tactics()
     self.auto_lineup()
     self.stats_update()
+    self.free_taker_right = sorted([x for x in self], reverse=True,
+      key=lambda x: x.physical.right+x.physical.shooting)[0]
+    self.free_taker_left = sorted([x for x in self], reverse=True,
+      key=lambda x: x.physical.left+x.physical.shooting)[0]
+    self.free_taker_long = sorted([x for x in [self.free_taker_right,
+      self.free_taker_left]], reverse=True, key=lambda x: x.physical.shooting)[0]
 
   def update_playing_positions(self):
     '''Update team positions based on lineup and formation'''
@@ -248,6 +254,29 @@ class MatchTeam(Team):
       return player
     except IndexError:
       return self.choose_player(p0, p1, p2)
+
+  def choose_free_taker(self):
+    if ((self.free_taker_right in self.playing) and
+      (self.free_taker_left in self.playing)):
+      return random.choice([self.free_taker_right, self.free_taker_left])
+    elif ((self.free_taker_right in self.playing) and
+      (self.free_taker_left not in self.playing)):
+      return random.choice([self.free_taker_right, self.choose_player(0.05, 0.1, 0.2)])
+    elif ((self.free_taker_right not in self.playing) and
+      (self.free_taker_left in self.playing)):
+      return random.choice([self.free_taker_left, self.choose_player(0.05, 0.1, 0.2)])
+    else:
+      return self.choose_player(0.05, 0.1, 0.2)
+
+  def choose_free_taker_45(self):
+    if (self.free_taker_long in self.playing):
+      return self.free_taker_long
+    elif (self.free_taker_right in self.playing):
+      return self.free_taker_right
+    elif (self.free_taker_left in self.playing):
+      return self.free_taker_left
+    else:
+      return self.choose_player(0.05, 0.1, 0.2)
 
   def reset_match_stats(self):
     '''Clear all scores etc. for beginning of next match'''
