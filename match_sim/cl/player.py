@@ -1,12 +1,15 @@
 '''Create objects to represent people'''
 
+import datetime
+from dateutil.relativedelta import relativedelta
 import random
+
 import names
 import numpy as np
 
 from match_sim.cl.injury import Injury
 from match_sim.cl.suspension import Suspension
-from match_sim.cl.utils import random_0_100_normal
+from match_sim.cl.utils import random_0_100_normal, random_normal
 
 class Score():
   '''Store data on score'''
@@ -185,6 +188,8 @@ class SeasonStats():
 class Player():
   '''Player object to represent player'''
   def __init__(self, team=None):
+    self.dob = datetime.date(2020, 1, 1) - datetime.timedelta(365 * 26 + random_normal(0, 365*3))
+    self.get_age(datetime.date(2020, 1, 1))
     self.first_name = names.get_first_name(gender='male')
     self.last_name = names.get_last_name()
     self.team = team
@@ -201,6 +206,9 @@ class Player():
   def __lt__(self, other):
     '''Assert player order for table sorting'''
     return self.__repr__() < other.__repr__()
+
+  def get_age(self, date):
+    self.age = relativedelta(date, self.dob).years
 
   def update_lineup(self, i):
     self.match.lineup = i
@@ -282,6 +290,7 @@ class Player():
 
   def process_daily(self, date):
     '''Update player stats after aging a day'''
+    self.get_age(date)
     self.check_injury(date)
     self.check_suspension(date)
     self.condition_improve()
