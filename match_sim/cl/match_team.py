@@ -41,6 +41,15 @@ class MatchTeam(Team):
     self.forwards = self.full_forwards + self.half_forwards
     self.get_player_table()
 
+  def update_free_taker(self, pstring, side):
+    player = [x for x in self if str(x) == pstring][0]
+    if side == 'left':
+      self.free_taker_left = player
+    elif side == 'right':
+      self.free_taker_right = player
+    elif side == 'long':
+      self.free_taker_long = player
+
   def lineup_change(self, l_a=None, l_b=None):
     '''Ask user to change lineup.  Continue is only escape'''
     if self.control is True:

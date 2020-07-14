@@ -185,6 +185,33 @@ class ManagePanel(PaintPanel):
     label.SetBackgroundColour(colour.LIME)
     self.vbox2.Add(label, proportion=0)
     self.vbox2.Add(self.tactics)
+    self.free_taker_left = wx.ComboBox(self, choices=[str(x) for x in self.team])
+    self.free_taker_left.SetStringSelection(str(self.team.free_taker_left))
+    self.free_taker_left.Bind(wx.EVT_COMBOBOX, self.update_free_taker)
+    self.free_taker_right = wx.ComboBox(self, choices=[str(x) for x in self.team])
+    self.free_taker_right.SetStringSelection(str(self.team.free_taker_right))
+    self.free_taker_right.Bind(wx.EVT_COMBOBOX, self.update_free_taker)
+    self.free_taker_long = wx.ComboBox(self, choices=[str(x) for x in self.team])
+    self.free_taker_long.SetStringSelection(str(self.team.free_taker_long))
+    self.free_taker_long.Bind(wx.EVT_COMBOBOX, self.update_free_taker)
+    label = wx.StaticText(self, label='Left free kicks:', size=label_size)
+    label.SetFont(font)
+    label.SetForegroundColour(colour.BL)
+    label.SetBackgroundColour(colour.LIME)
+    self.vbox3.Add(label, proportion=0)
+    self.vbox3.Add(self.free_taker_left)
+    label = wx.StaticText(self, label='Right free kicks:', size=label_size)
+    label.SetFont(font)
+    label.SetForegroundColour(colour.BL)
+    label.SetBackgroundColour(colour.LIME)
+    self.vbox3.Add(label, proportion=0)
+    self.vbox3.Add(self.free_taker_right)
+    label = wx.StaticText(self, label='Long free kicks:', size=label_size)
+    label.SetFont(font)
+    label.SetForegroundColour(colour.BL)
+    label.SetBackgroundColour(colour.LIME)
+    self.vbox3.Add(label, proportion=0)
+    self.vbox3.Add(self.free_taker_long)
     self.refresh()
 
   def on_training(self, event):
@@ -209,6 +236,13 @@ class ManagePanel(PaintPanel):
   def update_tactics(self, event):
     self.team.tactics_change(self.tactics.GetValue())
     self.refresh()
+
+  def update_free_taker(self, event):
+    self.team.update_free_taker(self.free_taker_left.GetValue(), 'left')
+    self.team.update_free_taker(self.free_taker_right.GetValue(), 'right')
+    self.team.update_free_taker(self.free_taker_long.GetValue(), 'long')
+    self.refresh()
+    pass
 
   def update_lists(self):
     for i in range(1, 22):
