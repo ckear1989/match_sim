@@ -10,6 +10,7 @@ from match_sim.gui.graphics import PaintPanel, Colour
 from match_sim.gui.manage import ManagePanel, MatchManagePanel
 from match_sim.gui.settings import MatchSettings
 from match_sim.gui.template import TemplateButton
+from match_sim.reporting.match_report import MatchReport
 
 STOPCLOCK_EVENT = wx.NewEventType()
 STOPCLOCK_EVENT_CUSTOM = wx.PyEventBinder(STOPCLOCK_EVENT, 1)
@@ -60,7 +61,11 @@ class MatchPanel(PaintPanel):
     self.txt_output = wx.StaticText(self, size=wx.Size(420, (28*4)), style=wx.ST_NO_AUTORESIZE)
     self.txt_output.SetBackgroundColour(colour.LIME)
     self.txt_output.SetFont(font)
-    self.vbox1.Add(self.txt_output)
+    self.vbox1.Add(self.txt_output, flag=wx.ALL, border=5)
+    self.txt_output_long = wx.TextCtrl(self, size=wx.Size(420, (28*8)), style=wx.TE_WORDWRAP|wx.TE_READONLY|wx.TE_MULTILINE)
+    font = wx.Font(8, wx.ROMAN, wx.ITALIC, wx.NORMAL)
+    self.txt_output_long.SetFont(font)
+    self.vbox1.Add(self.txt_output_long, flag=wx.ALL, border=5)
     self.Bind(MATCH_EVENT_CUSTOM, self.on_match_event)
     self.Bind(STOPCLOCK_EVENT_CUSTOM, self.on_stopclock)
     self.Bind(PAUSE_EVENT_CUSTOM, self.on_pause)
@@ -197,6 +202,9 @@ class MatchPanel(PaintPanel):
     ps = event.GetMyVal()
     if len(ps) > 6:
       self.txt_output.SetLabel(ps)
+      self.match.append_report(ps)
+      self.txt_output_long.AppendText('\n')
+      self.txt_output_long.AppendText(ps)
       self.Update()
       wx.Yield()
       time.sleep(0.5)
@@ -217,6 +225,10 @@ class Match(ClMatch):
     self.first_half_length = 35 * 60
     self.second_half_length = 35 * 60
     self.settings = MatchSettings(time_step)
+    self.report = MatchReport()
+
+  def append_report(self, ps):
+    self.report.append(self.stopclock_time, ps)
 
   def set_status(self, status):
     self.status = status
