@@ -10,13 +10,14 @@ import wx.grid
 from match_sim.cl.game import Game as ClGame
 import match_sim.cl.default as default
 from match_sim.cl.training import Training
-from match_sim.gui.template import TemplatePanel, TemplateButton
+from match_sim.gui.graphics import Colour
 from match_sim.gui.inbox import InboxPanel, Inbox
 from match_sim.gui.manage import ManagePanel
 from match_sim.gui.match import MatchPanel, Match
 from match_sim.gui.stats import StatsPanel
 from match_sim.gui.settings import SettingsPanel, Settings
 from match_sim.gui.team import Team
+from match_sim.gui.template import TemplatePanel, TemplateButton
 from match_sim.gui.utils import ptable_to_grid
 
 class GamePanel(TemplatePanel):
@@ -73,16 +74,23 @@ class GamePanel(TemplatePanel):
 
   def create_tables(self):
     font = wx.Font(16, wx.ROMAN, wx.ITALIC, wx.NORMAL) 
+    colour = Colour()
     label_size = wx.Size((200, 28))
     self.events = ptable_to_grid(self, self.game.upcoming_events)
     self.label1 = wx.StaticText(self, size=label_size)
     self.label1.SetFont(font)
+    self.label1.SetForegroundColour(colour.BL)
+    self.label1.SetBackgroundColour(colour.LIME)
     self.label1.SetLabel('Upcoming Events')
     self.label2 = wx.StaticText(self, size=label_size)
     self.label2.SetFont(font)
+    self.label2.SetForegroundColour(colour.BL)
+    self.label2.SetBackgroundColour(colour.LIME)
     self.label2.SetLabel('{0} Table'.format(self.game.team_league.name))
     self.label3 = wx.StaticText(self, size=label_size)
     self.label3.SetFont(font)
+    self.label3.SetForegroundColour(colour.BL)
+    self.label3.SetBackgroundColour(colour.LIME)
     self.label3.SetLabel('Team Status')
     self.vbox1.Add(self.label1, flag=wx.ALL, border=5)
     self.vbox1.Add(self.events, flag=wx.ALL, border=5)
