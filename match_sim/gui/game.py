@@ -32,9 +32,9 @@ class GamePanel(TemplatePanel):
     continue_button = TemplateButton(self, 'Continue')
     continue_button.Bind(wx.EVT_BUTTON, self.on_continue)
     self.hbox3.Add(continue_button, proportion=0)
-    inbox_button = TemplateButton(self, 'Inbox[{0}]'.format(self.game.inbox.count))
-    inbox_button.Bind(wx.EVT_BUTTON, self.on_inbox)
-    self.hbox3.Add(inbox_button, proportion=0)
+    self.inbox_button = TemplateButton(self, 'Inbox[{0}]'.format(self.game.inbox.count))
+    self.inbox_button.Bind(wx.EVT_BUTTON, self.on_inbox)
+    self.hbox3.Add(self.inbox_button, proportion=0)
     manage_button = TemplateButton(self, 'Manage')
     manage_button.Bind(wx.EVT_BUTTON, self.on_manage)
     self.hbox3.Add(manage_button, proportion=0)
@@ -48,7 +48,6 @@ class GamePanel(TemplatePanel):
     save_button.Bind(wx.EVT_BUTTON, self.save_game)
     self.hbox3.Add(save_button, proportion=0)
     self.SetSizer(self.main_sizer)
-
 
   def on_inbox(self, event):
     self.GetParent().on_inbox(InboxPanel)
@@ -98,6 +97,7 @@ class GamePanel(TemplatePanel):
     self.Layout()
 
   def refresh(self, event):
+    self.inbox_button.SetLabel('Inbox[{0}]'.format(self.game.inbox.count))
     self.events.Destroy()
     self.league_table.Destroy()
     self.team.Destroy()

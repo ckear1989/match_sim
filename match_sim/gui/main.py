@@ -168,6 +168,7 @@ class MSFrame(wx.Frame):
     self.Layout()
 
   def exit_inbox(self, event):
+    self.game_panel.inbox_button.SetLabel('Inbox[{0}]'.format(self.game.inbox.count))
     self.game_panel.Show()
     self.inbox_panel.Hide()
     self.Layout()

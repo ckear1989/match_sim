@@ -34,7 +34,7 @@ class MatchPanel(PaintPanel):
     self.play_button.Bind(wx.EVT_BUTTON, self.on_play)
     self.hbox3.Add(self.play_button)
     self.pause_button = TemplateButton(self, 'Choose Lineup')
-    self.pause_button.Bind(wx.EVT_BUTTON, self.on_pause)
+    self.pause_button.Bind(wx.EVT_BUTTON, self.emit_pause_event)
     self.hbox3.Add(self.pause_button)
     self.vbox1 = wx.BoxSizer(wx.VERTICAL)
     self.hbox1.Add(self.vbox1)
@@ -117,6 +117,11 @@ class MatchPanel(PaintPanel):
     self.scoreboard_str()
     wx.Yield()
 
+  def emit_pause_event(self, msg=None):
+    event = MatchEvent(PAUSE_EVENT, self.GetId())
+    event.SetMyVal(msg)
+    self.GetEventHandler().ProcessEvent(event)
+
   def on_pause(self, event):
     print('pause')
     self.pause_button.Hide()
@@ -125,18 +130,16 @@ class MatchPanel(PaintPanel):
       self.GetParent().on_match_manage(ManagePanel, self.home)
     else:
       self.match.set_status('paused')
-      if event.GetId() == 999:
+      if isinstance(event.GetMyVal(), str):
         time.sleep(0.5)
-        self.txt_output.SetLabel(
-        '{0} have lost {1} from their lineup.'.format(event.GetMyVal()[0].name, event.GetMyVal()[1]))
+        self.txt_output.SetLabel(event.GetMyVal())
         self.Update()
       time.sleep(0.5)
       self.Update()
       wx.Yield()
       self.GetParent().on_match_manage(MatchManagePanel, self.home)
-      if event.GetId() == 999:
-        self.GetParent().match_manage_panel.txt_output.SetLabel(
-          '{0} have lost {1} from their lineup.'.format(event.GetMyVal()[0].name, event.GetMyVal()[1]))
+      if isinstance(event.GetMyVal(), str):
+        self.GetParent().match_manage_panel.txt_output.SetLabel(event.GetMyVal())
     while self.match.status in ['pre-match', 'paused']:
       wx.Yield()
 
@@ -173,8 +176,11 @@ class MatchPanel(PaintPanel):
       for ts in self.match.play(self.match.settings.time_step):
         pass
     if self.match.status in ['finished']:
+      self.play_button.Hide()
+      self.pause_button.Hide()
       self.match.team_a.update_event_handler()
       self.match.team_b.update_event_handler()
+      print('debug')
       self.game.process_match_result(self.match, self.match.comp_name)
       self.game.update_next_fixture()
       self.on_exit_match(event)
@@ -227,7 +233,7 @@ class Match(ClMatch):
     self.stopclock_time = stopclock(self.time)
     self.print_stopclock()
     wx.Yield()
-    self.emit_pause_event()
+    self.emit_pause_event('Half Time')
     yield 'half time'
 
   def full_time(self):
@@ -326,9 +332,10 @@ class Match(ClMatch):
       event.SetMyVal(self.stopclock_time)
       self.event_handler.ProcessEvent(event)
 
-  def emit_pause_event(self):
+  def emit_pause_event(self, msg=None):
     if self.silent is not True:
       event = MatchEvent(PAUSE_EVENT, self.GetId())
+      event.SetMyVal(msg)
       self.event_handler.ProcessEvent(event)
     else:
       self.set_status('playing')
