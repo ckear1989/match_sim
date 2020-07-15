@@ -25,6 +25,7 @@ class MatchTeam(Team):
 
   def update_playing_positions(self):
     '''Update team positions based on lineup and formation'''
+    self.formation.get_pos_lineups()
     self.goalkeepers = [x for x in self.playing if x.match.lineup in
       self.formation.goalkeeper_lineups]
     self.full_backs = [x for x in self.playing if x.match.lineup in
@@ -39,6 +40,7 @@ class MatchTeam(Team):
       self.formation.full_forward_lineups]
     self.defenders = self.full_backs + self.half_backs
     self.forwards = self.full_forwards + self.half_forwards
+    self.off = [x for x in self if ((x.match.lineup < 1) and (x.match.minutes > 0))]
     self.get_player_table()
 
   def update_free_taker(self, pstring, side):
@@ -132,6 +134,7 @@ class MatchTeam(Team):
     subs_used = len([x for x in self.playing if x.match.lineup not in range(1, 16)])
     if subs_used > 4:
       self.playing.remove(player)
+      player.set_lineup(0)
     else:
       if preferred_position is None:
         preferred_position = player.physical.position
@@ -147,6 +150,7 @@ class MatchTeam(Team):
           sub_made = self.substitute(l_a=player)
       else:
         self.auto_sub(player, preferred_position)
+    self.update_playing_positions()
 
   def auto_lineup(self):
     '''Set team lineup for non-controlled team.  Force changes only when necessary'''
@@ -189,6 +193,7 @@ class MatchTeam(Team):
       self.substitute(player, sorted(player_on, key=lambda x: -x.physical.condition)[0])
     else:
       self.substitute(player, sorted(self.subs, key=lambda x: -x.physical.condition)[0])
+    self.update_playing_positions()
 
   def substitute(self, l_a=None, l_b=None):
     '''Determine if sub can be made.  Ask user for players to switch.  Execute switch'''
@@ -236,6 +241,7 @@ class MatchTeam(Team):
       self.subs.remove(player_on)
       self.playing.append(player_on)
       self.formation.ammend_pos_lineups(player_off.match.lineup, player_on.match.lineup)
+      player_off.set_lineup(0)
       self.update_playing_positions()
       if self.control is True:
         print(self)

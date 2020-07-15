@@ -18,9 +18,17 @@ class Team(MatchTeam):
 
   def forced_substitution(self, player, preferred_position=None, reason=None):
     '''Force user to make a sub'''
+    self.formation.injured_lineup(player.match.lineup)
+    self.update_playing_positions()
+    print(self.playing)
+    print(self.off)
+    print(self.formation.playing_lineups)
+    print(self.formation.off_lineups)
+    print(self.formation.injured_lineups)
     subs_used = len([x for x in self.playing if x.match.lineup not in range(1, 16)])
     if subs_used > 4:
       self.playing.remove(player)
+      player.set_lineup(0)
     else:
       if preferred_position is None:
         preferred_position = player.physical.position
@@ -34,10 +42,18 @@ class Team(MatchTeam):
         self.event_handler.ProcessEvent(event)
       else:
         self.auto_sub(player, preferred_position)
+    self.update_playing_positions()
 
   def send_off_player(self, player):
+    self.formation.remove_lineup(player.match.lineup)
+    player.set_lineup(-1)
+    self.update_playing_positions()
+    print(self.playing)
+    print(self.off)
+    print(self.formation.playing_lineups)
+    print(self.formation.off_lineups)
+    print(self.formation.injured_lineups)
     self.emit_send_off_event(player)
-    self.playing.remove(player)
 
   def emit_send_off_event(self, player):
     if self.control is True:

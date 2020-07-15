@@ -27,6 +27,7 @@ class MatchPanel(PaintPanel):
     self.exit_button.Destroy()
     font = wx.Font(16, wx.ROMAN, wx.ITALIC, wx.NORMAL) 
     self.game = self.GetParent().game
+    self.verbosity = 5
     self.home = True
     if self.game.team == self.match.team_b.name:
       self.home = False
@@ -90,31 +91,39 @@ class MatchPanel(PaintPanel):
 
   def draw_lineup(self, dc):
     self.draw_pitch(dc, x0=500, y0=50, header_border=True)
-    for player in self.match.team_a.playing + self.match.team_a.subs:
+    off_count = 0
+    for player in self.match.team_a.playing + self.match.team_a.subs + self.match.team_a.off:
       if player.match.lineup in self.match.team_a.formation.goalkeeper_lineups:
         colour_p = self.match.team_a.colour.goalkeeper_p
         colour_s = self.match.team_a.colour.goalkeeper_s
       else:
         colour_p = self.match.team_a.colour.home_p
         colour_s = self.match.team_a.colour.home_s
-      x, y = self.match.team_a.formation.get_coords(player.match.lineup)
+      if player.match.lineup < 1:
+        off_count += 1
+      x, y = self.match.team_a.formation.get_coords(player.match.lineup, off_count)
       self.draw_player_match(player, dc, x=x, y=y, x0=500, y0=50,
         colour_p=colour_p, colour_s=colour_s)
-    self.draw_manager(self.match.team_a.manager, dc, x=380, y=-8, x0=500, y0=50)
+    self.draw_manager(self.match.team_a.manager, dc, x=380, y=340, x0=500, y0=50)
     self.draw_pitch(dc, x0=940, y0=50, header_border=True)
-    for player in self.match.team_b.playing + self.match.team_b.subs:
+    off_count = 0
+    for player in self.match.team_b.playing + self.match.team_b.subs + self.match.team_b.off:
       if player.match.lineup in self.match.team_b.formation.goalkeeper_lineups:
         colour_p = self.match.team_b.colour.goalkeeper_p
         colour_s = self.match.team_b.colour.goalkeeper_s
       else:
         colour_p = self.match.team_b.colour.away_p
         colour_s = self.match.team_b.colour.away_s
-      x, y = self.match.team_b.formation.get_coords(player.match.lineup)
+      if player.match.lineup < 1:
+        off_count += 1
+      x, y = self.match.team_b.formation.get_coords(player.match.lineup, off_count)
       self.draw_player_match(player, dc, x=x, y=y, x0=940, y0=50,
         colour_p=colour_p, colour_s=colour_s)
-    self.draw_manager(self.match.team_b.manager, dc, x=380, y=-8, x0=940, y0=50)
+    self.draw_manager(self.match.team_b.manager, dc, x=380, y=340, x0=940, y0=50)
 
   def Draw(self, dc):
+    self.match.team_a.update_playing_positions()
+    self.match.team_b.update_playing_positions()
     dc.Clear() # make sure you clear the bitmap!
     bmp = wx.Bitmap(default.gui_background)
     dc.DrawBitmap(bmp, 0, 0)
@@ -147,6 +156,7 @@ class MatchPanel(PaintPanel):
         self.GetParent().match_manage_panel.txt_output.SetLabel(event.GetMyVal())
     while self.match.status in ['pre-match', 'paused']:
       wx.Yield()
+    self.game.teams[self.game.team].update_playing_positions()
 
   def on_forced_sub(self, event):
     print('forced sub')
@@ -200,14 +210,16 @@ class MatchPanel(PaintPanel):
 
   def on_match_event(self, event):
     ps = event.GetMyVal()
-    if len(ps) > 6:
-      self.txt_output.SetLabel(ps)
-      self.match.append_report(ps)
-      self.txt_output_long.AppendText('\n')
-      self.txt_output_long.AppendText(ps)
-      self.Update()
-      wx.Yield()
-      time.sleep(0.5)
+    vb = event.GetVerbosity()
+    if vb == 0:
+      self.txt_output_long.AppendText(ps + '\n')
+    if 0 < vb <= self.verbosity:
+      if len(ps) > 6:
+        self.txt_output.SetLabel(ps)
+        self.match.append_report(ps)
+        self.Update()
+        wx.Yield()
+        time.sleep(0.5)
     self.txt_output.SetLabel('')
 
   def on_exit_match(self, event):
@@ -226,6 +238,18 @@ class Match(ClMatch):
     self.second_half_length = 35 * 60
     self.settings = MatchSettings(time_step)
     self.report = MatchReport()
+
+  def get_score(self, ts=True, sc=True):
+    '''Get user friendly string of match score'''
+    ps = ''
+    if ts is True:
+      ps += "' " + '{0} '.format(int(self.stopclock_time[:2]) + 1).rjust(2)
+    if sc is True:
+      ps += '{0} {1} {2} {3}'.format(
+      self.team_a.name, self.team_a.score,
+      self.team_b.name, self.team_b.score
+    )
+    return ps.strip()
 
   def append_report(self, ps):
     self.report.append(self.stopclock_time, ps)
@@ -293,6 +317,7 @@ class Match(ClMatch):
   def play(self, time_step=0):
     '''Play through various stages of matches.  Update timekeeping.'''
     yield 'pre match'
+    self.update_team_condition()
     self.set_status('playing')
     for ts in self.play_half(self.first_half_length, time_step):
       yield ts

@@ -47,20 +47,44 @@ class MatchPlayerTarget(MyTarget):
       self.team = team
 
   def OnDropText(self, x, y, data):
+    self.team.update_playing_positions()
     new_lineup = int(data.split(' ')[0])
     new_name = ' '.join(data.split(' ')[1:])
     # debug
-    # print('target', self.lineup)
-    # print('dropped', new_lineup)
+    print('target', self.lineup)
+    print('dropped', new_lineup)
     if (new_lineup in self.team.formation.playing_lineups) and \
+      (self.lineup in self.team.formation.off_lineups):
+      # sent off player switch lineup positions
+      print('swap pos off')
+      self.team.formation.swap_playing_positions(new_lineup, self.lineup)
+    elif (new_lineup in self.team.formation.off_lineups) and \
+      (self.lineup in self.team.formation.playing_lineups):
+      # sent off player switch lineup positions
+      print('swap pos off')
+      self.team.formation.swap_playing_positions(new_lineup, self.lineup)
+    elif (new_lineup in self.team.formation.playing_lineups) and \
+      (self.lineup in self.team.formation.injured_lineups):
+      # injured player swap lineup positions
+      print('swap pos inj')
+      self.team.formation.swap_playing_positions(new_lineup, self.lineup)
+    elif (new_lineup in self.team.formation.injured_lineups) and \
+      (self.lineup in self.team.formation.playing_lineups):
+      # injured player swap lineup positions
+      print('swap pos inj')
+      self.team.formation.swap_playing_positions(new_lineup, self.lineup)
+    elif (new_lineup in self.team.formation.playing_lineups) and \
       (self.lineup in self.team.formation.playing_lineups):
       # swap positions on pitch
+      print('swap pos')
       self.team.formation.swap_playing_positions(new_lineup, self.lineup)
     elif (new_lineup not in self.team.formation.playing_lineups) and \
       (self.lineup not in self.team.formation.playing_lineups):
+      print('none playing')
       return False
     elif self.lineup in self.team.formation.playing_lineups:
       # dragged player coming on
+      print('dragged on')
       for player in self.team.playing:
         if player.match.lineup == self.lineup:
           player_off = player
@@ -82,25 +106,30 @@ class MatchPlayerTarget(MyTarget):
               return False
     else:
       # dragged player coming off
+      print('dragged off')
+      player_on = None
       for player in self.team.subs:
         if player.match.lineup == self.lineup:
           player_on = player
-      for player in self.team.playing:
-        if player.match.lineup == new_lineup:
-          if str(player) == new_name:
-            player_off = player
-            # confirm dialog
-            dlg = wx.MessageDialog(self.parent, '{0} coming off for {1}'.format(
-              player_off, player_on), style=wx.OK|wx.CANCEL)
-            resp = dlg.ShowModal()
-            if resp == wx.ID_OK:
-              self.team.playing.remove(player_off)
-              player_off.set_lineup(0)
-              self.team.playing.append(player_on)
-              self.team.subs.remove(player_on)
-              self.team.formation.ammend_pos_lineups(new_lineup, self.lineup)
-            else:
-              return False
+      if player_on is not None:
+        for player in self.team.playing:
+          if player.match.lineup == new_lineup:
+            if str(player) == new_name:
+              player_off = player
+              # confirm dialog
+              dlg = wx.MessageDialog(self.parent, '{0} coming off for {1}'.format(
+                player_off, player_on), style=wx.OK|wx.CANCEL)
+              resp = dlg.ShowModal()
+              if resp == wx.ID_OK:
+                self.team.playing.remove(player_off)
+                player_off.set_lineup(0)
+                self.team.playing.append(player_on)
+                self.team.subs.remove(player_on)
+                self.team.formation.ammend_pos_lineups(new_lineup, self.lineup)
+              else:
+                return False
+      else:
+        return False
     self.team.update_playing_positions()
     return True
 

@@ -1,4 +1,6 @@
 
+import random
+
 import wx
 
 from match_sim.cl.event import Event as ClEvent
@@ -12,6 +14,7 @@ class MatchEvent(wx.PyCommandEvent):
   def __init__(self, evtType, id):
     wx.PyCommandEvent.__init__(self, evtType, id)
     myVal = None
+    verbosity = None
 
   def SetMyVal(self, val):
     self.myVal = val
@@ -19,17 +22,24 @@ class MatchEvent(wx.PyCommandEvent):
   def GetMyVal(self):
     return self.myVal
 
+  def SetVerbosity(self, val):
+    self.verbosity = val
+
+  def GetVerbosity(self):
+    return self.verbosity
+
 class EventPl(list):
   def __init__(self, event_handler):
     super().__init__()
     self.event_handler = event_handler
 
-  def append(self, astr):
-    self.emit_match_event(astr)
+  def append(self, astr, vb=5):
+    self.emit_match_event(astr, vb)
 
-  def emit_match_event(self, astr):
+  def emit_match_event(self, astr, vb=5):
     event = MatchEvent(MATCH_EVENT, wx.ID_ANY)
     event.SetMyVal(astr)
+    event.SetVerbosity(vb)
     self.event_handler.ProcessEvent(event)
 
 class Event(ClEvent):
@@ -42,9 +52,11 @@ class Event(ClEvent):
   def full_time(self):
     '''Update scorer stats.  Print final result'''
     self.pl.append('Full time score is:\n{0}'.format(self.match.get_score().replace('Score is now ', '')))
+    self.pl.append('FT {0}'.format(self.match.get_score(ts=False)), vb=0)
 
   def half_time(self):
     self.pl.append('And that\'s the end of the half')
+    self.pl.append('HT {0}'.format(self.match.get_score(ts=False)), vb=0)
 
   def emit_refresh_event(self):
     event = MatchEvent(REFRESH_EVENT, wx.ID_ANY)
@@ -57,3 +69,100 @@ class Event(ClEvent):
     new_score = self.match.get_score()[:]
     if new_score != old_score:
       self.emit_refresh_event()
+
+  def shooting_player_point_attempt(self, shooting_player=None, assisting_player=None):
+    '''Point attempt made.  Score or wide determined'''
+    if shooting_player is None:
+      shooting_player = self.shooting_player
+    if assisting_player is None:
+      assisting_player = self.posession_player
+    p0 = random.random()
+    if p0 < (shooting_player.physical.shooting*1.2/100):
+      shooting_player.score_point()
+      assisting_player.assist()
+      shooting_player.update_score()
+      self.attackers.update_score()
+      self.pl.append('And he scores.')
+      self.pl.append('{0} {1} point'.format(self.match.get_score(), shooting_player), vb=0)
+    elif p0 < 0.97:
+      self.pl.append('But he misses.')
+    else:
+      self.pl.append('His shot comes off a defender and out for a 45.')
+      self.free_kick_45()
+
+  def free_kick_45(self):
+    shooting_player = self.attackers.choose_free_taker_45()
+    self.pl.append('{0} steps up to take the 45.'.format(shooting_player))
+    p0 = random.random()
+    if p0 < 0.7:
+      shooting_player.score_point()
+      shooting_player.update_score()
+      self.attackers.update_score()
+      self.pl.append('It goes ofver the bar!')
+      self.pl.append('{0} {1} point'.format(self.match.get_score(), shooting_player), vb=0)
+    elif p0 < 0.85:
+      self.pl.append('But the kick drops short')
+    else:
+      self.pl.append('But the kick goes wide')
+
+  def shooting_player_goal_attempt(self, shooting_player=None, assisting_player=None):
+    '''Point attempt made.  Score or wide or goalkeeper save determined'''
+    if shooting_player is None:
+      shooting_player = self.shooting_player
+    if assisting_player is None:
+      assisting_player = self.posession_player
+    p0 = random.random()
+    if p0 < (self.shooting_player.physical.shooting/100):
+      shooting_player.score_goal()
+      assisting_player.assist()
+      shooting_player.update_score()
+      self.attackers.update_score()
+      self.pl.append('And he scores.')
+      self.pl.append('{0} {1} goal'.format(self.match.get_score(), shooting_player), vb=0)
+    elif p0 < 0.95:
+      self.pl.append('It\'s saved by the goalkeeper.')
+      self.goalkeeper.save_goal()
+    else:
+      self.pl.append('But he misses.')
+
+  def foul(self, attacker):
+    '''Foul event happens.  Card determined.  Injury determined.  Free kick given'''
+    self.pl.append('But he is fouled by {0}.'.format(self.defending_player))
+    p0 = random.random()
+    if p0 < 0.2:
+      self.defending_player.gain_card('y')
+      self.pl.append('{0} receives a yellow card.'.format(self.defending_player))
+      self.pl.append('{0} {1} {2} yellow'.format(self.match.get_score(sc=False), self.defenders.name, self.defending_player), vb=0)
+      if self.defending_player.season.cards.count('y') == 2:
+        self.defending_player.gain_card('r')
+        self.defending_player.gain_suspension('yellow', self.date)
+        self.defenders.send_off_player(self.defending_player)
+        self.pl.append('And it\'s his second yellow.  He is sent off by the referee.')
+        self.pl.append('{0} {1} {2} second yellow'.format(self.match.get_score(sc=False), self.defenders.name, self.defending_player), vb=0)
+        self.emit_refresh_event()
+      p1 = random.random()
+      if p1 < 0.2:
+        attacker.gain_injury(self.date)
+        self.pl.append('{0} {1} {2} injury'.format(self.match.get_score(sc=False), self.attackers.name, attacker), vb=0)
+        self.emit_refresh_event()
+        self.attackers.forced_substitution(attacker)
+    elif p0 < 0.25:
+      self.defending_player.gain_card('r')
+      self.defending_player.gain_suspension('red', self.date)
+      self.defenders.send_off_player(self.defending_player)
+      self.pl.append('{0} receives a red card.'.format(self.defending_player))
+      self.pl.append('{0} {1} {2} red'.format(self.match.get_score(sc=False), self.defenders.name, self.defending_player), vb=0)
+      self.emit_refresh_event()
+      if self.defending_player.physical.position == 'GK':
+        player_off = random.choice(self.defenders.playing)
+        self.defenders.forced_substitution(player_off, 'GK',
+          '{0} has been sent off. {1} is being substituted to bring on a GK'.format(
+           self.defending_player, player_off))
+      p2 = random.random()
+      if p2 < 0.5:
+        attacker.gain_injury(self.date)
+        self.pl.append('{0} {1} {2} injury'.format(self.match.get_score(sc=False), self.attackers.name, attacker), vb=0)
+        self.emit_refresh_event()
+        self.attackers.forced_substitution(attacker)
+    self.free_kick(attacker)
+

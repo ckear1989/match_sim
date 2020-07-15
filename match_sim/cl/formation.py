@@ -5,9 +5,11 @@ class Formation():
   def __init__(self):
     self.nlist = formations[0]
     self.get_pos()
+    self.pos_lineup_changes = []
+    self.off_lineups = []
+    self.injured_lineups = []
     self.get_pos_lineups()
     self.get_ascii()
-    self.pos_lineup_changes = []
 
   def __repr__(self):
     ps = '{0}\n'.format(self.nlist)
@@ -19,6 +21,8 @@ class Formation():
     return self.__repr__()
 
   def post_match_reset(self, team):
+    self.off_lineups = []
+    self.injured_lineups = []
     self.pos_lineup_changes = []
     self.change(team, self.nlist)
 
@@ -29,9 +33,16 @@ class Formation():
       self.nlist = x
       self.get_pos()
       self.get_pos_lineups()
-      self.check_pos_lineup_changes()
       self.get_ascii()
       self.update_ascii(team)
+
+  def remove_lineup(self, lineup):
+    self.off_lineups.append(lineup)
+    self.get_pos_lineups()
+
+  def injured_lineup(self, lineup):
+    self.injured_lineups.append(lineup)
+    self.get_pos_lineups()
 
   def check_pos_lineup_changes(self):
     for pair in self.pos_lineup_changes:
@@ -70,8 +81,20 @@ class Formation():
     i = j
     j = self.pos[4] + i
     self.full_forward_lineups = list(range(i, j))
-    self.playing_lineups = self.goalkeeper_lineups + self.full_back_lineups + \
-      self.half_back_lineups + self.midfielder_lineups + self.half_forward_lineups + self.full_forward_lineups
+    for lineup in self.off_lineups:
+      if lineup in self.goalkeeper_lineups:
+        self.goalkeeper_lineups.remove(lineup)
+      if lineup in self.full_back_lineups:
+        self.full_back_lineups.remove(lineup)
+      if lineup in self.half_back_lineups:
+        self.half_back_lineups.remove(lineup)
+      if lineup in self.midfielder_lineups:
+        self.midfielder_lineups.remove(lineup)
+      if lineup in self.half_forward_lineups:
+        self.half_forward_lineups.remove(lineup)
+      if lineup in self.full_forward_lineups:
+        self.full_forward_lineups.remove(lineup)
+    self.check_pos_lineup_changes()
 
   def which_lineups(self, x):
     if x in self.goalkeeper_lineups:
@@ -146,7 +169,7 @@ class Formation():
       plstr = str(p).center(15).replace('[', ' ').replace(']', ' ')
       self.ascii = self.ascii.replace(postr, plstr)
 
-  def get_coords(self, i):
+  def get_coords(self, i, off_count=None):
     if i in self.goalkeeper_lineups:
       x, y =  (170, 540)
     elif i in self.full_back_lineups:
@@ -174,6 +197,9 @@ class Formation():
       width = (340 / (len(self.full_forward_lineups) + 1))
       j = self.full_forward_lineups.index(i) + 1
       x = (340 - (j*width))
+    elif i < 1:
+      x = 380
+      y = 290 + (off_count + 1) * 50
     else:
       x = 380
       y = 290 - ((21 - i) * 50)
