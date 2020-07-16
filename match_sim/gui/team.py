@@ -49,6 +49,7 @@ class Team(MatchTeam):
   def send_off_player(self, player):
     self.formation.remove_lineup(player.match.lineup)
     player.set_lineup(-1)
+    self.playing.remove(player)
     self.update_playing_positions()
     if self.control:
       print('playing', self.playing)

@@ -27,17 +27,17 @@ class MatchTeam(Team):
     '''Update team positions based on lineup and formation'''
     self.formation.get_pos_lineups()
     self.goalkeepers = [x for x in self.playing if x.match.lineup in
-      self.formation.goalkeeper_lineups]
+      self.formation.goalkeeper_lineups.values()]
     self.full_backs = [x for x in self.playing if x.match.lineup in
-      self.formation.full_back_lineups]
+      self.formation.full_back_lineups.values()]
     self.half_backs = [x for x in self.playing if x.match.lineup in
-      self.formation.half_back_lineups]
+      self.formation.half_back_lineups.values()]
     self.midfielders = [x for x in self.playing if x.match.lineup in
-      self.formation.midfielder_lineups]
+      self.formation.midfielder_lineups.values()]
     self.half_forwards = [x for x in self.playing if x.match.lineup in
-      self.formation.half_forward_lineups]
+      self.formation.half_forward_lineups.values()]
     self.full_forwards = [x for x in self.playing if x.match.lineup in
-      self.formation.full_forward_lineups]
+      self.formation.full_forward_lineups.values()]
     self.defenders = self.full_backs + self.half_backs
     self.forwards = self.full_forwards + self.half_forwards
     self.off = [x for x in self if ((x.match.lineup < 1) and (x.match.minutes > 0))]
