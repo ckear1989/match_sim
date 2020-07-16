@@ -6,16 +6,14 @@ class Formation():
     self.nlist = formations[0]
     self.get_pos()
     self.playing_lineups = {i: i for i in range(1, 16)}
-    self.sub_lineups = {i: i for i in range(16, 21)}
+    self.sub_lineups = {i: i for i in range(16, 22)}
     self.goalkeeper_lineups = {}
     self.full_back_lineups = {}
     self.half_back_lineups = {}
     self.midfielder_lineups = {}
     self.half_forward_lineups = {}
     self.full_forward_lineups = {}
-    self.off_lineups = []
-    self.injured_lineups = []
-    self.pos_lineup_changes = []
+    self.off_lineups = {}
     self.get_pos_lineups()
     self.get_ascii()
 
@@ -30,16 +28,14 @@ class Formation():
 
   def post_match_reset(self, team):
     self.playing_lineups = {i: i for i in range(1, 16)}
-    self.sub_lineups = {i: i for i in range(16, 21)}
+    self.sub_lineups = {i: i for i in range(16, 22)}
     self.goalkeeper_lineups = {}
     self.full_back_lineups = {}
     self.half_back_lineups = {}
     self.midfielder_lineups = {}
     self.half_forward_lineups = {}
     self.full_forward_lineups = {}
-    self.off_lineups = []
-    self.injured_lineups = []
-    self.pos_lineup_changes = []
+    self.off_lineups = {}
     self.change(team, self.nlist)
 
   def change(self, team, x=None):
@@ -53,14 +49,13 @@ class Formation():
       self.update_ascii(team)
 
   def remove_lineup(self, lineup):
-    self.off_lineups.append(lineup)
+    for i in self.playing_lineups:
+      if self.playing_lineups[i] == lineup:
+        playing_lineup = i
+    self.off_lineups[lineup] = playing_lineup
     for x in self.playing_lineups:
       if self.playing_lineups[x] == lineup:
         self.playing_lineups[x] = None
-    self.get_pos_lineups()
-
-  def injured_lineup(self, lineup):
-    self.injured_lineups.append(lineup)
     self.get_pos_lineups()
 
   def get_pos(self):
@@ -91,43 +86,68 @@ class Formation():
       self.full_forward_lineups[x] = self.playing_lineups[x]
 
   def sub_on_off(self, on, off):
-    self.off_lineups.append(off)
     for x in self.playing_lineups:
       if self.playing_lineups[x] == off:
         self.playing_lineups[x] = on
+        self.sub_lineups[on] = None
         self.get_pos_lineups()
         return True
 
-  def which_lineups(self, x):
-    if x in self.goalkeeper_lineups.values():
-      return self.goalkeeper_lineups
-    elif x in self.full_back_lineups.values():
-      return self.full_back_lineups
-    elif x in self.half_back_lineups.values():
-      return self.half_back_lineups
-    elif x in self.midfielder_lineups.values():
-      return self.midfielder_lineups
-    elif x in self.half_forward_lineups.values():
-      return self.half_forward_lineups
-    elif x in self.full_forward_lineups.values():
-      return self.full_forward_lineups
+  def which_lineups(self, x, key=False):
+    if key is False:
+      if x in self.goalkeeper_lineups.values():
+        return self.goalkeeper_lineups
+      elif x in self.full_back_lineups.values():
+        return self.full_back_lineups
+      elif x in self.half_back_lineups.values():
+        return self.half_back_lineups
+      elif x in self.midfielder_lineups.values():
+        return self.midfielder_lineups
+      elif x in self.half_forward_lineups.values():
+        return self.half_forward_lineups
+      elif x in self.full_forward_lineups.values():
+        return self.full_forward_lineups
+    else:
+      if x in self.goalkeeper_lineups.keys():
+        return self.goalkeeper_lineups
+      elif x in self.full_back_lineups.keys():
+        return self.full_back_lineups
+      elif x in self.half_back_lineups.keys():
+        return self.half_back_lineups
+      elif x in self.midfielder_lineups.keys():
+        return self.midfielder_lineups
+      elif x in self.half_forward_lineups.keys():
+        return self.half_forward_lineups
+      elif x in self.full_forward_lineups.keys():
+        return self.full_forward_lineups
 
   def swap_playing_positions(self, x, y):
-    if ((x in self.playing_lineups.values()) and
-      (y in self.playing_lineups.values())):
-      self.pos_lineup_changes.append([x, y])
-      self.pos_lineup_changes.append([y, x])
-      x_lineups = self.which_lineups(x)
-      y_lineups = self.which_lineups(y)
-      # might be the same so use this verbose method
-      for i in x_lineups:
-        if x_lineups[i] == x:
-          x_key = i
-      for i in y_lineups:
-        if y_lineups[i] == y:
-          y_key = i
-      x_lineups[x_key] = y
-      y_lineups[y_key] = x
+    x_lineups = self.which_lineups(x)
+    y_lineups = self.which_lineups(y)
+    # might be the same so use this verbose method
+    for i in x_lineups:
+      if x_lineups[i] == x:
+        x_key = i
+    for i in y_lineups:
+      if y_lineups[i] == y:
+        y_key = i
+    x_lineups[x_key] = y
+    y_lineups[y_key] = x
+    self.playing_lineups[x_key] = y
+    self.playing_lineups[y_key] = x
+
+  def swap_playing_positions_off(self, on_lineup, off_lineup):
+    on_lineups = self.which_lineups(on_lineup)
+    off_lineups = self.which_lineups(off_lineup)
+    # might be the same so use this verbose method
+    for i in on_lineups:
+      if on_lineups[i] == on_lineup:
+        on_key = i
+    for i in off_lineups:
+      if off_lineups[i] == off_lineup:
+        off_key = i
+    on_lineups[on_key] = None
+    off_lineups[off_key] = on_lineup
 
   def get_preferred_position(self, lineup):
     if lineup in [1, 16]:

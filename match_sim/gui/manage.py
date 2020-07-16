@@ -49,87 +49,77 @@ class MatchPlayerTarget(MyTarget):
   def OnDropText(self, x, y, data):
     self.team.update_playing_positions()
     new_lineup = int(data.split(' ')[0])
-    new_name = ' '.join(data.split(' ')[1:])
-    # debug
-    print('target', self.lineup)
-    print('dropped', new_lineup)
-    if (new_lineup in self.team.formation.playing_lineups) and \
-      (self.lineup in self.team.formation.off_lineups):
-      # sent off player switch lineup positions
-      print('swap pos off')
-      self.team.formation.swap_playing_positions(new_lineup, self.lineup)
-    elif (new_lineup in self.team.formation.off_lineups) and \
-      (self.lineup in self.team.formation.playing_lineups):
-      # sent off player switch lineup positions
-      print('swap pos off')
-      self.team.formation.swap_playing_positions(new_lineup, self.lineup)
-    elif (new_lineup in self.team.formation.playing_lineups) and \
-      (self.lineup in self.team.formation.injured_lineups):
-      # injured player swap lineup positions
-      print('swap pos inj')
-      self.team.formation.swap_playing_positions(new_lineup, self.lineup)
-    elif (new_lineup in self.team.formation.injured_lineups) and \
-      (self.lineup in self.team.formation.playing_lineups):
-      # injured player swap lineup positions
-      print('swap pos inj')
-      self.team.formation.swap_playing_positions(new_lineup, self.lineup)
-    elif (new_lineup in self.team.formation.playing_lineups) and \
-      (self.lineup in self.team.formation.playing_lineups):
-      # swap positions on pitch
-      print('swap pos')
-      self.team.formation.swap_playing_positions(new_lineup, self.lineup)
-    elif (new_lineup not in self.team.formation.playing_lineups) and \
-      (self.lineup not in self.team.formation.playing_lineups):
-      print('none playing')
-      return False
-    elif self.lineup in self.team.formation.playing_lineups:
-      # dragged player coming on
-      print('dragged on')
-      for player in self.team.playing:
-        if player.match.lineup == self.lineup:
-          player_off = player
-      for player in self.team.subs:
-        if player.match.lineup == new_lineup:
-          if str(player) == new_name:
-            player_on = player
-            # confirm dialog
-            dlg = wx.MessageDialog(self.parent, '{0} coming off for {1}'.format(
-              player_off, player_on), style=wx.OK|wx.CANCEL)
-            resp = dlg.ShowModal()
-            if resp == wx.ID_OK:
-              self.team.playing.remove(player_off)
-              player_off.set_lineup(0)
-              self.team.playing.append(player_on)
-              self.team.subs.remove(player_on)
-              self.team.formation.sub_on_off(new_lineup, self.lineup)
-            else:
-              return False
-    else:
-      # dragged player coming off
-      print('dragged off')
-      player_on = None
-      for player in self.team.subs:
-        if player.match.lineup == self.lineup:
-          player_on = player
-      if player_on is not None:
-        for player in self.team.playing:
-          if player.match.lineup == new_lineup:
-            if str(player) == new_name:
-              player_off = player
-              # confirm dialog
-              dlg = wx.MessageDialog(self.parent, '{0} coming off for {1}'.format(
-                player_off, player_on), style=wx.OK|wx.CANCEL)
-              resp = dlg.ShowModal()
-              if resp == wx.ID_OK:
-                self.team.playing.remove(player_off)
-                player_off.set_lineup(0)
-                self.team.playing.append(player_on)
-                self.team.subs.remove(player_on)
-                self.team.formation.sub_on_off(self.lineup, new_lineup)
-              else:
-                return False
-      else:
+    if self.lineup in self.team.formation.playing_lineups.keys():
+      current_lineup = self.team.formation.playing_lineups[self.lineup]
+      if current_lineup is None:
+        print('target off')
+        if new_lineup in self.team.formation.playing_lineups.values():
+          print('dropped playing')
+          self.team.formation.swap_playing_positions_off(new_lineup, current_lineup)
+        elif new_lineup in self.team.formation.sub_lineups.values():
+          print('dropped sub')
+          return False
+        elif new_lineup in self.team.formation.off_lineups:
+          print('dropped off')
+          return False
+        else:
+          print('target', self.lineup)
+          print('target current', current_lineup)
+          print('dropped', new_lineup)
+          raise Exception('debug sub')
+      elif current_lineup in self.team.formation.playing_lineups.values():
+        print('target playing', current_lineup)
+        if new_lineup in self.team.formation.playing_lineups.values():
+          print('dropped playing', new_lineup)
+          self.team.formation.swap_playing_positions(current_lineup, new_lineup)
+        elif new_lineup in self.team.formation.sub_lineups.values():
+          print('dropped sub', new_lineup)
+          self.team.sub_on_off(new_lineup, current_lineup)
+        elif new_lineup in self.team.formation.off_lineups:
+          print('dropped off', new_lineup)
+          self.team.formation.swap_playing_positions_off(current_lineup, new_lineup)
+        else:
+          print('target', self.lineup)
+          print('target current', current_lineup)
+          print('dropped', new_lineup)
+          raise Exception('debug sub')
+      elif current_lineup in self.team.formation.sub_lineups.values():
+        print('target sub', current_lineup)
+        if new_lineup in self.team.formation.playing_lineups.values():
+          print('dropped playing', new_lineup)
+          self.team.sub_on_off(current_lineup, new_lineup)
+        elif new_lineup in self.team.formation.sub_lineups.values():
+          print('dropped sub', new_lineup)
+          return False
+        elif new_lineup in self.team.formation.off_lineups:
+          print('dropped off', new_lineup)
+          return False
+        else:
+          print('target', self.lineup)
+          print('target current', current_lineup)
+          print('dropped', new_lineup)
+          raise Exception('debug sub')
+    elif self.lineup in self.team.formation.sub_lineups.keys():
+      current_lineup = self.lineup
+      print('target sub', current_lineup)
+      if new_lineup in self.team.formation.playing_lineups.values():
+        print('dropped playing', new_lineup)
+        self.team.sub_on_off(current_lineup, new_lineup)
+      elif new_lineup in self.team.formation.sub_lineups.values():
+        print('dropped sub', new_lineup)
         return False
+      elif new_lineup in self.team.formation.off_lineups:
+        print('dropped off', new_lineup)
+        return False
+      else:
+        print('target', self.lineup)
+        print('target current', current_lineup)
+        print('dropped', new_lineup)
+        raise Exception('debug sub')
+    else:
+      print('target', self.lineup)
+      print('dropped', new_lineup)
+      raise Exception('debug sub')  
     self.team.update_playing_positions()
     return True
 
@@ -296,22 +286,17 @@ class ManagePanel(PaintPanel):
 
   def draw_lineup(self, dc):
     self.draw_pitch(dc, self.team.name)
-    for i in range(1, 22):
-      players = [p for p in self.team if p.match.lineup == i]
-      if len(players) > 0:
-        player = players[0]
-        x, y = self.team.formation.get_coords(i)
-        if player.match.lineup in self.team.formation.goalkeeper_lineups:
-          colour_p = self.team.colour.goalkeeper_p
-          colour_s = self.team.colour.goalkeeper_s
-        else:
-          if self.home is True:
-            colour_p = self.team.colour.home_p
-            colour_s = self.team.colour.home_s
-          else:
-            colour_p = self.team.colour.away_p
-            colour_s = self.team.colour.away_s
-        self.draw_player(player, dc, x=x, y=y, colour_p=colour_p, colour_s=colour_s) 
+    for player in self.team.playing + self.team.subs:
+      if player.match.lineup in self.team.formation.goalkeeper_lineups:
+        colour_p = selfteam.colour.goalkeeper_p
+        colour_s = self.team.colour.goalkeeper_s
+      else:
+        colour_p = self.team.colour.home_p
+        colour_s = self.team.colour.home_s
+      x, y = self.team.formation.get_coords(player.match.lineup, off_count)
+      self.draw_player(player, dc, x=x, y=y, x0=500, y0=50,
+        colour_p=colour_p, colour_s=colour_s)
+    self.draw_manager(self.team.manager, dc, x=380, y=340, x0=500, y0=50)
 
 class MatchManagePanel(ManagePanel):
   def __init__(self, parent, team, home=True, x0=None, y0=None):
@@ -335,6 +320,7 @@ class MatchManagePanel(ManagePanel):
 
   def make_a_sub(self, event):
     text = event.GetText()
+    print(text)
     text_n = int(text.split(' ')[0])
     src = wx.DropSource(self.lineups[text_n])
     tobj = wx.TextDataObject(text)
@@ -345,15 +331,31 @@ class MatchManagePanel(ManagePanel):
   def update_lists(self):
     for i in range(1, 22):
       self.lineups[i].ClearAll()
-    for j in self.team.formation.playing_lineups:
-      lineup = self.team.formation.playing_lineups[j]
-      if lineup:
-        for player in self.team.playing:
-          if player.match.lineup == lineup:
-            self.lineups[j].InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
-    for player in self.team.subs:
-      if player.match.lineup > 0:
-        self.lineups[player.match.lineup].InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
+      if i in self.team.formation.playing_lineups:
+        current_lineup = self.team.formation.playing_lineups[i]
+      else:
+        current_lineup = self.team.formation.sub_lineups[i]
+      players = [p for p in self.team if p.match.lineup == current_lineup]
+      if len(players) > 0:
+        player = players[0]
+        self.lineups[i].InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
+
+  def draw_lineup(self, dc):
+    self.draw_pitch(dc, self.team.name)
+    off_count = 0
+    for player in self.team.playing + self.team.subs + self.team.off:
+      if player.match.lineup in self.team.formation.goalkeeper_lineups:
+        colour_p = self.team.colour.goalkeeper_p
+        colour_s = self.team.colour.goalkeeper_s
+      else:
+        colour_p = self.team.colour.home_p
+        colour_s = self.team.colour.home_s
+      if player.match.lineup < 1:
+        off_count += 1
+      x, y = self.team.formation.get_coords(player.match.lineup, off_count)
+      self.draw_player_match(player, dc, x=x, y=y, x0=self.x0, y0=self.y0,
+        colour_p=colour_p, colour_s=colour_s)
+    self.draw_manager(self.team.manager, dc, x=380, y=340, x0=self.x0, y0=self.y0)
 
 class TrainingPanel(TemplatePanel):
   def __init__(self, parent):
