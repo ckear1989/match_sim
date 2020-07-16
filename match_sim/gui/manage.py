@@ -101,7 +101,7 @@ class MatchPlayerTarget(MyTarget):
               player_off.set_lineup(0)
               self.team.playing.append(player_on)
               self.team.subs.remove(player_on)
-              self.team.formation.ammend_pos_lineups(self.lineup, new_lineup)
+              self.team.formation.sub_on_off(new_lineup, self.lineup)
             else:
               return False
     else:
@@ -125,7 +125,7 @@ class MatchPlayerTarget(MyTarget):
                 player_off.set_lineup(0)
                 self.team.playing.append(player_on)
                 self.team.subs.remove(player_on)
-                self.team.formation.ammend_pos_lineups(new_lineup, self.lineup)
+                self.team.formation.sub_on_off(self.lineup, new_lineup)
               else:
                 return False
       else:
@@ -345,12 +345,12 @@ class MatchManagePanel(ManagePanel):
   def update_lists(self):
     for i in range(1, 22):
       self.lineups[i].ClearAll()
-    i = 0
     for j in self.team.formation.playing_lineups:
-      i += 1
-      for player in self.team.playing:
-        if player.match.lineup == j:
-          self.lineups[i].InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
+      lineup = self.team.formation.playing_lineups[j]
+      if lineup:
+        for player in self.team.playing:
+          if player.match.lineup == lineup:
+            self.lineups[j].InsertItem(0, '{0} {1}'.format(player.match.lineup, player))
     for player in self.team.subs:
       if player.match.lineup > 0:
         self.lineups[player.match.lineup].InsertItem(0, '{0} {1}'.format(player.match.lineup, player))

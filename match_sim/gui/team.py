@@ -20,11 +20,13 @@ class Team(MatchTeam):
     '''Force user to make a sub'''
     self.formation.injured_lineup(player.match.lineup)
     self.update_playing_positions()
-    print(self.playing)
-    print(self.off)
-    print(self.formation.playing_lineups)
-    print(self.formation.off_lineups)
-    print(self.formation.injured_lineups)
+    if self.control:
+      print('playing', self.playing)
+      print('subs', self.subs)
+      print('off', self.off)
+      print('playing lineups', self.formation.playing_lineups)
+      print('off lineups', self.formation.off_lineups)
+      print('injured lineups', self.formation.injured_lineups)
     subs_used = len([x for x in self.playing if x.match.lineup not in range(1, 16)])
     if subs_used > 4:
       self.playing.remove(player)
@@ -48,11 +50,13 @@ class Team(MatchTeam):
     self.formation.remove_lineup(player.match.lineup)
     player.set_lineup(-1)
     self.update_playing_positions()
-    print(self.playing)
-    print(self.off)
-    print(self.formation.playing_lineups)
-    print(self.formation.off_lineups)
-    print(self.formation.injured_lineups)
+    if self.control:
+      print('playing', self.playing)
+      print('subs', self.subs)
+      print('off', self.off)
+      print('playing lineups', self.formation.playing_lineups)
+      print('off lineups', self.formation.off_lineups)
+      print('injured lineups', self.formation.injured_lineups)
     self.emit_send_off_event(player)
 
   def emit_send_off_event(self, player):
