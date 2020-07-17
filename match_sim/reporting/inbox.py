@@ -57,7 +57,7 @@ class Inbox():
     msg = 'Match report\n'
     msg += '{0} \n'.format(match)
     for atime in log:
-      msg += '{0} {1}\n'.format(atime, log[atime])
+      msg += '{0} \n'.format(log[atime])
     msg += 'From {0}.'.format(self.team_coach)
     self.messages['unread'].append(msg)
     self.update_count()

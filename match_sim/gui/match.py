@@ -202,6 +202,7 @@ class MatchPanel(PaintPanel):
       print('debug')
       self.game.process_match_result(self.match, self.match.comp_name)
       self.game.update_next_fixture()
+      self.game.inbox.add_match_message(self.match)
       self.on_exit_match(event)
     self.match.set_status('playing')
     self.pause_button.SetLabel('Pause')

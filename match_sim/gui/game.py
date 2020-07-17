@@ -155,9 +155,9 @@ class GamePanel(TemplatePanel):
       self.match_logs[self.game.current_date].append(match.report)
       self.game.process_match_result(match, match.comp_name)
       self.game.update_next_fixture()
+      self.game.inbox.add_match_message(match)
     else:
       self.GetParent().on_match(MatchPanel, match, self.match_logs[self.game.current_date])
-    self.game.inbox.add_match_message(match)
 
 class Game(ClGame):
   def __init__(self, team, name):
