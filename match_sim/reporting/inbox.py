@@ -52,6 +52,16 @@ class Inbox():
     self.messages['unread'].append(msg)
     self.update_count()
 
+  def add_match_message(self, match):
+    log = match.report
+    msg = 'Match report\n'
+    msg += '{0} \n'.format(match)
+    for atime in log:
+      msg += '{0} {1}\n'.format(atime, log[atime])
+    msg += 'From {0}.'.format(self.team_coach)
+    self.messages['unread'].append(msg)
+    self.update_count()
+
   def update_count(self):
     self.count = len(self.messages['unread'])
 
