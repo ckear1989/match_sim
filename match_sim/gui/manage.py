@@ -9,6 +9,7 @@ path = pathlib.Path(__file__).parent.absolute()
 import wx
 
 from match_sim.gui.graphics import PaintPanel, Colour
+from match_sim.gui.training import TrainingPanel
 import match_sim.cl.default as default
 
 class MyTarget(wx.TextDropTarget):
@@ -180,7 +181,7 @@ class ManagePanel(PaintPanel):
       self.targets[i] = PlayerTarget(self.lineups[i], i, self.team)
       self.lineups[i].SetDropTarget(self.targets[i])
       self.vbox2.Add(self.lineups[i], proportion=0, flag=wx.EXPAND)
-    self.reserves = wx.ListCtrl(self, -1, style=wx.LC_LIST|wx.LC_SORT_ASCENDING)
+    self.reserves = wx.ListCtrl(self, -1, style=wx.LC_LIST|wx.LC_SORT_ASCENDING, size=wx.Size(50, 280))
     self.update_lists()
     self.vbox3.Add(self.reserves, proportion=1, flag=wx.EXPAND)
     self.reserves_t = ReservesTarget(self.reserves, 0, self.team)
@@ -288,15 +289,15 @@ class ManagePanel(PaintPanel):
     self.draw_pitch(dc, self.team.name)
     for player in self.team.playing + self.team.subs:
       if player.match.lineup in self.team.formation.goalkeeper_lineups:
-        colour_p = selfteam.colour.goalkeeper_p
+        colour_p = self.team.colour.goalkeeper_p
         colour_s = self.team.colour.goalkeeper_s
       else:
         colour_p = self.team.colour.home_p
         colour_s = self.team.colour.home_s
-      x, y = self.team.formation.get_coords(player.match.lineup, off_count)
-      self.draw_player(player, dc, x=x, y=y, x0=500, y0=50,
+      x, y = self.team.formation.get_coords(player.match.lineup)
+      self.draw_player(player, dc, x=x, y=y, x0=self.x0, y0=self.y0,
         colour_p=colour_p, colour_s=colour_s)
-    self.draw_manager(self.team.manager, dc, x=380, y=340, x0=500, y0=50)
+    self.draw_manager(self.team.manager, dc, x=380, y=340, x0=self.x0, y0=self.y0)
 
 class MatchManagePanel(ManagePanel):
   def __init__(self, parent, team, home=True, x0=None, y0=None):
@@ -356,10 +357,6 @@ class MatchManagePanel(ManagePanel):
       self.draw_player_match(player, dc, x=x, y=y, x0=self.x0, y0=self.y0,
         colour_p=colour_p, colour_s=colour_s)
     self.draw_manager(self.team.manager, dc, x=380, y=340, x0=self.x0, y0=self.y0)
-
-class TrainingPanel(TemplatePanel):
-  def __init__(self, parent):
-    super().__init__(parent)
 
 if __name__ == "__main__":
 

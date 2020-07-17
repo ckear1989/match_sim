@@ -212,7 +212,7 @@ class Formation():
       width = (340 / (len(self.full_forward_lineups) + 1))
       j = list(self.full_forward_lineups.values()).index(i) + 1
       x = (340 - (j*width))
-    elif i < 1:
+    elif i < 0:
       x = 380
       y = 290 + (off_count + 1) * 50
     else:
