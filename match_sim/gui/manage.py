@@ -75,7 +75,17 @@ class MatchPlayerTarget(MyTarget):
           self.team.formation.swap_playing_positions(current_lineup, new_lineup)
         elif new_lineup in self.team.formation.sub_lineups.values():
           print('dropped sub', new_lineup)
-          self.team.sub_on_off(new_lineup, current_lineup)
+          for player in self.team:
+            if player.match.lineup == current_lineup:
+              player_off = player
+            elif player.match.lineup == new_lineup:
+              player_on = player
+          dlg = wx.MessageDialog(self.parent, '{0} coming off for {1}'.format(
+              player_off, player_on), style=wx.OK|wx.CANCEL)
+          resp = dlg.ShowModal()
+          if resp == wx.ID_OK:
+            self.team.sub_on_off(new_lineup, current_lineup)
+            player_off.set_lineup(0)
         elif new_lineup in self.team.formation.off_lineups:
           print('dropped off', new_lineup)
           self.team.formation.swap_playing_positions_off(current_lineup, new_lineup)
@@ -88,7 +98,17 @@ class MatchPlayerTarget(MyTarget):
         print('target sub', current_lineup)
         if new_lineup in self.team.formation.playing_lineups.values():
           print('dropped playing', new_lineup)
-          self.team.sub_on_off(current_lineup, new_lineup)
+          for player in self.team:
+            if player.match.lineup == current_lineup:
+              player_on = player
+            elif player.match.lineup == new_lineup:
+              player_off = player
+          dlg = wx.MessageDialog(self.parent, '{0} coming off for {1}'.format(
+            player_off, player_on), style=wx.OK|wx.CANCEL)
+          resp = dlg.ShowModal()
+          if resp == wx.ID_OK:
+            self.team.sub_on_off(current_lineup, new_lineup)
+            player_off.set_lineup(0)
         elif new_lineup in self.team.formation.sub_lineups.values():
           print('dropped sub', new_lineup)
           return False
@@ -101,22 +121,36 @@ class MatchPlayerTarget(MyTarget):
           print('dropped', new_lineup)
           raise Exception('debug sub')
     elif self.lineup in self.team.formation.sub_lineups.keys():
-      current_lineup = self.lineup
-      print('target sub', current_lineup)
-      if new_lineup in self.team.formation.playing_lineups.values():
-        print('dropped playing', new_lineup)
-        self.team.sub_on_off(current_lineup, new_lineup)
-      elif new_lineup in self.team.formation.sub_lineups.values():
-        print('dropped sub', new_lineup)
-        return False
-      elif new_lineup in self.team.formation.off_lineups:
-        print('dropped off', new_lineup)
-        return False
+      current_lineup = self.team.formation.sub_lineups[self.lineup]
+      if current_lineup is not None:
+        print('target sub', current_lineup)
+        if new_lineup in self.team.formation.playing_lineups.values():
+          print('dropped playing', new_lineup)
+          for player in self.team:
+            if player.match.lineup == current_lineup:
+              player_on = player
+            elif player.match.lineup == new_lineup:
+              player_off = player
+          dlg = wx.MessageDialog(self.parent, '{0} coming off for {1}'.format(
+            player_off, player_on), style=wx.OK|wx.CANCEL)
+          resp = dlg.ShowModal()
+          if resp == wx.ID_OK:
+            self.team.sub_on_off(current_lineup, new_lineup)
+            player_off.set_lineup(0)
+        elif new_lineup in self.team.formation.sub_lineups.values():
+          print('dropped sub', new_lineup)
+          return False
+        elif new_lineup in self.team.formation.off_lineups:
+          print('dropped off', new_lineup)
+          return False
+        else:
+          print('target', self.lineup)
+          print('target current', current_lineup)
+          print('dropped', new_lineup)
+          raise Exception('debug sub')
       else:
-        print('target', self.lineup)
-        print('target current', current_lineup)
-        print('dropped', new_lineup)
-        raise Exception('debug sub')
+        print('target none')
+        return False
     else:
       print('target', self.lineup)
       print('dropped', new_lineup)

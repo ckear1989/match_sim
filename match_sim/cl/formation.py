@@ -91,6 +91,7 @@ class Formation():
         self.playing_lineups[x] = on
         self.sub_lineups[on] = None
         self.get_pos_lineups()
+        print('sub lineups', self.sub_lineups)
         return True
 
   def which_lineups(self, x, key=False):
@@ -215,7 +216,7 @@ class Formation():
       width = (340 / (len(self.full_forward_lineups) + 1))
       j = list(self.full_forward_lineups.values()).index(i) + 1
       x = (340 - (j*width))
-    elif i < 0:
+    elif i < 1:
       x = 380
       y = 290 + (off_count + 1) * 50
     else:
