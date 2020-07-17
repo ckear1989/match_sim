@@ -24,6 +24,7 @@ class GamePanel(TemplatePanel):
   def __init__(self, parent):
     super().__init__(parent)
     self.game = self.GetParent().game
+    self.match_logs = {}
     self.txt_output.Destroy()
     self.vbox1 = wx.BoxSizer(wx.VERTICAL)
     self.vbox2 = wx.BoxSizer(wx.VERTICAL)
@@ -117,6 +118,7 @@ class GamePanel(TemplatePanel):
   def process_fixtures_daily(self):
     '''Get today\'s fixtures.  Iteratively play eatch game.'''
     if self.game.current_date == self.game.next_fixture_date:
+      self.match_logs[self.game.current_date] = []
       fixtures = self.game.fixtures[self.game.current_date]
       if len(fixtures) > 1:
         if self.game.team in fixtures[-1]:
@@ -150,10 +152,11 @@ class GamePanel(TemplatePanel):
     if silent is True:
       for ts in match.play(0):
         pass
+      self.match_logs[self.game.current_date].append(match.report)
       self.game.process_match_result(match, match.comp_name)
       self.game.update_next_fixture()
     else:
-      self.GetParent().on_match(MatchPanel, match)
+      self.GetParent().on_match(MatchPanel, match, self.match_logs[self.game.current_date])
 
 class Game(ClGame):
   def __init__(self, team, name):

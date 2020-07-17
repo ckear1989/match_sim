@@ -20,8 +20,9 @@ FORCED_SUB_EVENT = wx.NewEventType()
 FORCED_SUB_EVENT_CUSTOM = wx.PyEventBinder(FORCED_SUB_EVENT, 1)
 
 class MatchPanel(PaintPanel):
-  def __init__(self, parent, match, x0=600, y0=None):
+  def __init__(self, parent, match, logs, x0=600, y0=None):
     self.match = match
+    self.logs = logs
     super().__init__(parent, x0, y0)
     colour = Colour()
     self.exit_button.Destroy()
@@ -208,6 +209,9 @@ class MatchPanel(PaintPanel):
 
   def on_stopclock(self, event):
     self.stopclock.SetLabel(event.GetMyVal())
+    for log in self.logs:
+      if self.match.time in log.keys():
+        self.txt_output_long.AppendText(log[self.match.time] + '\n')
     self.Update()
     wx.Yield()
 
@@ -219,7 +223,6 @@ class MatchPanel(PaintPanel):
     if 0 < vb <= self.verbosity:
       if len(ps) > 6:
         self.txt_output.SetLabel(ps)
-        self.match.append_report(ps)
         self.Update()
         wx.Yield()
         time.sleep(0.5)
@@ -255,7 +258,7 @@ class Match(ClMatch):
     return ps.strip()
 
   def append_report(self, ps):
-    self.report.append(self.stopclock_time, ps)
+    self.report[self.time] = ps
 
   def set_status(self, status):
     self.status = status

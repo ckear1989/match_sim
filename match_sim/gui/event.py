@@ -29,12 +29,15 @@ class MatchEvent(wx.PyCommandEvent):
     return self.verbosity
 
 class EventPl(list):
-  def __init__(self, event_handler):
+  def __init__(self, event_handler, amatch):
     super().__init__()
     self.event_handler = event_handler
+    self.match = amatch
 
   def append(self, astr, vb=5):
     self.emit_match_event(astr, vb)
+    if vb == 0:
+      self.match.append_report(astr)
 
   def emit_match_event(self, astr, vb=5):
     event = MatchEvent(MATCH_EVENT, wx.ID_ANY)
@@ -46,7 +49,7 @@ class Event(ClEvent):
   def __init__(self, amatch, event_handler):
     super().__init__(amatch)
     self.event_handler = event_handler
-    self.pl = EventPl(self.event_handler)
+    self.pl = EventPl(self.event_handler, amatch)
     self.match = amatch
 
   def full_time(self):

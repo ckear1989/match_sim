@@ -1,5 +1,5 @@
 
-class MatchReport(list):
+class MatchReport(dict):
 
   def append(self, ts, ps):
-    super().append('{0} {1}'.format(ts, ps))
+    self[ts] = ps
