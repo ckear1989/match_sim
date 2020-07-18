@@ -21,6 +21,16 @@ class InboxPanel(TemplatePanel):
     self.hbox3.Add(next_button, proportion=0)
     self.SetSizer(self.main_sizer)
 
+  def Draw(self, dc):
+    super().Draw(dc)
+    try:
+      if self.game.inbox.current_folder == self.game.inbox.messages['unread']:
+        self.on_unread(None)
+      else:
+        self.on_read(None)
+    except AttributeError:
+      pass
+
   def on_read(self, event):
     self.game.inbox.get_read()
     self.txt_output.Clear()
