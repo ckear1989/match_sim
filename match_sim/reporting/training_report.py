@@ -34,7 +34,7 @@ class TrainingReport():
 
   def append_report(self, player):
     start_stats = self.training.history[self.start_date][str(player)]
-    end_stats = self.training.history[self.start_date][str(player)]
+    end_stats = self.training.history[self.end_date][str(player)]
     self.report += '\n{0}\n'.format(player)
     for stat in start_stats.__dict__.keys():
       if (isinstance(start_stats.__dict__[stat], float)) or \
