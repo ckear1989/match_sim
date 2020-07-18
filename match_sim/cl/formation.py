@@ -91,7 +91,6 @@ class Formation():
         self.playing_lineups[x] = on
         self.sub_lineups[on] = None
         self.get_pos_lineups()
-        print('sub lineups', self.sub_lineups)
         return True
 
   def which_lineups(self, x, key=False):
@@ -136,22 +135,22 @@ class Formation():
     y_lineups[y_key] = x
     self.playing_lineups[x_key] = y
     self.playing_lineups[y_key] = x
+    self.get_pos_lineups()
 
   def swap_playing_positions_off(self, on_lineup, off_lineup):
     on_lineups = self.which_lineups(on_lineup)
     off_lineups = self.which_lineups(off_lineup)
-    print(on_lineups, off_lineups)
     for i in on_lineups:
       if on_lineups[i] == on_lineup:
         on_key = i
     for i in off_lineups:
       if off_lineups[i] == off_lineup:
         off_key = i
-    print(on_key, off_key)
     on_lineups[on_key] = None
     off_lineups[off_key] = on_lineup
     self.playing_lineups[on_key] = None
     self.playing_lineups[off_key] = on_lineup
+    self.get_pos_lineups()
 
   def get_preferred_position(self, lineup):
     if lineup in [1, 16]:

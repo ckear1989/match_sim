@@ -322,7 +322,7 @@ class ManagePanel(PaintPanel):
   def draw_lineup(self, dc):
     self.draw_pitch(dc, self.team.name)
     for player in self.team.playing + self.team.subs:
-      if player.match.lineup in self.team.formation.goalkeeper_lineups:
+      if player.match.lineup in self.team.formation.goalkeeper_lineups.values():
         colour_p = self.team.colour.goalkeeper_p
         colour_s = self.team.colour.goalkeeper_s
       else:
@@ -379,7 +379,7 @@ class MatchManagePanel(ManagePanel):
     self.draw_pitch(dc, self.team.name)
     off_count = 0
     for player in self.team.playing + self.team.subs + self.team.off:
-      if player.match.lineup in self.team.formation.goalkeeper_lineups:
+      if player.match.lineup in self.team.formation.goalkeeper_lineups.values():
         colour_p = self.team.colour.goalkeeper_p
         colour_s = self.team.colour.goalkeeper_s
       else:

@@ -93,11 +93,8 @@ class MatchPanel(PaintPanel):
   def draw_lineup(self, dc):
     self.draw_pitch(dc, x0=500, y0=50, header_border=True)
     off_count = 0
-    print('playing', self.match.team_a.playing)
-    print('subs', self.match.team_a.subs)
-    print('off', self.match.team_a.off)
     for player in self.match.team_a.playing + self.match.team_a.subs + self.match.team_a.off:
-      if player.match.lineup in self.match.team_a.formation.goalkeeper_lineups:
+      if player.match.lineup in self.match.team_a.formation.goalkeeper_lineups.values():
         colour_p = self.match.team_a.colour.goalkeeper_p
         colour_s = self.match.team_a.colour.goalkeeper_s
       else:
@@ -112,7 +109,7 @@ class MatchPanel(PaintPanel):
     self.draw_pitch(dc, x0=940, y0=50, header_border=True)
     off_count = 0
     for player in self.match.team_b.playing + self.match.team_b.subs + self.match.team_b.off:
-      if player.match.lineup in self.match.team_b.formation.goalkeeper_lineups:
+      if player.match.lineup in self.match.team_b.formation.goalkeeper_lineups.values():
         colour_p = self.match.team_b.colour.goalkeeper_p
         colour_s = self.match.team_b.colour.goalkeeper_s
       else:
