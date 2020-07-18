@@ -30,19 +30,15 @@ class TrainingPanel(TemplatePanel):
       self.days[day].Add(label, flag=wx.ALL, border=5)
       self.schedule[day] = wx.ComboBox(self, choices=[x for x in default.focus if len(x) > 2])
       self.schedule[day].Bind(wx.EVT_COMBOBOX, self.update_schedule)
-      if day in self.training.schedule.keys():
-        self.schedule[day].SetStringSelection(self.training.schedule[day])
+      if default.dow[day] in self.training.schedule.keys():
+        self.schedule[day].SetStringSelection(self.training.schedule[default.dow[day]])
       self.days[day].Add(self.schedule[day])
       self.hbox1.Add(self.days[day])
 
   def update_schedule(self, event):
     for day in self.days:
       focus = self.schedule[day].GetStringSelection()
-      print(day, focus)
       self.training.get_schedule(day, focus)
-    print(self.training.schedule)
-    print(self.training.fixtures)
 
   def get_report(self, event):
-    report = TrainingReport()
-    self.inbox.add_training_message(report)
+    report = TrainingReport(self)

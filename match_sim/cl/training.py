@@ -43,6 +43,7 @@ class Training():
   def __init__(self, start_date, dow=None, fs=None):
     self.schedule = {}
     self.fixtures = {}
+    self.history = {}
     self.start_date = start_date
     if dow is not None:
       if fs is not None:
@@ -55,6 +56,11 @@ class Training():
     ps = '\n'.join(['{0}:{1}'.format(
       calendar.day_name[x[0]], x[1]) for x in self.schedule.items()])
     return ps
+
+  def record_history(self, ateam, adate):
+    self.history[adate] = {}
+    for player in ateam:
+      self.history[adate][str(player)] = player.physical
 
   def get_schedule(self, dow=None, focus=None):
     '''Ask user for day of week to train on.  Pair with training focus'''

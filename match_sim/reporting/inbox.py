@@ -63,12 +63,10 @@ class Inbox():
     self.update_count()
 
   def add_training_message(self, report):
-    # msg = 'Match report\n'
-    # msg += '{0} \n'.format(match)
-    # for atime in log:
-    #   msg += '{0} \n'.format(log[atime])
-    # msg += 'From {0}.'.format(self.team_coach)
-    # self.messages['unread'].append(msg)
+    msg = 'Training report\n'
+    msg += '{0} \n'.format(report)
+    msg += 'From {0}.'.format(self.team_coach)
+    self.messages['unread'].append(msg)
     self.update_count()
 
   def update_count(self):

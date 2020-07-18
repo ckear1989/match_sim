@@ -105,7 +105,14 @@ class GamePanel(TemplatePanel):
     self.vbox2.Add(self.team, flag=wx.ALL, border=5)
     self.Layout()
 
-  def refresh(self, event):
+  def Draw(self, dc):
+    try:
+      super().Draw(dc)
+      self.refresh()
+    except AttributeError:
+      pass
+
+  def refresh(self, event=None):
     self.inbox_button.SetLabel('Inbox[{0}]'.format(self.game.inbox.count))
     self.events.Destroy()
     self.league_table.Destroy()
