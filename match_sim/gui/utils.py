@@ -1,7 +1,7 @@
 
 import wx
 
-def ptable_to_grid(parent, atable):
+def ptable_to_grid(parent, atable, keep_cols=None):
   x = wx.grid.Grid(parent)
   rows = atable._rows
   cols = atable._field_names
@@ -23,4 +23,11 @@ def ptable_to_grid(parent, atable):
         j += 1
     i += 1
   x.HideRowLabels()
+  if keep_cols is not None:
+    i = 0
+    for col in cols:
+      if col not in keep_cols:
+        x.DeleteCols(i, 1)
+        i -= 1
+      i += 1
   return x

@@ -98,9 +98,8 @@ class GamePanel(TemplatePanel):
     self.league_table = ptable_to_grid(self, self.game.team_league.league_table)
     self.vbox1.Add(self.label2, flag=wx.ALL, border=5)
     self.vbox1.Add(self.league_table, flag=wx.ALL, border=5)
-    self.team = ptable_to_grid(self, self.game.teams[self.game.team].player_table)
-    self.team.DeleteCols(5, 5)
-    self.team.DeleteCols(8, 2)
+    self.team = ptable_to_grid(self, self.game.teams[self.game.team].player_table,
+      ['first name', 'last name', 'position', 'lineup', 'overall'])
     self.vbox2.Add(self.label3, flag=wx.ALL, border=5)
     self.vbox2.Add(self.team, flag=wx.ALL, border=5)
     self.Layout()
