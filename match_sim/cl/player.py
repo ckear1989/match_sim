@@ -6,6 +6,7 @@ import random
 
 import names
 import numpy as np
+from prettytable import PrettyTable
 
 from match_sim.cl.injury import Injury
 from match_sim.cl.suspension import Suspension
@@ -206,6 +207,27 @@ class Player():
   def __lt__(self, other):
     '''Assert player order for table sorting'''
     return self.__repr__() < other.__repr__()
+
+  def get_table(self):
+    '''Table of all players with selected stats'''
+    x = PrettyTable()
+    x.add_column('last name', [self.last_name])
+    x.add_column('first name', [self.first_name])
+    x.add_column('position', [self.physical.position])
+    x.add_column('overall', [self.physical.overall])
+    x.add_column('rating', [self.season.average_match_rating])
+    x.add_column('defending', [self.physical.defending])
+    x.add_column('passing', [self.physical.passing])
+    x.add_column('shooting', [self.physical.shooting])
+    x.add_column('fitness', [self.physical.fitness])
+    x.add_column('condition', [self.physical.condition])
+    x.add_column('injury', [self.season.injury])
+    x.add_column('suspension', [self.season.suspension])
+    x.add_column('minutes', [self.match.minutes])
+    x.add_column('score', [self.season.score.score])
+    x.title = '{0} {1}'.format(self.first_name, self.last_name)
+    x.float_format = '5.2'
+    self.table = x
 
   def get_age(self, date):
     self.age = relativedelta(date, self.dob).years

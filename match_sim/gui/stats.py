@@ -30,7 +30,7 @@ class StatsPanel(TemplatePanel):
   def refresh(self, event):
     self.comp_table.Destroy()
     self.team_table.Destroy()
-    # self.player_table.Destroy()
+    self.player_table.Destroy()
     self.update_selections()
     self.get_tables()
 
@@ -53,8 +53,11 @@ class StatsPanel(TemplatePanel):
   def get_tables(self):
     self.comp_table = ptable_to_grid(self, self.game.competitions[self.comps.GetStringSelection()].league_table)
     self.team_table = ptable_to_grid(self, self.game.teams[self.teams.GetStringSelection()].player_table)
-    # player_table = ptable_to_grid(self, )
+    player = [x for x in self.game.teams[self.teams.GetStringSelection()] if str(x) == self.players.GetStringSelection()][0]
+    player.get_table()
+    self.player_table = ptable_to_grid(self, player.table)
     self.vbox2.Add(self.comp_table, flag=wx.ALL, border=5)
     self.vbox2.Add(self.team_table, flag=wx.ALL, border=5)
+    self.vbox2.Add(self.player_table, flag=wx.ALL, border=5)
     self.Layout()
 
