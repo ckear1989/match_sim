@@ -20,10 +20,10 @@ class StatsPanel(TemplatePanel):
     self.vbox1 = wx.BoxSizer(wx.VERTICAL)
     self.vbox2 = wx.BoxSizer(wx.VERTICAL)
     self.hbox1.Add(self.vbox1, flag=wx.ALL, border=5)
-    self.hbox1.Add(self.vbox2, flag=wx.ALL, border=5)
-    self.vbox1.Add(self.comps, proportion=0)
-    self.vbox1.Add(self.teams, proportion=0)
-    self.vbox1.Add(self.players, proportion=0)
+    self.hbox1.Add(self.vbox2, proportion=1, flag=wx.ALL|wx.EXPAND, border=5)
+    self.vbox1.Add(self.comps, proportion=1)
+    self.vbox1.Add(self.teams, proportion=1)
+    self.vbox1.Add(self.players, proportion=1)
     self.get_tables()
     self.Bind(wx.EVT_COMBOBOX, self.refresh)
 
@@ -56,8 +56,8 @@ class StatsPanel(TemplatePanel):
     player = [x for x in self.game.teams[self.teams.GetStringSelection()] if str(x) == self.players.GetStringSelection()][0]
     player.get_table()
     self.player_table = ptable_to_grid(self, player.table)
-    self.vbox2.Add(self.comp_table, flag=wx.ALL, border=5)
-    self.vbox2.Add(self.team_table, flag=wx.ALL, border=5)
-    self.vbox2.Add(self.player_table, flag=wx.ALL, border=5)
+    self.vbox2.Add(self.comp_table, proportion=0, flag=wx.ALL|wx.EXPAND, border=5)
+    self.vbox2.Add(self.team_table, proportion=0, flag=wx.ALL|wx.EXPAND, border=5)
+    self.vbox2.Add(self.player_table, proportion=1, flag=wx.ALL|wx.EXPAND, border=5)
     self.Layout()
 
