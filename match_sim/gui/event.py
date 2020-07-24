@@ -4,6 +4,7 @@ import random
 import wx
 
 from match_sim.cl.event import Event as ClEvent
+from match_sim.reporting import match_message as msg
 
 MATCH_EVENT = wx.NewEventType()
 MATCH_EVENT_CUSTOM = wx.PyEventBinder(MATCH_EVENT, 1)
@@ -54,11 +55,11 @@ class Event(ClEvent):
 
   def full_time(self):
     '''Update scorer stats.  Print final result'''
-    self.pl.append('Full time score is:\n{0}'.format(self.match.get_score().replace('Score is now ', '')))
+    self.pl.append(random.choice(msg.full_time).format(self.match.get_score().replace('Score is now ', '')), 1)
     self.pl.append('FT {0}'.format(self.match.get_score(ts=False)), vb=0)
 
   def half_time(self):
-    self.pl.append('And that\'s the end of the half')
+    self.pl.append(random.choice(msg.half_time), 1)
     self.pl.append('HT {0}'.format(self.match.get_score(ts=False)), vb=0)
 
   def emit_refresh_event(self):
@@ -85,28 +86,26 @@ class Event(ClEvent):
       assisting_player.assist()
       shooting_player.update_score()
       self.attackers.update_score()
-      self.pl.append('And he scores.')
+      self.pl.append(random.choice(msg.he_scores_point), 5)
       self.pl.append('{0} {1} point'.format(self.match.get_score(), shooting_player), vb=0)
     elif p0 < 0.97:
-      self.pl.append('But he misses.')
+      self.pl.append(random.choice(msg.he_misses_point), 5)
     else:
-      self.pl.append('His shot comes off a defender and out for a 45.')
+      self.pl.append(random.choice(msg.he_wins_45), 5)
       self.free_kick_45()
 
   def free_kick_45(self):
     shooting_player = self.attackers.choose_free_taker_45()
-    self.pl.append('{0} steps up to take the 45.'.format(shooting_player))
+    self.pl.append(random.choice(msg.he_takes_45).format(shooting_player))
     p0 = random.random()
     if p0 < 0.7:
       shooting_player.score_point()
       shooting_player.update_score()
       self.attackers.update_score()
-      self.pl.append('It goes ofver the bar!')
+      self.pl.append(random.choice(he_scores_45))
       self.pl.append('{0} {1} point'.format(self.match.get_score(), shooting_player), vb=0)
-    elif p0 < 0.85:
-      self.pl.append('But the kick drops short')
     else:
-      self.pl.append('But the kick goes wide')
+      self.pl.append(random.choice(msg.he_misses_45))
 
   def shooting_player_goal_attempt(self, shooting_player=None, assisting_player=None):
     '''Point attempt made.  Score or wide or goalkeeper save determined'''
@@ -120,27 +119,27 @@ class Event(ClEvent):
       assisting_player.assist()
       shooting_player.update_score()
       self.attackers.update_score()
-      self.pl.append('And he scores.')
+      self.pl.append(random.choice(msg.he_scores_goal))
       self.pl.append('{0} {1} goal'.format(self.match.get_score(), shooting_player), vb=0)
     elif p0 < 0.95:
-      self.pl.append('It\'s saved by the goalkeeper.')
+      self.pl.append(random.choice(msg.goalkeeper_saves_goal))
       self.goalkeeper.save_goal()
     else:
-      self.pl.append('But he misses.')
+      self.pl.append(random.choice(msg.he_misses_goal))
 
   def foul(self, attacker):
     '''Foul event happens.  Card determined.  Injury determined.  Free kick given'''
-    self.pl.append('But he is fouled by {0}.'.format(self.defending_player))
+    self.pl.append(random.choice(msg.fouled_by).format(self.defending_player), 5)
     p0 = random.random()
     if p0 < 0.2:
       self.defending_player.gain_card('y')
-      self.pl.append('{0} receives a yellow card.'.format(self.defending_player))
+      self.pl.append(random.choice(msg.yellow_for).format(self.defending_player), 5)
       self.pl.append('{0} {1} {2} yellow'.format(self.match.get_score(sc=False), self.defenders.name, self.defending_player), vb=0)
       if self.defending_player.season.cards.count('y') == 2:
         self.defending_player.gain_card('r')
         self.defending_player.gain_suspension('yellow', self.date)
         self.defenders.send_off_player(self.defending_player)
-        self.pl.append('And it\'s his second yellow.  He is sent off by the referee.')
+        self.pl.append(random.choice(msg.second_yellow), 5)
         self.pl.append('{0} {1} {2} second yellow'.format(self.match.get_score(sc=False), self.defenders.name, self.defending_player), vb=0)
         self.emit_refresh_event()
       p1 = random.random()
@@ -153,7 +152,7 @@ class Event(ClEvent):
       self.defending_player.gain_card('r')
       self.defending_player.gain_suspension('red', self.date)
       self.defenders.send_off_player(self.defending_player)
-      self.pl.append('{0} receives a red card.'.format(self.defending_player))
+      self.pl.append(random.choice(msg.red).format(self.defending_player), 5)
       self.pl.append('{0} {1} {2} red'.format(self.match.get_score(sc=False), self.defenders.name, self.defending_player), vb=0)
       self.emit_refresh_event()
       if self.defending_player.physical.position == 'GK':

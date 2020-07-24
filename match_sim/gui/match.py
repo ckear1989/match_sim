@@ -28,7 +28,7 @@ class MatchPanel(PaintPanel):
     self.exit_button.Destroy()
     font = wx.Font(16, wx.ROMAN, wx.ITALIC, wx.NORMAL) 
     self.game = self.GetParent().game
-    self.verbosity = 5
+    self.verbosity = self.game.settings.verbosity
     self.home = True
     if self.game.team == self.match.team_b.name:
       self.home = False
@@ -138,7 +138,6 @@ class MatchPanel(PaintPanel):
     self.GetEventHandler().ProcessEvent(event)
 
   def on_pause(self, event):
-    print('pause')
     self.pause_button.Hide()
     if self.match.time == 0:
       self.match.set_status('pre-match')
@@ -160,7 +159,6 @@ class MatchPanel(PaintPanel):
     self.game.teams[self.game.team].update_playing_positions()
 
   def on_forced_sub(self, event):
-    print('forced sub')
     self.pause_button.Hide()
     self.match.set_status('forced-sub')
     team = event.GetMyVal()[0]
@@ -181,7 +179,6 @@ class MatchPanel(PaintPanel):
     self.match.set_status('paused')
 
   def on_play(self, event):
-    print('play')
     if self.match.status in ['pre-match']:
       self.pause_button.SetLabel('Pause')
       self.pause_button.Show()
@@ -196,7 +193,6 @@ class MatchPanel(PaintPanel):
       self.pause_button.Hide()
       self.match.team_a.update_event_handler()
       self.match.team_b.update_event_handler()
-      print('debug')
       self.game.process_match_result(self.match, self.match.comp_name)
       self.game.update_next_fixture()
       self.game.inbox.add_match_message(self.match)
@@ -227,7 +223,6 @@ class MatchPanel(PaintPanel):
     self.txt_output.SetLabel('')
 
   def on_exit_match(self, event):
-    print('exit')
     if self.match.status in ['finished']:
       self.GetParent().exit_match(event)
 

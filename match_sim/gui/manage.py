@@ -53,28 +53,18 @@ class MatchPlayerTarget(MyTarget):
     if self.lineup in self.team.formation.playing_lineups.keys():
       current_lineup = self.team.formation.playing_lineups[self.lineup]
       if current_lineup is None:
-        print('target off')
         if new_lineup in self.team.formation.playing_lineups.values():
-          print('dropped playing')
           self.team.formation.swap_playing_positions_off(new_lineup, current_lineup)
         elif new_lineup in self.team.formation.sub_lineups.values():
-          print('dropped sub')
           return False
         elif new_lineup in self.team.formation.off_lineups:
-          print('dropped off')
           return False
         else:
-          print('target', self.lineup)
-          print('target current', current_lineup)
-          print('dropped', new_lineup)
           raise Exception('debug sub')
       elif current_lineup in self.team.formation.playing_lineups.values():
-        print('target playing', current_lineup)
         if new_lineup in self.team.formation.playing_lineups.values():
-          print('dropped playing', new_lineup)
           self.team.formation.swap_playing_positions(current_lineup, new_lineup)
         elif new_lineup in self.team.formation.sub_lineups.values():
-          print('dropped sub', new_lineup)
           for player in self.team:
             if player.match.lineup == current_lineup:
               player_off = player
@@ -87,17 +77,11 @@ class MatchPlayerTarget(MyTarget):
             self.team.sub_on_off(new_lineup, current_lineup)
             player_off.set_lineup(0)
         elif new_lineup in self.team.formation.off_lineups:
-          print('dropped off', new_lineup)
           self.team.formation.swap_playing_positions_off(current_lineup, new_lineup)
         else:
-          print('target', self.lineup)
-          print('target current', current_lineup)
-          print('dropped', new_lineup)
           raise Exception('debug sub')
       elif current_lineup in self.team.formation.sub_lineups.values():
-        print('target sub', current_lineup)
         if new_lineup in self.team.formation.playing_lineups.values():
-          print('dropped playing', new_lineup)
           for player in self.team:
             if player.match.lineup == current_lineup:
               player_on = player
@@ -110,22 +94,15 @@ class MatchPlayerTarget(MyTarget):
             self.team.sub_on_off(current_lineup, new_lineup)
             player_off.set_lineup(0)
         elif new_lineup in self.team.formation.sub_lineups.values():
-          print('dropped sub', new_lineup)
           return False
         elif new_lineup in self.team.formation.off_lineups:
-          print('dropped off', new_lineup)
           return False
         else:
-          print('target', self.lineup)
-          print('target current', current_lineup)
-          print('dropped', new_lineup)
           raise Exception('debug sub')
     elif self.lineup in self.team.formation.sub_lineups.keys():
       current_lineup = self.team.formation.sub_lineups[self.lineup]
       if current_lineup is not None:
-        print('target sub', current_lineup)
         if new_lineup in self.team.formation.playing_lineups.values():
-          print('dropped playing', new_lineup)
           for player in self.team:
             if player.match.lineup == current_lineup:
               player_on = player
@@ -138,22 +115,14 @@ class MatchPlayerTarget(MyTarget):
             self.team.sub_on_off(current_lineup, new_lineup)
             player_off.set_lineup(0)
         elif new_lineup in self.team.formation.sub_lineups.values():
-          print('dropped sub', new_lineup)
           return False
         elif new_lineup in self.team.formation.off_lineups:
-          print('dropped off', new_lineup)
           return False
         else:
-          print('target', self.lineup)
-          print('target current', current_lineup)
-          print('dropped', new_lineup)
           raise Exception('debug sub')
       else:
-        print('target none')
         return False
     else:
-      print('target', self.lineup)
-      print('dropped', new_lineup)
       raise Exception('debug sub')  
     self.team.update_playing_positions()
     return True
@@ -355,7 +324,6 @@ class MatchManagePanel(ManagePanel):
 
   def make_a_sub(self, event):
     text = event.GetText()
-    print(text)
     text_n = int(text.split(' ')[0])
     src = wx.DropSource(self.lineups[text_n])
     tobj = wx.TextDataObject(text)
