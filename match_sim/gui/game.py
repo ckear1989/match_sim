@@ -101,7 +101,7 @@ class GamePanel(TemplatePanel):
     self.vbox1.Add(self.label2, flag=wx.ALL, border=5)
     self.vbox1.Add(self.league_table, flag=wx.ALL, border=5)
     self.team = ptable_to_grid(self, self.game.teams[self.game.team].player_table,
-      ['first name', 'last name', 'position', 'lineup', 'overall'], 'lineup > 0')
+      ['first name', 'last name', 'position', 'lineup', 'overall'], 'lineup > 0', 'lineup')
     self.vbox2.Add(self.label3, flag=wx.ALL, border=5)
     self.vbox2.Add(self.team, flag=wx.ALL|wx.EXPAND, border=5)
     self.reserves = ptable_to_grid(self, self.game.teams[self.game.team].player_table,

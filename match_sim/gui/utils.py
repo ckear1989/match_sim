@@ -1,7 +1,7 @@
 
 import wx
 
-def ptable_to_grid(parent, atable, keep_cols=None, subset_rows=None):
+def ptable_to_grid(parent, atable, keep_cols=None, subset_rows=None, sort_col=None):
   x = wx.grid.Grid(parent)
   x.DisableDragGridSize()
   x.DisableCellEditControl()
@@ -62,6 +62,10 @@ def ptable_to_grid(parent, atable, keep_cols=None, subset_rows=None):
               i -= 1
         j += 1
       i += 1
+  if sort_col is not None:
+    if sort_col in keep_cols:
+      x.UnsetSortingColumn()
+      x.SetSortingColumn(keep_cols.index(sort_col))
   x.AutoSize()
-  x.SetMargins(0, 0)
+  # x.SetMargins(0, 0)
   return x

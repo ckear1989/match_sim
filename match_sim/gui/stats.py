@@ -20,19 +20,42 @@ class StatsPanel(TemplatePanel):
     self.vbox1 = wx.BoxSizer(wx.VERTICAL)
     self.vbox2 = wx.BoxSizer(wx.VERTICAL)
     self.hbox1.Add(self.vbox1, flag=wx.ALL, border=5)
-    self.hbox1.Add(self.vbox2, proportion=1, flag=wx.ALL|wx.EXPAND, border=5)
+    self.hbox1.Add(self.vbox2, proportion=1, flag=wx.ALL, border=5)
     self.vbox1.Add(self.comps, proportion=1)
     self.vbox1.Add(self.teams, proportion=1)
     self.vbox1.Add(self.players, proportion=1)
-    self.get_tables()
-    self.Bind(wx.EVT_COMBOBOX, self.refresh)
+    self.comps.Bind(wx.EVT_COMBOBOX, self.show_comp)
+    self.teams.Bind(wx.EVT_COMBOBOX, self.show_team)
+    self.players.Bind(wx.EVT_COMBOBOX, self.show_player)
+    self.table = ptable_to_grid(self, self.game.competitions[self.comps.GetStringSelection()].league_table)
+    self.vbox2.Add(self.table, proportion=0, flag=wx.ALL, border=5)
+
+  def show_comp(self, event):
+    self.refresh(event)
+    self.table = ptable_to_grid(self, self.game.competitions[self.comps.GetStringSelection()].league_table)
+    self.vbox2.Add(self.table, proportion=0, flag=wx.ALL, border=5)
+    self.Layout()
+    self.Update()
+
+  def show_team(self, event):
+    self.refresh(event)
+    self.table = ptable_to_grid(self, self.game.teams[self.teams.GetStringSelection()].player_table, sort_col='lineup')
+    self.vbox2.Add(self.table, proportion=0, flag=wx.ALL, border=5)
+    self.Layout()
+    self.Update()
+
+  def show_player(self, event):
+    self.refresh(event)
+    player = [x for x in self.game.teams[self.teams.GetStringSelection()] if str(x) == self.players.GetStringSelection()][0]
+    player.get_table()
+    self.table = ptable_to_grid(self, player.table)
+    self.vbox2.Add(self.table, proportion=0, flag=wx.ALL, border=5)
+    self.Layout()
+    self.Update()
 
   def refresh(self, event):
-    self.comp_table.Destroy()
-    self.team_table.Destroy()
-    self.player_table.Destroy()
+    self.table.Destroy()
     self.update_selections()
-    self.get_tables()
 
   def update_selections(self):
     comp = self.comps.GetStringSelection()
@@ -43,21 +66,12 @@ class StatsPanel(TemplatePanel):
       self.teams = wx.ComboBox(self, choices=[x for x in self.game.competitions[comp].teams])
       self.teams.SetSelection(0)
       self.vbox1.Add(self.teams, proportion=0)
+      self.teams.Bind(wx.EVT_COMBOBOX, self.show_team)
       team = self.teams.GetStringSelection()
     if player not in [str(x) for x in self.game.teams[team]]:
       self.players.Destroy()
       self.players = wx.ComboBox(self, choices=[str(x) for x in self.game.teams[team]])
       self.vbox1.Add(self.players, proportion=0)
       self.players.SetSelection(0)
-
-  def get_tables(self):
-    self.comp_table = ptable_to_grid(self, self.game.competitions[self.comps.GetStringSelection()].league_table)
-    self.team_table = ptable_to_grid(self, self.game.teams[self.teams.GetStringSelection()].player_table)
-    player = [x for x in self.game.teams[self.teams.GetStringSelection()] if str(x) == self.players.GetStringSelection()][0]
-    player.get_table()
-    self.player_table = ptable_to_grid(self, player.table)
-    self.vbox2.Add(self.comp_table, proportion=0, flag=wx.ALL|wx.EXPAND, border=5)
-    self.vbox2.Add(self.team_table, proportion=0, flag=wx.ALL|wx.EXPAND, border=5)
-    self.vbox2.Add(self.player_table, proportion=1, flag=wx.ALL|wx.EXPAND, border=5)
-    self.Layout()
+      self.players.Bind(wx.EVT_COMBOBOX, self.show_player)
 
