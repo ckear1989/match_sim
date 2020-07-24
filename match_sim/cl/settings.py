@@ -15,6 +15,7 @@ class Settings():
       self.defaults = json.load(f)
     self.autosave = self.defaults['autosave']
     self.match_speed = self.defaults['match_speed']
+    self.verbosity = self.defaults['verbosity']
 
   def update_setting(self, setting, value):
     '''Update class attribute with user input'''

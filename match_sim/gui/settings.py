@@ -18,8 +18,11 @@ class SettingsPanel(TemplatePanel):
     self.vbox1 = wx.BoxSizer(wx.VERTICAL)
     self.vbox1.Add(self.autosave, flag=wx.ALL, border=10)
     self.match_speed = wx.Slider(self, minValue=1, maxValue=70, style=wx.SL_HORIZONTAL|wx.SL_LABELS)
+    self.verbosity = wx.Slider(self, minValue=1, maxValue=5, style=wx.SL_HORIZONTAL|wx.SL_LABELS)
     self.vbox1.Add(wx.StaticText(self, label='Match Speed'), flag=wx.EXPAND|wx.LEFT|wx.TOP|wx.RIGHT, border=10)
     self.vbox1.Add(self.match_speed, flag=wx.EXPAND|wx.LEFT|wx.BOTTOM|wx.RIGHT, border=10)
+    self.vbox1.Add(wx.StaticText(self, label='Verbosity'), flag=wx.EXPAND|wx.LEFT|wx.TOP|wx.RIGHT, border=10)
+    self.vbox1.Add(self.verbosity, flag=wx.EXPAND|wx.LEFT|wx.BOTTOM|wx.RIGHT, border=10)
     self.Bind(wx.EVT_CHECKBOX, self.checkbox)
     self.Bind(wx.EVT_SLIDER, self.slider)
     self.set_current()
@@ -29,12 +32,14 @@ class SettingsPanel(TemplatePanel):
   def set_current(self):
     self.autosave.SetValue(self.game.settings.autosave)
     self.match_speed.SetValue(self.game.settings.match_speed)
+    self.verbosity.SetValue(self.game.settings.verbosity)
 
   def checkbox(self, event):
     self.game.settings.autosave = self.autosave.IsChecked()
 
   def slider(self, event):
     self.game.settings.match_speed = self.match_speed.GetValue()
+    self.game.settings.verbosity = self.verbosity.GetValue()
 
 class Settings(ClSettings):
   def __init__(self):
