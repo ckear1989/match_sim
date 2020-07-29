@@ -69,13 +69,13 @@ class GamePanel(TemplatePanel):
     self.game.save(self)
 
   def on_continue(self, event):
+    if self.game.settings.autosave is True:
+      self.save_game(event)
     self.game.current_date += datetime.timedelta(1)
     self.game.process_teams_daily()
     self.process_fixtures_daily()
     self.game.update_next_fixture()
     self.refresh(event)
-    if self.game.settings.autosave is True:
-      self.save_game(None)
 
   def create_tables(self, init=False):
     font = wx.Font(16, wx.ROMAN, wx.ITALIC, wx.NORMAL) 
@@ -105,12 +105,12 @@ class GamePanel(TemplatePanel):
     self.team = ptable_to_grid(self, self.game.teams[self.game.team].player_table,
       ['first name', 'last name', 'position', 'lineup', 'overall'], 'lineup > 0', 'lineup')
     self.vbox2.Add(self.label3, flag=wx.ALL, border=5)
-    self.vbox2.Add(self.team, flag=wx.ALL|wx.EXPAND, border=5)
+    self.vbox2.Add(self.team, flag=wx.ALL, border=5)
     self.reserves = ptable_to_grid(self, self.game.teams[self.game.team].player_table,
       ['first name', 'last name', 'position', 'lineup', 'overall'], 'lineup < 1')
     if init:
       self.vbox3.Add((200, 28), flag=wx.ALL, border=5)
-    self.vbox3.Add(self.reserves, flag=wx.ALL|wx.EXPAND, border=5)
+    self.vbox3.Add(self.reserves, flag=wx.ALL, border=5)
     self.Layout()
 
   def Draw(self, dc):
@@ -130,6 +130,7 @@ class GamePanel(TemplatePanel):
     self.label2.Destroy()
     self.label3.Destroy()
     self.create_tables()
+    self.Update()
 
   def process_fixtures_daily(self):
     '''Get today\'s fixtures.  Iteratively play eatch game.'''
@@ -166,7 +167,7 @@ class GamePanel(TemplatePanel):
     match = Match(self.game.teams[match_t[0]], self.game.teams[match_t[1]],
       self.game.current_date, silent, extra_time_required, match_t[2], self.GetEventHandler(), time_step)
     if silent is True:
-      for ts in match.play(0):
+      for ts in match.play(time_step):
         pass
       self.match_logs[self.game.current_date].append(match.report)
       self.game.process_match_result(match, match.comp_name)

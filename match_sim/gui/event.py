@@ -102,7 +102,7 @@ class Event(ClEvent):
       shooting_player.score_point()
       shooting_player.update_score()
       self.attackers.update_score()
-      self.pl.append(random.choice(he_scores_45))
+      self.pl.append(random.choice(msg.he_scores_45))
       self.pl.append('{0} {1} point'.format(self.match.get_score(), shooting_player), vb=0)
     else:
       self.pl.append(random.choice(msg.he_misses_45))

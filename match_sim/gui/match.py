@@ -224,6 +224,8 @@ class MatchPanel(PaintPanel):
 
   def on_exit_match(self, event):
     if self.match.status in ['finished']:
+      if self.game.settings.autosave is True:
+        self.game.save(self)
       self.GetParent().exit_match(event)
 
 class Match(ClMatch):
