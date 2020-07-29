@@ -168,3 +168,14 @@ class Event(ClEvent):
         self.attackers.forced_substitution(attacker)
     self.free_kick(attacker)
 
+  def recycle_posession(self):
+    self.pl.append(random.choice(msg.recycle_possession).format(self.defenders.name), 3)
+    self.defenders.condition_deteriorate(0.4)
+    p0 = random.random()
+    if p0 < 0.2:
+      self.foul(self.posession_player)
+
+  def defensive_setup(self):
+    self.pl.append(random.choice(msg.defensive_setup).format(self.defenders.name), 3)
+    self.defenders.condition_deteriorate(0.6)
+

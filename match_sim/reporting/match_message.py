@@ -95,3 +95,13 @@ red = [
   '{0} receives a red card',
   'The foul by {0} earns him a red card!'
 ]
+
+recycle_possession = [
+  'He cycles back to retain posession. This will tire out {0}.',
+  'A short pass backwards gives the team a breather. {0} will have to chase them down for the ball.'
+]
+
+defensive_setup = [
+  'He\'s using the time to let his team mates filter back. This will frustrate {0}.',
+  'They are getting their defensive shape set up. {0} will find it difficult to break down.'
+]
