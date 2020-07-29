@@ -66,7 +66,7 @@ class GamePanel(TemplatePanel):
     self.GetParent().on_settings(SettingsPanel)
 
   def save_game(self, event):
-    self.game.save()
+    self.game.save(self)
 
   def on_continue(self, event):
     self.game.current_date += datetime.timedelta(1)
@@ -74,6 +74,8 @@ class GamePanel(TemplatePanel):
     self.process_fixtures_daily()
     self.game.update_next_fixture()
     self.refresh(event)
+    if self.game.settings.autosave is True:
+      self.save_game(None)
 
   def create_tables(self, init=False):
     font = wx.Font(16, wx.ROMAN, wx.ITALIC, wx.NORMAL) 
@@ -179,12 +181,6 @@ class Game(ClGame):
     self.inbox = Inbox(self.teams[self.team])
     self.settings = Settings()
 
-  def pcontinue(self):
-    self.current_date += datetime.timedelta(1)
-    self.process_teams_daily()
-    self.process_fixtures_daily()
-    self.update_next_fixture()
-
   def get_teams(self):
     '''Create teams from random data.  Instantiate competitions'''
     self.teams = {}
@@ -203,10 +199,8 @@ class Game(ClGame):
     teams4 = poss_teams[(teams_per_div*3):]
     self.init_competitions(teams1, teams2, teams3, teams4)
 
-  def save(self):
+  def save(self, parent):
+    parent.progress = wx.ProgressDialog('Saving', "please wait", parent=parent, style=wx.PD_SMOOTH)
     with open(self.save_file, 'wb') as f:
       pickle.dump(self, f)
-      # debug failed save
-      # for key, value in self.__dict__.items():
-      #   print(key)
-      #   pickle.dump(value, f)
+    parent.progress.Destroy()
