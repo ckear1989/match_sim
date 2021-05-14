@@ -21,5 +21,23 @@ setuptools.setup(
       "License :: OSI Approved :: MIT License",
       "Operating System :: OS Independent",
   ],
-  python_requires='>=3.6',
+  python_requires=">=2.7",
+  extras_require={
+    "run": [
+    ],
+    "dev": [
+      "pyfiglet>=0.8",
+      "progressbar>=2.5",
+      "numpy>=1.16.6",
+      "tqdm>=4.46.1",
+      "prettytable>=0.7.2",
+      "names>=0.3.0",
+      "python-dateutil>=2.8.1",
+      "barnum>=0.5.1",
+      "dill>=0.3.1.1",
+      "pytest>=3.5",
+    ],
+    "gen_tests": [
+    ]   
+  }
 )
