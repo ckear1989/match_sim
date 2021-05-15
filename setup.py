@@ -5,7 +5,6 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
   name="match_sim-ckear",
-  version="0.0.2",
   author="Conor Kearney",
   author_email="ckear@example.com",
   description="A small example package",
@@ -35,9 +34,11 @@ setuptools.setup(
       "python-dateutil>=2.8.1",
       "barnum>=0.5.1",
       "dill>=0.3.1.1",
-      "pytest>=3.5",
+      "pytest>=3.5"
     ],
     "gen_tests": [
     ]   
-  }
+  },
+  use_scm_version=True,
+  setup_requires=["setuptools_scm"],
 )
