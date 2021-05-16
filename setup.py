@@ -34,7 +34,8 @@ setuptools.setup(
       "python-dateutil>=2.8.1",
       "barnum>=0.5.1",
       "dill>=0.3.1.1",
-      "pytest>=3.5"
+      "wxPython>=4.1.0",
+      "pytest>=3.5",
     ],
     "gen_tests": [
     ]   

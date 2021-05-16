@@ -19,7 +19,7 @@ def team_b():
 
 def run_event(i, team_a, team_b):
   random.seed(i)
-  match = Match(copy.deepcopy(team_a), copy.deepcopy(team_b), datetime.date(2020, 1, 1), True, False)
+  match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)
   event = Event(match)
   event.run(match)
 
