@@ -47,6 +47,9 @@ def x_0_100_cap(x):
 def random_0_100_normal(mean, sd):
   return x_0_100_cap(np.random.normal(mean, sd))
 
+def random_normal(mean, sd):
+  return round(np.random.normal(mean, sd), 0)
+
 def get_sundays(start_date):
   sundays = []
   year = start_date.year

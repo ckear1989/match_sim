@@ -1,6 +1,5 @@
-
 import sys
-sys.path.append('/'.join(__file__.split('/')[:-1]))
+sys.path.append(__path__[0])
 
-from main import home_screen
+from cl.main import home_screen
 

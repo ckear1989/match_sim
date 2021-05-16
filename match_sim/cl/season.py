@@ -1,60 +1,21 @@
 '''Season engine'''
 
-import time
 import random
 import datetime
 import calendar
-import copy
+import names
 import pyfiglet
 from prettytable import PrettyTable
 import dill as pickle
-from progressbar import Counter, Timer, ProgressBar
 import concurrent.futures
 
-import default
-from utils import timed_future_progress_bar
-from team import Team
-from match_team import MatchTeam
-from match import Match
-from training import Training
-from competition import Competition
-from settings import Settings
-
-def relegation(league):
-  '''Get bottom of league team based on league points and point difference'''
-  min_league_points = min([x.league_points for x in league.teams.values()])
-  league_rel = [x for x in league.teams.values() if x.league_points == min_league_points]
-  min_league_pd = min([x.league_points_diff for x in league_rel])
-  league_rel = random.sample([x for x in league_rel if x.league_points_diff == min_league_pd], 1)
-  return random.sample(league_rel, 1)[0].name
-
-def promotion(league):
-  '''Get top of league team based on league points and point difference'''
-  max_league_points = max([x.league_points for x in league.teams.values()])
-  league_pro = [x for x in league.teams.values() if x.league_points == max_league_points]
-  max_league_pd = max([x.league_points_diff for x in league_pro])
-  league_pro = random.sample([x for x in league_pro if x.league_points_diff == max_league_pd], 1)
-  return random.sample(league_pro, 1)[0].name
-
-def process_league_match_result(match):
-  '''Update team stats from match result.'''
-  match.team_a.played += 1
-  match.team_b.played += 1
-  match.team_a.league_points_diff += (match.team_a.points - match.team_b.points)
-  match.team_b.league_points_diff += (match.team_b.points - match.team_a.points)
-  if match.team_a.score > match.team_b.score:
-    match.team_a.league_win += 1
-    match.team_b.league_loss += 1
-    match.team_a.league_points += 2
-  elif match.team_a.score < match.team_b.score:
-    match.team_b.league_win += 1
-    match.team_a.league_loss += 1
-    match.team_b.league_points += 2
-  else:
-    match.team_a.league_draw += 1
-    match.team_b.league_draw += 1
-    match.team_a.league_points += 1
-    match.team_b.league_points += 1
+import match_sim.cl.default as default
+from match_sim.cl.utils import timed_future_progress_bar, print_side_by_side
+from match_sim.cl.match_team import MatchTeam
+from match_sim.cl.training import Training
+from match_sim.cl.competition import Competition
+from match_sim.cl.settings import Settings
+from match_sim.reporting.inbox import Inbox
 
 class Season():
   '''Season engine to store all game data'''
@@ -78,19 +39,11 @@ class Season():
     self.update_cup()
     self.get_upcoming_events()
     self.settings = Settings()
+    self.inbox = Inbox(self.teams[self.team])
 
   def __repr__(self):
     '''User friendly representation of season in current state'''
-    print_string = '{0}\n'.format(self.upcoming_events)
-    print_string += '{0}\n'.format(self.teams[self.team])
-    if self.next_team_fixture is not None:
-      if 'league' in self.next_team_fixture[2]:
-        print_string += '{0}\n'.format(self.team_league)
-      elif 'cup' in self.next_team_fixture[2]:
-        print_string += '{0}\n'.format(self.competitions['cup'])
-    else:
-      print_string += '{0}\n'.format(self.competitions['cup'])
-    return print_string
+    return print_side_by_side(self.upcoming_events, self.teams[self.team])
 
   def get_upcoming_events(self):
     '''Create pretty table of events from previous day to week in advance'''
@@ -127,21 +80,44 @@ class Season():
     x.title = '{0} upcoming events'.format(self.current_date)
     self.upcoming_events = x
 
+  def relegation(self, league):
+    '''Get bottom of league team based on league points and point difference'''
+    league_teams = {x: self.teams[x] for x in league.teams}
+    min_league_points = min([x.league_points for x in league_teams.values()])
+    league_rel = [x for x in league_teams.values() if x.league_points == min_league_points]
+    min_league_pd = min([x.league_points_diff for x in league_rel])
+    league_rel = random.sample([x for x in league_rel if x.league_points_diff == min_league_pd], 1)
+    return random.sample(league_rel, 1)[0].name
+  
+  def promotion(self, league):
+    '''Get top of league team based on league points and point difference'''
+    league_teams = {x: self.teams[x] for x in league.teams}
+    max_league_points = max([x.league_points for x in league_teams.values()])
+    league_pro = [x for x in league_teams.values() if x.league_points == max_league_points]
+    max_league_pd = max([x.league_points_diff for x in league_pro])
+    league_pro = random.sample([x for x in league_pro if x.league_points_diff == max_league_pd], 1)
+    return random.sample(league_pro, 1)[0].name
+
   def update_league(self):
     '''Refresh stats for leagues'''
-    self.competitions['league1'].get_league_table()
-    self.competitions['league1'].get_stats_tables()
-    self.competitions['league2'].get_league_table()
-    self.competitions['league2'].get_stats_tables()
-    self.competitions['league3'].get_league_table()
-    self.competitions['league3'].get_stats_tables()
-    self.competitions['league4'].get_league_table()
-    self.competitions['league4'].get_stats_tables()
+    league1_teams = self.competitions['league1'].teams
+    league2_teams = self.competitions['league2'].teams
+    league3_teams = self.competitions['league3'].teams
+    league4_teams = self.competitions['league4'].teams
+    self.competitions['league1'].get_league_table(self.teams)
+    self.competitions['league1'].get_stats_tables(self.teams)
+    self.competitions['league2'].get_league_table(self.teams)
+    self.competitions['league2'].get_stats_tables(self.teams)
+    self.competitions['league3'].get_league_table(self.teams)
+    self.competitions['league3'].get_stats_tables(self.teams)
+    self.competitions['league4'].get_league_table(self.teams)
+    self.competitions['league4'].get_stats_tables(self.teams)
 
   def update_cup(self):
     '''Refresh stats for cup'''
+    cup_teams = self.competitions['cup'].teams
     self.competitions['cup'].update_bracket(self.current_date)
-    self.competitions['cup'].get_stats_tables()
+    self.competitions['cup'].get_stats_tables(self.teams)
 
   def update_next_fixture(self):
     '''Refresh data on upcoming fixtures'''
@@ -189,7 +165,7 @@ class Season():
 
   def banner_end(self):
     '''Create ascii art banner from end of season data.  Print banner'''
-    league_winners = promotion(self.team_league)
+    league_winners = self.promotion(self.team_league)
     current_round = self.competitions['cup'].get_current_round()
     cup_winners = self.competitions['cup'].bracket.rounds[current_round-1][0]
     banner = pyfiglet.figlet_format(
@@ -202,14 +178,8 @@ class Season():
     self.banner_end()
     self.year += 1
     self.promotion_relegation()
-    self.reset_players()
-    for comp in self.competitions:
-      for team in self.competitions[comp].teams:
-        self.competitions[comp].teams[team].reset_match_stats()
-        self.competitions[comp].teams[team].reset_wld()
     for team in self.teams:
-      self.teams[team].reset_match_stats()
-      self.teams[team].reset_wld()
+      self.teams[team].reset_season_stats()
     self.get_fixtures()
     self.update_next_fixture()
     self.update_league()
@@ -220,66 +190,53 @@ class Season():
     self.teams = {}
     for team in default.poss_teams:
       if team == self.team:
-        self.teams[team] = MatchTeam(Team(team, self.manager, control=True))
+        self.teams[team] = MatchTeam(team, self.manager, control=True)
       else:
-        self.teams[team] = MatchTeam(Team(team, 'jim'))
+        self.teams[team] = MatchTeam(team, names.get_full_name())
         self.teams[team].training = Training(self.current_date, [0, 2, 4], ['fi', 'pa', 'sh'])
     n_teams = len(self.teams.keys())
     poss_teams = random.sample(self.teams.keys(), n_teams)
     teams_per_div = int(n_teams / 4)
     teams1 = poss_teams[:teams_per_div]
-    teams2 = poss_teams[teams_per_div:teams_per_div+4]
-    teams3 = poss_teams[teams_per_div+4:teams_per_div+8]
-    teams4 = poss_teams[teams_per_div+8:]
+    teams2 = poss_teams[teams_per_div:(teams_per_div*2)]
+    teams3 = poss_teams[(teams_per_div*2):(teams_per_div*3)]
+    teams4 = poss_teams[(teams_per_div*3):]
     self.init_competitions(teams1, teams2, teams3, teams4)
 
   def get_teams(self):
-    print('creating teams...')
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
       future = pool.submit(self.progress_get_teams)
       timed_future_progress_bar(future, 4)
 
-  def reset_players(self):
-    '''Reset stats of all players in all competitions'''
-    for comp in self.competitions:
-      for player in self.competitions[comp].players:
-        player.reset_match_stats()
-
-  def progress_init_competitions(self, teams1, teams2, teams3, teams4):
+  def init_competitions(self, teams1, teams2, teams3, teams4):
     '''Create 4 leagues and cup.'''
     self.competitions['league1'] = Competition('league1', 'rr',
-      datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams1})
+      datetime.date(self.year, 1, 1), {x: self.teams[x] for x in teams1})
     self.competitions['league2'] = Competition('league2', 'rr',
-      datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams2})
+      datetime.date(self.year, 1, 1), {x: self.teams[x] for x in teams2})
     self.competitions['league3'] = Competition('league3', 'rr',
-      datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams3})
+      datetime.date(self.year, 1, 1), {x: self.teams[x] for x in teams3})
     self.competitions['league4'] = Competition('league4', 'rr',
-      datetime.date(self.year, 1, 1), {x:self.teams[x] for x in self.teams if x in teams4})
+      datetime.date(self.year, 1, 1), {x: self.teams[x] for x in teams4})
     for league in self.competitions.values():
-      if self.team in league.teams.keys():
+      if self.team in league.teams:
         self.team_league = league
     last_league_fixture_date = max([x.last_fixture_date for x in self.competitions.values()])
     self.competitions['cup'] = Competition('cup', 'cup',
       last_league_fixture_date + datetime.timedelta(1), self.teams)
 
-  def init_competitions(self, teams1, teams2, teams3, teams4):
-    print('creating competitions...')
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-      future = pool.submit(self.progress_init_competitions, teams1, teams2, teams3, teams4)
-      timed_future_progress_bar(future, 2)
-
   def promotion_relegation(self):
     '''Determine teams to move up or down.  Change lists of team names'''
-    teams1 = list(self.competitions['league1'].teams.keys())
-    teams2 = list(self.competitions['league2'].teams.keys())
-    teams3 = list(self.competitions['league3'].teams.keys())
-    teams4 = list(self.competitions['league4'].teams.keys())
-    rel1 = relegation(self.competitions['league1'])
-    rel2 = relegation(self.competitions['league2'])
-    rel3 = relegation(self.competitions['league3'])
-    pro2 = promotion(self.competitions['league2'])
-    pro3 = promotion(self.competitions['league3'])
-    pro4 = promotion(self.competitions['league4'])
+    teams1 = self.competitions['league1'].teams[:]
+    teams2 = self.competitions['league2'].teams[:]
+    teams3 = self.competitions['league3'].teams[:]
+    teams4 = self.competitions['league4'].teams[:]
+    rel1 = self.relegation(self.competitions['league1'])
+    rel2 = self.relegation(self.competitions['league2'])
+    rel3 = self.relegation(self.competitions['league3'])
+    pro2 = self.promotion(self.competitions['league2'])
+    pro3 = self.promotion(self.competitions['league3'])
+    pro4 = self.promotion(self.competitions['league4'])
     teams1.remove(rel1)
     teams1.append(pro2)
     teams2.remove(pro2)
@@ -320,9 +277,10 @@ class Season():
   def cont(self):
     '''Continue season.  Wait on user input'''
     self.banner()
-    options = ['(c)ontinue', '(m)anage', '(t)raining', '(st)ats', '(sa)ve', '(se)ttings', '(e)xit']
     cmd = ''
     while cmd not in ['exit', 'e']:
+      options = ['(c)ontinue', '(i)nbox[{}]'.format(self.inbox.count), '(m)anage',
+        '(t)raining', '(st)ats', '(sa)ve', '(se)ttings', '(e)xit']
       print(self)
       if self.next_fixture_date is None:
         self.end()
@@ -332,44 +290,6 @@ class Season():
       self.process(cmd)
       if self.settings.autosave is True:
         self.save()
-
-  def process_cup_match_result(self, match, compo):
-    '''Update team stats from match result.  Progress bracket.'''
-    current_round = compo.get_current_round()
-    if match.team_a.score > match.team_b.score:
-      compo.update_bracket(self.current_date, (current_round+1), match.team_a.name)
-    elif match.team_a.score < match.team_b.score:
-      compo.update_bracket(self.current_date, (current_round+1), match.team_b.name)
-    else:
-      compo.schedule_replay(match.team_a.name, match.team_b.name, self.current_date)
-
-  def process_match_result(self, match, comp):
-    '''Update player and team stats postmatch'''
-    compo = [x for x in self.competitions.values() if x.name in comp]
-    if len(compo) != 1:
-      raise Exception('problem with competition {0}'.format(comp))
-    compo = compo[0]
-    if compo.form in ['rr', 'drr']:
-      process_league_match_result(match)
-    elif compo.form == 'cup':
-      self.process_cup_match_result(match, compo)
-    self.teams[match.team_a.name] = copy.deepcopy(match.team_a)
-    self.teams[match.team_b.name] = copy.deepcopy(match.team_b)
-    compo.teams[match.team_a.name] = copy.deepcopy(match.team_a)
-    compo.teams[match.team_b.name] = copy.deepcopy(match.team_b)
-    i = 0
-    for team in compo.teams.keys():
-      for player in compo.teams[team]:
-        compo.players[i].update_postmatch_stats(player)
-        i += 1
-      self.teams[team].reset_match_stats()
-      compo.teams[team].reset_match_stats()
-    self.update_league()
-    self.update_cup()
-    if self.current_date in self.results.keys():
-      self.results[self.current_date].append(match)
-    else:
-      self.results[self.current_date] = [match]
 
   def training(self):
     '''Create or append team training schedule'''
@@ -392,57 +312,6 @@ class Season():
   def manage_team(self):
     '''Manage user controlled team'''
     self.teams[self.team].manage()
-
-  def process_teams_daily(self):
-    '''Age team.  Call method to age players'''
-    for team in self.teams:
-      if self.current_date in self.teams[team].training.fixtures:
-        self.teams[team].train(self.current_date)
-      self.process_players_daily(team)
-      self.teams[team].get_overall()
-
-  def process_players_daily(self, team):
-    '''Age players after one day of season'''
-    for player in self.teams[team]:
-      player.process_daily(self.current_date)
-
-  def process_fixtures_daily(self):
-    '''Get today\'s fixtures.  Iteratively play eatch game.'''
-    if self.current_date == self.next_fixture_date:
-      fixtures = self.fixtures[self.current_date]
-      if len(fixtures) > 1:
-        if self.team in fixtures[-1]:
-          widgets = ['Processed: ', Counter(), ' matches (', Timer(), ')']
-          pbar = ProgressBar(widgets=widgets)
-          for match_t in pbar(fixtures[:-1]):
-            self.process_match_tuple(match_t)
-          time.sleep(0.1)
-          next_match_t = fixtures[-1]
-          self.process_match_tuple(next_match_t)
-        else:
-          for match_t in fixtures:
-            self.process_match_tuple(match_t)
-      else:
-        for match_t in fixtures:
-          self.process_match_tuple(match_t)
-
-  def process_match_tuple(self, match_t):
-    '''Determine match arguments.  Play match.'''
-    silent = False
-    time_step = 1/self.settings.match_speed
-    if self.settings.match_speed == 70:
-      time_step = 0
-    if self.team not in match_t:
-      silent = True
-      time_step = 0
-    extra_time_required = False
-    if 'replay' in match_t[2]:
-      extra_time_required = True
-    match = Match(self.teams[match_t[0]], self.teams[match_t[1]],
-      self.current_date, silent, extra_time_required)
-    match.play(time_step)
-    self.process_match_result(match, match_t[2])
-    self.update_next_fixture()
 
   def get_player_stats(self):
     '''Ask user for team and player.  Print player'''
@@ -495,24 +364,6 @@ class Season():
       self.get_team_stats()
     elif cmd in ['c', 'competitions']:
       self.get_competition_stats()
-
-  def process(self, cmd):
-    '''Call function based on user input cmd'''
-    if cmd in ['sa', 'save']:
-      self.save()
-    if cmd in ['se', 'settings']:
-      self.settings.get_settings()
-    if cmd in ['st', 'stats']:
-      self.stats()
-    elif cmd in ['m', 'manage']:
-      self.manage_team()
-    elif cmd in ['t', 'training']:
-      self.teams[self.team].training.get_schedule()
-    elif cmd in ['c', 'continue']:
-      self.current_date += datetime.timedelta(1)
-      self.process_teams_daily()
-      self.process_fixtures_daily()
-      self.update_next_fixture()
 
 if __name__ == "__main__":
 

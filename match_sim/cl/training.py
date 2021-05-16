@@ -3,8 +3,8 @@
 import datetime
 import calendar
 
-import default
-from utils import x_0_100_cap, random_0_100_normal
+import match_sim.cl.default as default
+from match_sim.cl.utils import x_0_100_cap, random_0_100_normal
 
 def options_from_list(alist):
   '''String format list'''
@@ -43,6 +43,7 @@ class Training():
   def __init__(self, start_date, dow=None, fs=None):
     self.schedule = {}
     self.fixtures = {}
+    self.history = {}
     self.start_date = start_date
     if dow is not None:
       if fs is not None:
@@ -56,15 +57,21 @@ class Training():
       calendar.day_name[x[0]], x[1]) for x in self.schedule.items()])
     return ps
 
-  def get_schedule(self):
+  def record_history(self, ateam, adate):
+    self.history[adate] = {}
+    for player in ateam:
+      self.history[adate][str(player)] = player.physical
+
+  def get_schedule(self, dow=None, focus=None):
     '''Ask user for day of week to train on.  Pair with training focus'''
-    poss_days = options_from_list(default.dow.keys())
-    dow = input('choose day of week to train:\n%s\n' % poss_days)
+    if dow is None:
+      poss_days = options_from_list(default.dow.keys())
+      dow = input('choose day of week to train:\n%s\n' % poss_days)
     if dow in default.dow.keys():
-      focus = None
-      while focus not in default.focus:
-        poss_focus = options_from_list(default.focus)
-        focus = input('choose training focus for {0}:\n{1}\n'.format(dow, poss_focus))
+      if focus is None:
+        while focus not in default.focus:
+          poss_focus = options_from_list(default.focus)
+          focus = input('choose training focus for {0}:\n{1}\n'.format(dow, poss_focus))
       self.schedule[default.dow[dow]] = focus
       self.get_fixtures()
     else:

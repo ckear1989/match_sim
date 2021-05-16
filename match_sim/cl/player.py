@@ -1,12 +1,16 @@
 '''Create objects to represent people'''
 
+import datetime
+from dateutil.relativedelta import relativedelta
 import random
+
 import names
 import numpy as np
+from prettytable import PrettyTable
 
-from injury import Injury
-from suspension import Suspension
-from utils import random_0_100_normal
+from match_sim.cl.injury import Injury
+from match_sim.cl.suspension import Suspension
+from match_sim.cl.utils import random_0_100_normal, random_normal
 
 class Score():
   '''Store data on score'''
@@ -14,11 +18,23 @@ class Score():
     self.goals = 0
     self.points = 0
     self.scoren = 0
-    self.score = ''
+    self.score = '0-0 (0)'
 
   def __repr__(self):
     '''User friendly representation of score'''
     return self.score
+
+  def __lt__(self, other):
+    '''Score less than other score'''
+    return self.scoren < other.scoren
+
+  def __gt__(self, other):
+    '''Score more than other score'''
+    return self.scoren > other.scoren
+
+  def __eq__(self, other):
+    '''Score equal to other score'''
+    return self.scoren == other.scoren
 
   def score_point(self):
     '''Increment stat and update score'''
@@ -43,6 +59,10 @@ class MatchStats():
     self.lineup = 0
     self.minutes = 0
     self.rating = 0.0
+    self.cards = []
+
+  def gain_card(self, card):
+    self.cards.append(card)
 
   def reset_match_stats(self):
     '''Reset stats accrued during match'''
@@ -50,10 +70,12 @@ class MatchStats():
     self.assists = 0
     self.minutes = 0
     self.rating = 0.0
+    self.cards = []
 
   def age_match_minute(self):
     '''Increment minutes played'''
     self.minutes += 1
+    self.rating = min(self.rating + 0.1, 10.0)
 
   def assist(self):
     '''Increment assist and improve rating'''
@@ -87,6 +109,8 @@ class PhysicalStats():
     self.shooting = random_0_100_normal(70, 20)
     self.fitness = random_0_100_normal(70, 20)
     self.condition = float(min(self.fitness, random_0_100_normal(70, 20)))
+    self.right = random.choice([random_0_100_normal(25, 20)] + [random_0_100_normal(75, 20) for i in range(7)])
+    self.left = 100 - self.right
     self.get_overall()
 
   def get_overall(self):
@@ -98,9 +122,9 @@ class PhysicalStats():
       self.fitness
     ])))
 
-  def condition_deteriorate(self):
+  def condition_deteriorate(self, n):
     '''Decrement condition to represent tiring during match'''
-    self.condition = max((self.condition-0.08), 0.2)
+    self.condition = max((self.condition-0.08), n)
 
   def condition_improve(self):
     '''Increment condition to represent resting period'''
@@ -114,6 +138,8 @@ class SeasonStats():
     self.injury = Injury()
     self.suspension = Suspension()
     self.update_match_rating()
+    self.score = Score()
+    self.assists = 0
 
   def gain_card(self, card):
     '''Add card to currently held cards'''
@@ -134,6 +160,13 @@ class SeasonStats():
     if self.injury.return_date is not None:
       if self.injury.return_date <= date:
         self.reset_injury()
+
+  def reset(self):
+    self.match_rating = 0
+    self.cards = []
+    self.update_match_rating()
+    self.score = Score()
+    self.assists = 0
 
   def reset_injury(self):
     '''Clear injury'''
@@ -156,12 +189,16 @@ class SeasonStats():
 class Player():
   '''Player object to represent player'''
   def __init__(self, team=None):
+    self.dob = datetime.date(2020, 1, 1) - datetime.timedelta(365 * 26 + random_normal(0, 365*3))
+    self.get_age(datetime.date(2020, 1, 1))
     self.first_name = names.get_first_name(gender='male')
     self.last_name = names.get_last_name()
     self.team = team
     self.match = MatchStats()
     self.physical = PhysicalStats()
     self.season = SeasonStats()
+    self.league = SeasonStats()
+    self.cup = SeasonStats()
 
   def __repr__(self):
     '''Return user friendly representation of player'''
@@ -171,16 +208,45 @@ class Player():
     '''Assert player order for table sorting'''
     return self.__repr__() < other.__repr__()
 
-  def update_postmatch_stats(self, mplayer):
+  def get_table(self):
+    '''Table of all players with selected stats'''
+    x = PrettyTable()
+    x.add_column('last name', [self.last_name])
+    x.add_column('first name', [self.first_name])
+    x.add_column('position', [self.physical.position])
+    x.add_column('overall', [self.physical.overall])
+    x.add_column('rating', [self.season.average_match_rating])
+    x.add_column('defending', [self.physical.defending])
+    x.add_column('passing', [self.physical.passing])
+    x.add_column('shooting', [self.physical.shooting])
+    x.add_column('fitness', [self.physical.fitness])
+    x.add_column('condition', [self.physical.condition])
+    x.add_column('injury', [self.season.injury])
+    x.add_column('suspension', [self.season.suspension])
+    x.add_column('minutes', [self.match.minutes])
+    x.add_column('score', [self.season.score.score])
+    x.title = '{0} {1}'.format(self.first_name, self.last_name)
+    x.float_format = '5.2'
+    self.table = x
+
+  def get_age(self, date):
+    self.age = relativedelta(date, self.dob).years
+
+  def update_lineup(self, i):
+    self.match.lineup = i
+
+  def update_postmatch_stats(self, comp):
     '''Copy match playing stats from one player to self'''
-    self.match.score.points += mplayer.match.score.points
-    self.match.score.goals += mplayer.match.score.goals
-    self.match.assists += mplayer.match.assists
-    if self.season.match_ratings == [0.0]:
-      self.season.match_ratings = [mplayer.match.rating]
-    else:
-      self.season.match_ratings.append(mplayer.match.rating)
-    self.season.update_match_rating()
+    if comp.form in ['rr', 'drr']:
+      stats = self.league
+    elif comp.form in ['cup']:
+      stats = self.cup
+    stats.score.points += self.match.score.points
+    stats.score.goals += self.match.score.goals
+    stats.assists += self.match.assists
+    if self.match.minutes > 0:
+      stats.match_ratings.append(self.match.rating)
+    stats.update_match_rating()
     self.update_score()
 
   def save_goal(self):
@@ -189,6 +255,7 @@ class Player():
 
   def gain_card(self, card):
     '''Add card to currently held cards'''
+    self.match.gain_card(card)
     self.season.gain_card(card)
 
   def assist(self):
@@ -202,6 +269,8 @@ class Player():
   def update_score(self):
     '''Tell sub class to do it\'s job'''
     self.match.score.update_score()
+    self.league.score.update_score()
+    self.cup.score.update_score()
 
   def score_point(self):
     '''Tell sub class to do it\'s job'''
@@ -214,6 +283,12 @@ class Player():
   def reset_match_stats(self):
     '''Set all match stats to start of match positions'''
     self.match.reset_match_stats()
+
+  def reset_season_stats(self):
+    '''Set all match stats to start of match positions'''
+    self.season.reset()
+    self.league.reset()
+    self.cup.reset()
 
   def gain_injury(self, date):
     '''Tell sub class to do it\'s job'''
@@ -237,20 +312,30 @@ class Player():
 
   def process_daily(self, date):
     '''Update player stats after aging a day'''
+    self.get_age(date)
     self.check_injury(date)
     self.check_suspension(date)
     self.condition_improve()
     self.get_overall()
 
+  def condition_deteriorate(self, n):
+    '''Update player stats after playing a minute'''
+    self.physical.condition_deteriorate(n)
+    self.get_overall()
+
   def age_match_minute(self):
     '''Update player stats after playing a minute'''
-    self.physical.condition_deteriorate()
+    self.physical.condition_deteriorate(0.2)
     self.match.age_match_minute()
     self.get_overall()
 
   def gain_suspension(self, status, date):
     '''Update suspension object'''
     self.season.gain_suspension(status, date)
+
+  def set_lineup(self, lineup):
+    '''Update match lineup'''
+    self.match.lineup = lineup
 
 if __name__ == "__main__":
 

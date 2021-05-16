@@ -6,12 +6,13 @@ import time
 import sys
 import os
 import numpy as np
-import keyboard
+# print(__name__)
+if __name__ in ["__main__"]:
+  import keyboard
 import pyfiglet
 
-from team import Team
-from match_team import MatchTeam
-from event import Event
+from match_sim.cl.match_team import MatchTeam
+from match_sim.cl.event import Event
 
 def printc(x):
   '''Print and clear'''
@@ -28,6 +29,21 @@ def time_until_next_event(mean=60, sd=10):
   '''Stochastic number of seconds until next event'''
   return max(round(np.random.normal(mean, sd), 0), 1)
 
+class Result():
+  '''Strip down match object'''
+  def __init__(self, amatch):
+    self.team_a_name = amatch.team_a.name
+    self.team_b_name = amatch.team_b.name
+    self.team_a_score = amatch.team_a.score
+    self.team_b_score = amatch.team_b.score
+
+  def __repr__(self):
+    '''User friendly scoreboard of match to represent object'''
+    ps = '{0} {1} {2} {3}'.format(
+      self.team_a_name, self.team_a_score, self.team_b_name, self.team_b_score
+    )
+    return ps
+
 class Match():
   '''Match playing engine'''
   def __init__(self, team_home, team_away, date, silent, extra_time_required):
@@ -40,14 +56,11 @@ class Match():
     self.stopclock_time = stopclock(self.time)
     self.first_half_length = 35 * 60
     self.second_half_length = 35 * 60
-    self.get_output()
-    random.seed()
 
   def __repr__(self):
     '''User friendly scoreboard of match to represent object'''
-    ps = '{0} {1}-{2} ({3}) {4}-{5} ({6}) {7}'.format(
-      self.team_a.name, self.team_a.goals, self.team_a.points, self.team_a.score,
-      self.team_b.goals, self.team_b.points, self.team_b.score, self.team_b.name
+    ps = '{0} {1} {2} {3}'.format(
+      self.team_a.name, self.team_a.score, self.team_b.name, self.team_b.score
     )
     return ps
 
@@ -76,7 +89,6 @@ class Match():
     event = Event(self)
     at = event.added_time()
     self.print_event_list(event.pl)
-    at = random.choice(range(1, 7))
     return at
 
   def play_half(self, end_time, time_step, tane=time_until_next_event()):
@@ -87,11 +99,12 @@ class Match():
       self.time += 1
       if self.time % 1 == 0:
         self.stopclock_time = stopclock(self.time)
-        printc(self.stopclock_time)
+        if self.silent is not True:
+          printc(self.stopclock_time)
         if keyboard.is_pressed('space') is True:
           self.pause()
       if self.time % 60 == 0:
-        if self.silent is False:
+        if self.silent is not True:
           print(self.stopclock_time)
         self.update_team_condition()
       if self.time % (34 * 60) == 0:
@@ -102,7 +115,8 @@ class Match():
         tane += tune
       if time_step > 0:
         time.sleep(time_step)
-    print('{0} And that\'s the end of the half'.format(self.stopclock_time))
+    if self.silent is not True:
+      print('{0} And that\'s the end of the half'.format(self.stopclock_time))
 
   def abandon(self):
     '''Determine if team has too few players.  Award victory to opponent'''
@@ -119,10 +133,8 @@ class Match():
 
   def lineup(self):
     '''Check lineups prior to match start.  Give user chance to change before match starts'''
-    self.team_a.lineup_check()
-    self.team_b.lineup_check()
-    self.team_a.lineup_change()
-    self.team_b.lineup_change()
+    self.team_a.auto_lineup()
+    self.team_b.auto_lineup()
 
   def pause(self):
     '''Pause match.  Give user chance to manage team'''
@@ -133,35 +145,27 @@ class Match():
     '''Create beginning of match ascii banner.  Print it'''
     banner = pyfiglet.figlet_format('{0} vs {1} {2}\n'.format(
       self.team_a.name, self.team_b.name, self.date))
-    print(banner)
+    if self.silent is not True:
+      print(banner)
 
   def banner_end(self):
     '''Create end of match ascii banner.  Print it'''
     banner = pyfiglet.figlet_format('{0} {1}\n'.format(
       self.get_score().replace('Score is now ', ''), self.date))
-    print(banner)
+    if self.silent is not True:
+      print(banner)
 
   def shootout(self):
     '''Coin toss to determine winner'''
     p0 = random.random()
     if p0 < 0.5:
-      print('{0} wins the shootout.'.format(self.team_a.name))
+      if self.silent is not True:
+        print('{0} wins the shootout.'.format(self.team_a.name))
       self.team_a.score += 1
     else:
-      print('{0} wins the shootout.'.format(self.team_b.name))
+      if self.silent is not True:
+        print('{0} wins the shootout.'.format(self.team_b.name))
       self.team_b.score += 1
-
-  def get_output(self):
-    '''Set output to null if match is to be silent'''
-    if self.silent is True:
-      self.stdout = sys.stdout
-      f = open(os.devnull, 'w')
-      sys.stdout = f
-
-  def reset_output(self):
-    '''Restore printed output back to default'''
-    if self.silent is True:
-      sys.stdout = self.stdout
 
   def extra_time(self, time_step):
     '''Determine if extra time is needed.Play 2x10 minute periods of events'''
@@ -194,14 +198,14 @@ class Match():
     self.full_time()
     self.extra_time(time_step)
     self.banner_end()
-    self.reset_output()
 
   def get_scorers(self):
     '''Call team methods to collate scorer data.  Print tables.'''
     self.team_a.get_scorer_table()
     self.team_b.get_scorer_table()
-    print(self.team_a.scorer_table)
-    print(self.team_b.scorer_table)
+    if self.silent is not True:
+      print(self.team_a.scorer_table)
+      print(self.team_b.scorer_table)
 
   def half_time(self):
     '''Reset added time back to 35 minutes.  Update scorer data.  Let user manage team'''
@@ -214,7 +218,8 @@ class Match():
   def full_time(self):
     '''Update scorer stats.  Print final result'''
     self.get_scorers()
-    print('Full time score is:\n{0}'.format(self.get_score().replace('Score is now ', '')))
+    if self.silent is not True:
+      print('Full time score is:\n{0}'.format(self.get_score().replace('Score is now ', '')))
 
   def event(self):
     '''Instatiate event.  Run it'''
@@ -225,16 +230,21 @@ class Match():
 
   def get_score(self):
     '''Get user friendly string of match score'''
-    return 'Score is now {0} {1}-{2} ({3}) {4} {5}-{6} ({7})'.format(
-      self.team_a.name, self.team_a.goals, self.team_a.points, self.team_a.score,
-      self.team_b.name, self.team_b.goals, self.team_b.points, self.team_b.score
+    return 'Score is now {0} {1} {2} {3})'.format(
+      self.team_a.name, self.team_a.score,
+      self.team_b.name, self.team_b.score
     )
 
 if __name__ == "__main__":
 
-  team_a = MatchTeam(Team('a', 'a'))
-  team_b = MatchTeam(Team('b', 'b'))
-  match = Match(team_a, team_b, datetime.date(2020, 1, 1), False, False)
-  match.play(0.1)
+  team_a = MatchTeam('a', 'a')
+  team_b = MatchTeam('b', 'b')
+  match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)
+  # match.play(0.1)
   # match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)
   # match.play()
+  import cProfile
+  import pstats
+  cProfile.run('match.play()', 'profile1.txt')
+  p = pstats.Stats('profile1.txt').sort_stats('tottime').reverse_order()
+  p.print_stats()

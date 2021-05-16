@@ -3,9 +3,10 @@
 import random
 import numpy as np
 from prettytable import PrettyTable
+import names
 
-from player import Player
-from training import Training, train
+from match_sim.cl.player import Player, Score
+from match_sim.cl.training import Training, train
 
 class TeamIterator:
   '''https://thispointer.com/python-how-to-make-a-class-
@@ -31,17 +32,16 @@ class Team():
   def __init__(self, name, manager, players=None, control=False):
     self.name = name
     self.manager = manager
+    self.coach = names.get_full_name()
     if players is None:
-      random.seed(name)
+      random.seed(str(name))
       self.players = [Player(name) for i in range(30)]
     else:
       self.players = players
     self.control = control
     self.get_overall()
-    self.score = 0
+    self.score = Score()
     self.played = 0
-    self.goals = 0
-    self.points = 0
     self.league_win = 0
     self.league_loss = 0
     self.league_draw = 0
@@ -158,12 +158,15 @@ class Team():
     x.add_column('fitness', [x.physical.fitness for x in self])
     x.add_column('condition', [x.physical.condition for x in self])
     x.add_column('injury', [x.season.injury for x in self])
+    x.add_column('suspension', [x.season.suspension for x in self])
     x.add_column('minutes', [x.match.minutes for x in self])
     x.add_column('score', [x.match.score.score for x in self])
     x.sortby = 'lineup'
     x.title = '{0} {1} {2}'.format(self.name, self.manager, self.overall)
     x.float_format = '5.2'
+    player_table_fields = ['last name', 'first name', 'position', 'lineup', 'condition', 'injury', 'suspension']
     self.player_table = x
+    x.fields = player_table_fields
 
   def get_scorer_table(self):
     '''Subset to scorers.  Format table'''
@@ -181,9 +184,15 @@ class Team():
 
   def update_score(self):
     '''Sum player points and goals.'''
-    self.goals = sum([x.match.score.goals for x in self])
-    self.points = sum([x.match.score.points for x in self])
-    self.score = (self.goals * 3) + self.points
+    self.score.goals = sum([x.match.score.goals for x in self])
+    self.score.points = sum([x.match.score.points for x in self])
+    self.score.update_score()
+
+  def update_postmatch_stats(self, comp):
+    '''Clear all scores etc. for beginning of next match'''
+    for x in self:
+      x.update_postmatch_stats(comp)
+    self.get_player_table()
 
   def reset_match_stats(self):
     '''Clear all scores etc. for beginning of next match'''
@@ -191,6 +200,14 @@ class Team():
       x.reset_match_stats()
       x.update_score()
     self.update_score()
+
+  def reset_season_stats(self):
+    '''Clear all scores etc. for beginning of next match'''
+    for x in self:
+      x.reset_season_stats()
+      x.update_score()
+    self.update_score()
+    self.reset_wld()
 
   def reset_wld(self):
     '''End of season reset stats for next season'''
@@ -215,6 +232,17 @@ class Team():
     if date in self.training.schedule.keys():
       focus = self.training.schedule[date]
       train(self, focus)
+
+  def get_player_report(self, inbox, date):
+    '''Clear all scores etc. for beginning of next match'''
+    if self.control is True:
+      for x in self:
+        if x.season.injury.status is not None:
+          if x.season.injury.gain_date == date:
+            inbox.add_injury_message(x)
+        if x.season.suspension.status is not None:
+          if x.season.suspension.gain_date == date:
+            inbox.add_suspension_message(x)
 
 if __name__ == "__main__":
   team = Team('a', 'a')

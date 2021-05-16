@@ -34,50 +34,77 @@ class Event():
   def run(self, amatch):
     '''Print string collected from method.  Printed if match is not silent'''
     self.pl.append(self.stopclock_time + ' ')
-    attack_propensity = min(1, (1.6 * self.attackers.attacking /
-      (self.attackers.attacking+self.attackers.defending)))
     self.pl.append('{0} has posession with {1} on the ball.'.format(
       self.attackers.name, self.posession_player))
+    attack_propensity = min(1, (self.attackers.attacking /
+      (self.attackers.attacking+self.attackers.posession+self.attackers.defending)))
+    posession_propensity = min(1, (self.attackers.posession /
+      (self.attackers.attacking+self.attackers.posession+self.attackers.defending)))
     p0 = random.random()
     if p0 < attack_propensity:
       self.attack(amatch)
+    elif p0 < (attack_propensity+posession_propensity):
+      self.recycle_posession()
     else:
-      self.pl.append('He cycles back to retain posession.')
+      self.defensive_setup()
     self.attackers.update_playing_positions()
     self.defenders.update_playing_positions()
+    self.attackers.update_score()
+    self.defenders.update_score()
+
+  def recycle_posession(self):
+    self.pl.append('He cycles back to retain posession.')
+    self.pl.append('This will tire out {0}.'.format(self.defenders.name))
+    self.defenders.condition_deteriorate(0.4)
+    p0 = random.random()
+    if p0 < 0.2:
+      self.foul(self.posession_player)
+
+  def defensive_setup(self):
+    self.pl.append('He\'s using the time to let his team mates filter back.')
+    self.pl.append('This will frustrate {0}.'.format(self.defenders.name))
+    self.defenders.condition_deteriorate(0.6)
 
   def throw_in(self):
     if random.random() < 0.5:
-      posession_player = random.choice(self.attackers.midfielders)
-      team = self.attackers.name
+      posession_player = self.attackers.choose_player(0.01, 0.04, 0.9)
     else:
-      posession_player = random.choice(self.defenders.midfielders)
-      team = self.defenders.name
-    self.pl.append('{0} The referee throws the ball in.{1} wins posession for {2}'.format(
-      self.stopclock_time, posession_player, team))
+      posession_player = self.defenders.choose_player(0.01, 0.04, 0.9)
+    self.pl.append('{0} '.format(self.stopclock_time))
+    self.pl.append('The referee throws the ball in.{0} wins posession for {1}'.format(
+      posession_player, posession_player.team))
 
   def added_time(self):
     '''Determine how many minutes and seconds to be played'''
-    at = random.choice(range(1, 7))
-    self.pl.append('{0} {1} minutes added time indicated by the linesman.'.format(self.stopclock_time, at))
+    at = random.choice([1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 6, 7])
+    self.pl.append('{0} '.format(self.stopclock_time))
+    self.pl.append('{0} minutes added time indicated by the linesman.'.format(at))
     at = float(at)
-    at += np.random.normal(0.5, 0.1)
+    at += np.random.normal(0.5, 0.2)
     at = at * 60
     return at
 
   def attack(self, amatch):
     '''Attackers have posession.  Pass or take on or foul given'''
+    def branch0(): pass
+    def branch1(): pass
+    def branch2(): pass
+    def branch3(): pass
     self.pl.append('He looks forward to attack.')
     p0 = random.random()
-    if p0 < (0.33 * self.posession_player.physical.passing/100):
+    if p0 < (0.4 * self.posession_player.physical.passing/100):
+      branch0()
       self.posession_player_take_on()
-    elif p0 < (0.66 * self.posession_player.physical.passing/100):
+    elif p0 < (0.9 * self.posession_player.physical.passing/100):
+      branch1()
       self.shooting_player_posession()
-    elif p0 < 0.98:
+    elif p0 < 0.9:
+      branch2()
       self.pl.append('But he loses posession with the kick.')
     else:
+      branch3()
       self.foul(self.posession_player)
-    self.shooting_player.update_score()
+    self.attackers.condition_deteriorate(0.1)
     self.attackers.update_score()
     self.pl.append(amatch.get_score())
 
@@ -122,6 +149,7 @@ class Event():
       shooting_player.score_goal()
       assisting_player.assist()
       self.pl.append('And he scores.')
+      shooting_player.update_score()
     elif p0 < 0.95:
       self.pl.append('It\'s saved by the goalkeeper.')
       self.goalkeeper.save_goal()
@@ -139,8 +167,12 @@ class Event():
       self.pl.append('And he scores.')
       shooting_player.score_point()
       assisting_player.assist()
-    else:
+      shooting_player.update_score()
+    elif p0 < 0.97:
       self.pl.append('But he misses.')
+    else:
+      self.pl.append('His shot comes off a defender and out for a 45.')
+      self.free_kick_45()
 
   def shooting_player_posession(self):
     '''Shooting player receives ball.  Loses ball or shoots or fouled is determined'''
@@ -159,16 +191,29 @@ class Event():
     else:
       self.foul(self.shooting_player)
 
+  def free_kick_45(self):
+    shooting_player = self.attackers.choose_free_taker_45()
+    self.pl.append('{0} steps up to take the 45.'.format(shooting_player))
+    p0 = random.random()
+    if p0 < 0.7:
+      self.pl.append('It goes ofver the bar!')
+      shooting_player.score_point()
+      shooting_player.update_score()
+    elif p0 < 0.85:
+      self.pl.append('But the kick drops short')
+    else:
+      self.pl.append('But the kick goes wide')
+
   def free_kick(self, assister):
     '''Shooting player chosen.   Free kick or penalty decided.  Attempt method called'''
-    shooting_player = self.attackers.choose_player(0.01, 0.1, 0.3)
+    shooting_player = self.attackers.choose_free_taker()
     p0 = random.random()
     if p0 < 0.95:
-      self.pl.append('{0} steps up to take the free kick.'.format(self.shooting_player))
+      self.pl.append('{0} steps up to take the free kick.'.format(shooting_player))
       self.shooting_player_point_attempt(shooting_player, assister)
     else:
       self.pl.append('It\'s inside the box.It will be a penalty.')
-      self.pl.append('The penalty is to be taken by {0}.'.format(self.shooting_player))
+      self.pl.append('The penalty is to be taken by {0}.'.format(shooting_player))
       self.shooting_player_goal_attempt(shooting_player, assister)
 
   def foul(self, attacker):
@@ -182,7 +227,7 @@ class Event():
         self.defending_player.gain_card('r')
         self.pl.append('And it\'s his second yellow.  He is sent off by the referee.')
         self.defending_player.gain_suspension('yellow', self.date)
-        self.defenders.playing.remove(self.defending_player)
+        self.defenders.send_off_player(self.defending_player)
       p1 = random.random()
       if p1 < 0.2:
         attacker.gain_injury(self.date)
@@ -191,7 +236,7 @@ class Event():
       self.pl.append('{0} receives a red card.'.format(self.defending_player))
       self.defending_player.gain_card('r')
       self.defending_player.gain_suspension('red', self.date)
-      self.defenders.playing.remove(self.defending_player)
+      self.defenders.send_off_player(self.defending_player)
       if self.defending_player.physical.position == 'GK':
         player_off = random.choice(self.defenders.playing)
         self.defenders.forced_substitution(player_off, 'GK',
