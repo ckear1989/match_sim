@@ -12,6 +12,7 @@ class MatchTeam(Team):
   '''Contain all data on team and players'''
   def __init__(self, name, manager, players=None, control=False):
     super().__init__(name, manager, players, control)
+    self.subs_used = 0
     self.formation = Formation()
     self.tactics = Tactics()
     self.auto_lineup()
@@ -187,7 +188,7 @@ class MatchTeam(Team):
   def auto_sub(self, player, preferred_position=None):
     '''For non-controlled teams choose sub'''
     if preferred_position is None:
-      preferred_position = player.position
+      preferred_position = player.physical.position
     player_on = [x for x in self.subs if x.physical.position == player.physical.position]
     if len(player_on) > 0:
       self.substitute(player, sorted(player_on, key=lambda x: -x.physical.condition)[0])
@@ -197,8 +198,7 @@ class MatchTeam(Team):
 
   def substitute(self, l_a=None, l_b=None):
     '''Determine if sub can be made.  Ask user for players to switch.  Execute switch'''
-    subs_used = len([x for x in self.playing if x.match.lineup not in range(1, 16)])
-    if subs_used < 5:
+    if self.subs_used < 5:
       if self.control is True:
         print(self)
       if l_b is None:
@@ -243,6 +243,7 @@ class MatchTeam(Team):
       self.formation.sub_on_off(player_on.match.lineup, player_off.match.lineup)
       player_off.set_lineup(-1)
       self.update_playing_positions()
+      self.subs_used += 1
       if self.control is True:
         print(self)
       return True

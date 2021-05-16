@@ -34,7 +34,7 @@ class Team():
     self.manager = manager
     self.coach = names.get_full_name()
     if players is None:
-      random.seed(name)
+      random.seed(str(name))
       self.players = [Player(name) for i in range(30)]
     else:
       self.players = players
