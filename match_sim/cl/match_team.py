@@ -181,7 +181,6 @@ class MatchTeam(Team):
     self.update_playing_positions()
 
   def send_off_player(self, player):
-    # self.formation.playing_lineups.pop(player.match.lineup)
     player.update_lineup(-1)
     self.playing.remove(player)
 
