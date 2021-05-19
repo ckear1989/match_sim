@@ -263,8 +263,8 @@ class TemplateButton(wx.Button):
     # self.font.SetPointSize(15)
     # self.SetFont(self.font)
     png = wx.Image('{0}/../data/image/buttons/new0.png'.format(path), wx.BITMAP_TYPE_ANY)
-    w = png.GetWidth() / 5
-    h = png.GetHeight() / 5
+    w = int(png.GetWidth() / 5)
+    h = int(png.GetHeight() / 5)
     png = png.Scale(w, h)
     png = png.ConvertToBitmap()
     png.SetMask(wx.Mask())
