@@ -6,8 +6,10 @@ import time
 import sys
 import os
 import numpy as np
-# print(__name__)
-if __name__ in ["__main__"]:
+from getpass import getuser
+
+print(__name__)
+if getuser() == "root":
   import keyboard
 import pyfiglet
 
@@ -101,8 +103,9 @@ class Match():
         self.stopclock_time = stopclock(self.time)
         if self.silent is not True:
           printc(self.stopclock_time)
-        if keyboard.is_pressed('space') is True:
-          self.pause()
+        if getuser() == "root":
+          if keyboard.is_pressed('space') is True:
+            self.pause()
       if self.time % 60 == 0:
         if self.silent is not True:
           print(self.stopclock_time)
@@ -240,9 +243,6 @@ if __name__ == "__main__":
   team_a = MatchTeam('a', 'a')
   team_b = MatchTeam('b', 'b')
   match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)
-  # match.play(0.1)
-  # match = Match(team_a, team_b, datetime.date(2020, 1, 1), True, False)
-  # match.play()
   import cProfile
   import pstats
   cProfile.run('match.play()', 'profile1.txt')

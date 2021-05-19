@@ -35,6 +35,7 @@ setuptools.setup(
       "barnum>=0.5.1",
       "dill>=0.3.1.1",
       "wxPython>=4.1.0",
+      "keyboard>=0.13.5",
       "pytest>=3.5",
     ],
     "gen_tests": [
